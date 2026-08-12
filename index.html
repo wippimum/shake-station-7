@@ -158,6 +158,39 @@ figcaption{ font-size:12px; padding:7px 11px; background:rgba(51,65,74,.06); bor
 .btn.ghost{ background:transparent; color:var(--ink); }
 .btn.coral{ background:var(--coral); border-color:var(--coral); }
 .btn.small{ padding:5px 11px; font-size:12px; margin-top:9px; border-width:1px; }
+
+/* ---------- chapters ----------
+   Each chapter carries its own accent. Everything that used to be hard-coded
+   coral follows --accent instead, and falls back to coral off-chapter. */
+.phead .u, .phead .n, .ctitle, .team .lab, .badgehead .d{ color:var(--accent,var(--coral)); }
+.card.coral, .card.dash, .team{ border-color:var(--accent,var(--coral)); }
+.rail b.now{ background:var(--dot,var(--coral)); }
+.rail b.done{ background:var(--dot,var(--green)); opacity:.65; }
+.rail b.ischap{ min-width:20px; border-radius:2px; }
+.rail b.isbadge{ min-width:16px; }
+.railgap{ flex:0 0 auto; width:9px; }
+
+.chcover{ border:3px solid var(--accent,var(--coral)); border-radius:4px; padding:0 0 16px; margin-bottom:16px; background:#fff; overflow:hidden; }
+.chcover .chno{ font-family:Georgia,serif; font-size:62px; font-weight:700; line-height:1; color:var(--cream); background:var(--accent,var(--coral)); padding:14px 20px 10px; }
+.chcover .chtag{ font-size:10px; letter-spacing:.18em; font-weight:700; color:var(--cream); background:var(--accent,var(--coral)); padding:0 20px 14px; }
+.chcover h2{ font-size:31px; padding:16px 20px 0; }
+.chcover .chpromise{ padding:8px 20px 0; font-size:16px; opacity:.85; }
+.chcover .chfig{ margin:16px 0 0; }
+.chcover .chfig svg{ display:block; width:100%; height:auto; }
+.chcover .ctitle{ padding:16px 20px 0; }
+.chlist{ list-style:none; margin:8px 20px 0; padding:0; counter-reset:l; }
+.chlist li{ counter-increment:l; position:relative; padding:9px 0 9px 34px; border-bottom:1px solid var(--line); font-weight:600; cursor:pointer; }
+.chlist li::before{ content:counter(l); position:absolute; left:0; top:8px; width:22px; height:22px; border-radius:50%; border:2px solid var(--accent,var(--coral)); color:var(--accent,var(--coral)); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+.chlist li.seen::before{ background:var(--accent,var(--coral)); color:#fff; content:"✓"; }
+.chlist li:hover{ color:var(--accent,var(--coral)); }
+.chbadge{ margin:14px 20px 0; border:2px dashed var(--accent,var(--coral)); border-radius:3px; padding:11px 13px; font-weight:700; font-size:15px; }
+.chbadge.got{ border-style:solid; background:var(--accent-soft,rgba(232,85,62,.10)); }
+.chbadge .lab{ display:block; font-size:10px; letter-spacing:.14em; color:var(--accent,var(--coral)); margin-bottom:4px; }
+.chbadge .dg{ display:block; font-size:11px; letter-spacing:.1em; font-weight:400; opacity:.7; margin-top:4px; }
+.chcover .result{ margin:14px 20px 0; }
+
+.revtally{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px; }
+.lessonend{ border-top:2px solid var(--line); margin-top:18px; padding-top:11px; font-size:13.5px; opacity:.7; font-style:italic; }
 .btn:disabled{ opacity:.35; pointer-events:none; }
 .btnrow{ display:flex; gap:9px; flex-wrap:wrap; margin-top:11px; }
 .result{ margin-top:11px; font-size:14px; padding:10px 12px; border-radius:3px; background:rgba(51,65,74,.07); }
@@ -962,6 +995,132 @@ ART.capstone = () => {
   </g>
   <g transform="translate(20,20)"><path d="M14 0 L14 30 M14 0 L8 10 M14 0 L20 10" stroke="${C.ink}" stroke-width="2" fill="none"/><text x="10" y="44" font-size="10" font-weight="700" fill="${C.ink}">N</text></g>`);
 };
+
+/* ---------- chapter banners ----------
+   One per chapter, drawn in the same flat editorial style as the lesson
+   diagrams and tinted with that chapter's accent. 800x240 banner shape. */
+const CHVB = '0 0 800 240';
+const ART_CH = {};
+
+// 1 — what is down there: a wedge cut out of the planet
+ART_CH[1] = a => wrap(`
+  <rect width="800" height="240" fill="${C.deep}"/>
+  <g transform="translate(400,250)">
+    <circle r="230" fill="${a}" opacity="0.20"/>
+    <circle r="168" fill="${a}" opacity="0.30"/>
+    <circle r="104" fill="${C.coral}" opacity="0.45"/>
+    <circle r="46" fill="${C.coral}" opacity="0.85"/>
+    <circle r="230" fill="none" stroke="${C.cream}" stroke-width="3" opacity="0.85"/>
+    <circle r="168" fill="none" stroke="${C.cream}" stroke-width="1.4" opacity="0.5"/>
+    <circle r="104" fill="none" stroke="${C.cream}" stroke-width="1.4" opacity="0.5"/>
+  </g>
+  <g stroke="${C.cream}" stroke-width="1.2" opacity="0.55" fill="none">
+    <line x1="400" y1="20" x2="640" y2="20"/><line x1="400" y1="82" x2="640" y2="82"/>
+    <line x1="400" y1="146" x2="640" y2="146"/>
+  </g>
+  <g font-size="11" fill="${C.cream}" opacity="0.8" letter-spacing="1.5">
+    <text x="648" y="24">CRUST</text><text x="648" y="86">MANTLE</text><text x="648" y="150">CORE</text>
+  </g>
+  <g transform="translate(150,18)">
+    <circle cx="0" cy="0" r="7" fill="${C.cream}"/>
+    <path d="M0 8 L0 26 M0 14 L-9 22 M0 14 L9 22 M0 26 L-8 40 M0 26 L8 40"
+          stroke="${C.cream}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  </g>`, CHVB);
+
+// 2 — the pieces move: slabs with push arrows
+ART_CH[2] = a => wrap(`
+  <rect width="800" height="240" fill="${C.deep}"/>
+  <g stroke="${C.cream}" stroke-width="2.5" fill="${a}" opacity="0.9">
+    <path d="M40 150 L250 130 L268 206 L54 214 Z" opacity="0.55"/>
+    <path d="M282 128 L520 118 L534 200 L296 206 Z" opacity="0.75"/>
+    <path d="M548 120 L760 138 L748 212 L540 200 Z" opacity="0.5"/>
+  </g>
+  <g stroke="${C.coral}" stroke-width="4" fill="none" stroke-linecap="round">
+    <path d="M200 96 L262 96"/><path d="M248 86 L264 96 L248 106"/>
+    <path d="M360 96 L298 96"/><path d="M312 86 L296 96 L312 106"/>
+    <path d="M600 84 L600 40"/><path d="M590 54 L600 38 L610 54"/>
+  </g>
+  <g font-size="11" fill="${C.cream}" opacity="0.75" letter-spacing="1.6" text-anchor="middle">
+    <text x="280" y="72">PUSHING</text><text x="600" y="24">RISING</text><text x="120" y="110">SLIDING</text>
+  </g>
+  <path d="M40 118 L150 108" stroke="${C.cream}" stroke-width="2.5" stroke-dasharray="9 6" fill="none"/>`, CHVB);
+
+// 3 — how a quake is born: the stick bends, then snaps
+ART_CH[3] = a => wrap(`
+  <rect width="800" height="240" fill="${C.deep}"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M60 130 Q 150 130 240 130" stroke="${C.cream}" stroke-width="9" opacity="0.55"/>
+    <path d="M300 130 Q 390 74 480 130" stroke="${a}" stroke-width="9"/>
+    <path d="M540 130 L610 130 M640 130 L710 130" stroke="${C.coral}" stroke-width="9"/>
+  </g>
+  <g font-size="11" fill="${C.cream}" opacity="0.75" letter-spacing="1.6" text-anchor="middle">
+    <text x="150" y="176">STUCK</text><text x="390" y="176">BENDING</text><text x="625" y="176">SNAP</text>
+  </g>
+  <g transform="translate(625,130)" fill="none" stroke="${C.coral}" stroke-width="2.4">
+    <circle r="26" opacity="0.75"/><circle r="46" opacity="0.5"/><circle r="68" opacity="0.28"/>
+  </g>
+  <g stroke="${C.cream}" stroke-width="1.2" opacity="0.35">
+    <line x1="270" y1="46" x2="270" y2="200"/><line x1="510" y1="46" x2="510" y2="200"/>
+  </g>`, CHVB);
+
+// 4 — measuring the monster: a dial and a trace
+ART_CH[4] = a => wrap(`
+  <rect width="800" height="240" fill="${C.deep}"/>
+  <g transform="translate(180,180)">
+    <path d="M-110 0 A110 110 0 0 1 110 0" fill="none" stroke="${C.cream}" stroke-width="3" opacity="0.85"/>
+    ${[0, 1, 2, 3, 4, 5, 6].map(i => {
+      const t = Math.PI - i * Math.PI / 6, x1 = Math.cos(t) * 110, y1 = -Math.sin(t) * 110,
+            x2 = Math.cos(t) * 92, y2 = -Math.sin(t) * 92;
+      return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${C.cream}" stroke-width="2" opacity="0.6"/>`;
+    }).join('')}
+    <line x1="0" y1="0" x2="62" y2="-72" stroke="${C.coral}" stroke-width="5" stroke-linecap="round"/>
+    <circle r="8" fill="${C.coral}"/>
+    <text y="34" font-size="12" fill="${C.cream}" opacity="0.75" text-anchor="middle" letter-spacing="1.6">MAGNITUDE</text>
+  </g>
+  <g transform="translate(360,120)">
+    <line x1="0" y1="0" x2="400" y2="0" stroke="${C.cream}" stroke-width="1.4" opacity="0.4"/>
+    <path d="M0 0 L52 0 L60 -14 L68 12 L76 0 L120 0 L132 -52 L146 60 L158 -30 L170 22 L182 -8 L196 0 L400 0"
+          fill="none" stroke="${a}" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <text y="94" font-size="12" fill="${C.cream}" opacity="0.75" letter-spacing="1.6">WHAT THE MACHINE ACTUALLY WROTE</text>
+  </g>`, CHVB);
+
+// 5 — what the shaking does: water stands up, ground gives way
+ART_CH[5] = a => wrap(`
+  <rect width="800" height="240" fill="${C.deep}"/>
+  <path d="M0 240 L0 176 Q 90 168 180 176 T 360 178 L360 240 Z" fill="${a}" opacity="0.35"/>
+  <path d="M360 178 Q 430 178 470 120 Q 500 66 540 74 Q 590 84 606 178 L800 178 L800 240 L360 240 Z"
+        fill="${a}" opacity="0.6" stroke="${C.cream}" stroke-width="2.5"/>
+  <path d="M470 120 Q 505 96 536 108" fill="none" stroke="${C.cream}" stroke-width="2.5" opacity="0.8"/>
+  <g stroke="${C.coral}" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M60 214 L96 196 L128 218 L166 198"/>
+    <path d="M196 216 L228 200 L258 220"/>
+  </g>
+  <g font-size="11" fill="${C.cream}" opacity="0.78" letter-spacing="1.6">
+    <text x="40" y="150">GROUND THAT GIVES WAY</text>
+    <text x="620" y="150">WATER THAT STANDS UP</text>
+  </g>`, CHVB);
+
+// 6 — fighting back: a braced building that stays up
+ART_CH[6] = a => wrap(`
+  <rect width="800" height="240" fill="${C.deep}"/>
+  <line x1="0" y1="206" x2="800" y2="206" stroke="${C.cream}" stroke-width="2.5" opacity="0.6"/>
+  <g transform="translate(300,0)">
+    <rect x="0" y="52" width="200" height="154" fill="${a}" opacity="0.55" stroke="${C.cream}" stroke-width="3"/>
+    <g stroke="${C.cream}" stroke-width="2.2" opacity="0.85">
+      <line x1="0" y1="52" x2="200" y2="206"/><line x1="200" y1="52" x2="0" y2="206"/>
+      <line x1="0" y1="129" x2="200" y2="129"/>
+    </g>
+    <rect x="66" y="24" width="68" height="28" fill="${C.coral}" stroke="${C.cream}" stroke-width="2.5"/>
+  </g>
+  <g stroke="${C.coral}" stroke-width="3.4" fill="none" stroke-linecap="round">
+    <path d="M240 130 L200 130"/><path d="M214 118 L198 130 L214 142"/>
+    <path d="M560 130 L600 130"/><path d="M586 118 L602 130 L586 142"/>
+  </g>
+  <g transform="translate(120,150)" fill="none" stroke="${C.cream}" stroke-width="2.6" opacity="0.9">
+    <path d="M0 0 L0 -34 M-14 -20 L0 -34 L14 -20"/>
+    <circle cx="0" cy="16" r="9"/>
+  </g>
+  <text x="120" y="196" font-size="11" fill="${C.cream}" opacity="0.75" letter-spacing="1.6" text-anchor="middle">DROP. COVER. HOLD.</text>`, CHVB);
 
 const SEISMO_TRACE = (level, w, h) => {
   if (level <= 0) return `<path d="M0 ${h/2} L${w} ${h/2}" fill="none" stroke="${C.ink}" stroke-width="1.2"/>`;
@@ -2089,6 +2248,69 @@ const PAGES = [...PAGES_A, ...PAGES_B, ...PAGES_C, ...PAGES_D];
 const CODE = PAGES.filter(p => p.badge).map(p => p.badge.digit).join('');
 const TIERS = { L: ['little', 'LITTLE SEISMOLOGIST', 'ages 6 to 7'], F: ['field', 'FIELD SEISMOLOGIST', 'ages 8 to 9'], C: ['chief', 'STATION CHIEF', 'ages 10 to 11'] };
 
+/* ============ chapters ============
+   The course used to be twenty pages in a row, with each page's questions
+   wrapped around its own lesson. It now runs as six chapters. A chapter opens
+   with a cover, teaches its lessons, and only then asks its questions — the
+   whole chapter's worth at once — before the badge that closes it.
+   PREDICT FIRST stays where it was, at the top of each lesson, because the
+   point of it is to make them commit before they read. */
+const CH_META = {
+  1: { colour: '#5f93a4', tag: 'THE GROUND UNDER THE GROUND',
+       promise: 'By the end you can say what the Earth is made of, why the rock moves, and why the shell on top is cracked.' },
+  2: { colour: '#6f8a5f', tag: 'A PLANET THAT WILL NOT SIT STILL',
+       promise: 'By the end you can name the three ways plates meet, and read a world map for where they are doing it.' },
+  3: { colour: '#e8553e', tag: 'FROM STUCK ROCK TO SHAKING GROUND',
+       promise: 'By the end you can explain what actually snaps, what travels, and how to read the squiggle it leaves behind.' },
+  4: { colour: '#c98b3a', tag: 'NUMBERS, AND WHAT THEY DO NOT TELL YOU',
+       promise: 'By the end you can find an epicentre with three circles, and say why big is not the same as bad.' },
+  5: { colour: '#3f7d7a', tag: 'WATER, SOUP AND FALLING THINGS',
+       promise: 'By the end you can explain what the shaking does after it arrives, and which ground you would not build on.' },
+  6: { colour: '#8a5f77', tag: 'WHAT PEOPLE DO ABOUT IT',
+       promise: 'By the end you can make a building survive, and you know your own thirty seconds by heart.' }
+};
+
+const CHAPTERS = (() => {
+  const out = [];
+  PAGES.forEach(p => {
+    if (!p.unit || !CH_META[p.unit] || p.cover || p.capstone) return;
+    let ch = out.find(c => c.u === p.unit);
+    if (!ch) {
+      ch = { u: p.unit, name: p.unitTitle, ...CH_META[p.unit], pages: [], review: [], badgePage: null };
+      out.push(ch);
+    }
+    ch.pages.push(p);
+    // questions are lifted off the lesson and held for the chapter review
+    if (p.trap) ch.review.push({ type: 'trap', page: p });
+    if (p.check) ch.review.push({ type: 'check', page: p });
+    if (p.badge) ch.badgePage = p;
+  });
+  out.forEach((c, i) => { c.no = i + 1; });
+  return out;
+})();
+
+/* the flat list the Back/Next buttons actually walk */
+const STEPS = (() => {
+  const s = [{ kind: 'arrival', page: PAGES[0] }];
+  CHAPTERS.forEach(ch => {
+    s.push({ kind: 'cover', ch });
+    ch.pages.forEach(p => s.push({ kind: 'lesson', ch, page: p }));
+    if (ch.review.length) s.push({ kind: 'review', ch });
+    if (ch.badgePage) s.push({ kind: 'badge', ch, page: ch.badgePage });
+  });
+  s.push({ kind: 'capstone', page: PAGES[PAGES.length - 1] });
+  return s;
+})();
+
+/* stable across content edits, unlike the raw index */
+const stepKey = st => `${st.kind}:${st.ch ? st.ch.u : 0}:${st.page ? st.page.n : 0}`;
+
+function applyTheme(ch) {
+  const root = document.documentElement;
+  root.style.setProperty('--accent', ch ? ch.colour : 'var(--coral)');
+  root.style.setProperty('--accent-soft', ch ? ch.colour + '22' : 'rgba(232,85,62,.10)');
+}
+
 const S = {
   name: '', tier: 'F', idx: -1,
   answered: {},          // key -> {pick, right}
@@ -2100,7 +2322,21 @@ const S = {
 
 const $ = s => document.querySelector(s);
 const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h !== undefined) e.innerHTML = h; return e; };
-const rich = s => String(s).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>');
+/* The course was written when it ran as twenty numbered pages, so a lot of the
+   prose says things like "you met this on page 4". Chapters have no page 4, so
+   those references are swapped for the lesson's actual name wherever they
+   appear. Numbers that match no lesson are left exactly as written. */
+const PAGE_BY_N = {};
+PAGES.forEach(p => { if (p.title && !p.cover) PAGE_BY_N[p.n] = p; });
+const depage = s => String(s).replace(/\b(on |in |from )?page (\d+)\b/gi, (m, prep, n) => {
+  const p = PAGE_BY_N[+n];
+  if (!p) return m;
+  // "on page 2" wants to become "in <title>", not "on <title>"
+  const lead = prep ? (/^on /i.test(prep) ? 'in ' : prep) : '';
+  return `${lead}“${p.title}”`;
+});
+
+const rich = s => depage(String(s)).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>');
 // plain escape, for anything the assistant typed themselves (no <b> pass-through)
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const paras = s => rich(s).split('\n\n').map(x => `<p>${x.replace(/\n/g, '<br>')}</p>`).join('');
@@ -2206,12 +2442,18 @@ function render() {
   scroll.appendChild(wrap);
   try { window.scrollTo(0, 0); } catch (e) {}
 
-  if (S.idx < 0) { renderSetup(wrap); traceLevel = 0; }
+  if (S.idx < 0) { renderSetup(wrap); traceLevel = 0; applyTheme(null); }
   else {
-    const p = PAGES[S.idx];
-    S.visited[p.n] = true;
-    traceLevel = p.seismo || 0;
-    p.cover ? renderSetup(wrap) : p.capstone ? renderCapstone(wrap, p) : renderPage(wrap, p);
+    const st = STEPS[S.idx];
+    S.visited[stepKey(st)] = true;
+    applyTheme(st.ch);
+    traceLevel = st.page ? (st.page.seismo || 0) : (st.kind === 'badge' ? 6 : 2);
+    if (st.kind === 'arrival') { renderSetup(wrap); traceLevel = 0; }
+    else if (st.kind === 'cover') renderChapterCover(wrap, st.ch);
+    else if (st.kind === 'review') renderReview(wrap, st.ch);
+    else if (st.kind === 'badge') renderBadgePage(wrap, st.ch, st.page);
+    else if (st.kind === 'capstone') renderCapstone(wrap, st.page);
+    else renderPage(wrap, st.page, st.ch);
   }
   $('#tstat').textContent = STAT(traceLevel);
   renderRail(); renderNav(); renderWho();
@@ -2233,17 +2475,31 @@ function renderWho() {
 
 function renderRail() {
   const r = $('#rail'); r.innerHTML = '';
-  PAGES.forEach((p, i) => {
+  let lastCh = null;
+  STEPS.forEach((st, i) => {
+    // a visible gap wherever one chapter hands over to the next
+    if (st.ch !== lastCh && i > 0) r.appendChild(el('i', 'railgap'));
+    lastCh = st.ch;
     const b = el('b');
-    if (S.visited[p.n]) b.classList.add('done');
+    const seen = !!S.visited[stepKey(st)];
+    if (seen) b.classList.add('done');
     if (i === S.idx) b.classList.add('now');
+    if (st.kind === 'cover') b.classList.add('ischap');
+    if (st.kind === 'badge') b.classList.add('isbadge');
+    if (st.ch) b.style.setProperty('--dot', st.ch.colour);
+    const label = st.kind === 'cover' ? `Chapter ${st.ch.no}, ${st.ch.name}`
+      : st.kind === 'review' ? `Chapter ${st.ch.no} review`
+      : st.kind === 'badge' ? `Chapter ${st.ch.no} badge challenge`
+      : st.kind === 'capstone' ? 'The case opens'
+      : st.kind === 'arrival' ? 'Front desk'
+      : `${st.page.title}`;
     const go = () => { S.idx = i; render(); };
-    // reachable by keyboard as well as by tapping: twenty of these are the
-    // only way to jump around the course
-    b.title = 'Page ' + p.n + ' — ' + p.title;
+    // reachable by keyboard as well as by tapping: these are the only way to
+    // jump around the course
+    b.title = label;
     b.setAttribute('role', 'button');
     b.setAttribute('tabindex', '0');
-    b.setAttribute('aria-label', `Page ${p.n}, ${p.title}${S.visited[p.n] ? ', visited' : ''}`);
+    b.setAttribute('aria-label', label + (seen ? ', visited' : ''));
     if (i === S.idx) b.setAttribute('aria-current', 'true');
     b.onclick = go;
     b.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
@@ -2257,8 +2513,8 @@ function renderNav() {
   const back = el('button', 'btn ghost', '← Back');
   back.onclick = () => { S.idx = Math.max(-1, S.idx - 1); render(); };
   back.disabled = S.idx <= -1;
-  const last = S.idx >= PAGES.length - 1;
-  const mid = el('div', 'sp', S.idx < 0 ? 'Sign in to begin' : `Page ${PAGES[S.idx].n} of ${PAGES.length}`);
+  const last = S.idx >= STEPS.length - 1;
+  const mid = el('div', 'sp', S.idx < 0 ? 'Sign in to begin' : whereAmI(STEPS[S.idx]));
   const next = el('button', 'btn coral', S.idx < 0 ? 'Report for duty →' : last ? 'Finish' : 'Next →');
   next.onclick = () => {
     if (S.idx < 0) { if (!S.name.trim()) S.name = 'Field Assistant'; S.idx = 1; render(); return; }
@@ -2271,10 +2527,103 @@ function renderNav() {
       if (!S.unlocked) { const f = $('.lockrow input'); if (f) f.focus(); }
       return;
     }
-    S.idx = Math.min(PAGES.length - 1, S.idx + 1);
+    S.idx = Math.min(STEPS.length - 1, S.idx + 1);
     render();
   };
   n.appendChild(back); n.appendChild(mid); n.appendChild(next);
+}
+
+/* where the nav bar says you are */
+function whereAmI(st) {
+  if (!st) return '';
+  if (st.kind === 'arrival') return 'Front desk';
+  if (st.kind === 'capstone') return 'The case opens';
+  const c = `Chapter ${st.ch.no} of ${CHAPTERS.length}`;
+  if (st.kind === 'cover') return c;
+  if (st.kind === 'review') return `${c} · the questions`;
+  if (st.kind === 'badge') return `${c} · badge`;
+  return `${c} · lesson ${st.ch.pages.indexOf(st.page) + 1} of ${st.ch.pages.length}`;
+}
+
+/* ---------- chapter cover ---------- */
+function renderChapterCover(wrap, ch) {
+  const done = ch.pages.every(p => S.visited[`lesson:${ch.u}:${p.n}`]);
+  const c = el('div', 'chcover');
+  c.innerHTML = `<div class="chno">${ch.no}</div>
+    <div class="chtag">${ch.tag}</div>
+    <h2>${ch.name}</h2>
+    <div class="chpromise">${rich(ch.promise)}</div>`;
+  const fig = el('figure', 'chfig'); fig.innerHTML = ART_CH[ch.u] ? ART_CH[ch.u](ch.colour) : '';
+  c.appendChild(fig);
+
+  const list = el('ol', 'chlist');
+  ch.pages.forEach(p => {
+    const li = el('li', S.visited[`lesson:${ch.u}:${p.n}`] ? 'seen' : '', rich(p.title));
+    li.onclick = () => { S.idx = STEPS.findIndex(s => s.kind === 'lesson' && s.page === p); render(); };
+    list.appendChild(li);
+  });
+  c.appendChild(el('div', 'ctitle', `THE ${ch.pages.length} LESSONS IN THIS CHAPTER`));
+  c.appendChild(list);
+
+  if (ch.badgePage) {
+    const got = S.digits[ch.badgePage.n] !== undefined;
+    c.appendChild(el('div', 'chbadge' + (got ? ' got' : ''),
+      `<span class="lab">${got ? 'BADGE EARNED' : 'BADGE ON OFFER'}</span>${rich(ch.badgePage.badge.title)}
+       <span class="dg">${got ? 'DIGIT ' + ch.badgePage.badge.digit : 'ONE DIGIT OF THE CASE CODE'}</span>`));
+  }
+  if (done) c.appendChild(el('div', 'result', 'You have read every lesson in this chapter. The questions are waiting at the end of it.'));
+  wrap.appendChild(c);
+}
+
+/* ---------- chapter review: every question from the chapter, together ---------- */
+function renderReview(wrap, ch) {
+  wrap.appendChild(el('div', 'phead',
+    `<div><div class="u">CHAPTER ${ch.no}</div><div class="un">${ch.name}</div></div>
+     <h2>The Questions</h2><div class="n">?</div>`));
+  wrap.appendChild(el('div', 'hook',
+    `Everything this chapter taught you, asked back. Nothing new here — if one of these will not come, the lesson it came from is a tap away on the rail above.`));
+
+  const tally = el('div', 'revtally');
+  wrap.appendChild(tally);
+
+  const paintTally = () => {
+    const done = ch.review.filter(r => S.answered[(r.type === 'trap' ? 'trap' : 'chk') + r.page.n]).length;
+    const right = ch.review.filter(r => (S.answered[(r.type === 'trap' ? 'trap' : 'chk') + r.page.n] || {}).right).length;
+    tally.innerHTML = `<span class="pill">${done} of ${ch.review.length} answered</span><span class="pill g">${right} right</span>`;
+  };
+
+  ch.review.forEach((r, i) => {
+    const q = r.type === 'trap' ? r.page.trap : r.page.check;
+    const key = (r.type === 'trap' ? 'trap' : 'chk') + r.page.n;
+    const card = el('div', 'card' + (r.type === 'trap' ? '' : ' dash'));
+    // a trap belongs to the lesson it sits on, so name it. A memory check is
+    // deliberately about something taught earlier, so naming the lesson it was
+    // attached to would point at the wrong place; the question says where.
+    card.appendChild(el('div', 'ctitle', r.type === 'trap'
+      ? `CATCH THE ERROR <span class="sub">· question ${i + 1} of ${ch.review.length} · from “${rich(r.page.title)}”</span>`
+      : `MEMORY CHECK <span class="sub">· question ${i + 1} of ${ch.review.length} · looking back, no peeking</span>`));
+    const text = r.type === 'trap' ? q.text.replace(/^MISCONCEPTION TRAP\.\s*/, '') : q.q;
+    card.appendChild(el('div', 'q', rich(text)));
+    card.appendChild(quiz(key, q, paintTally).frag);
+    // the tally also has to move when they use the retry button
+    card.addEventListener('click', () => setTimeout(paintTally, 0));
+    wrap.appendChild(card);
+  });
+  paintTally();
+
+  if (ch.badgePage) wrap.appendChild(el('div', 'result',
+    'When these feel solid, the badge challenge is next, and it releases your digit.'));
+}
+
+/* ---------- badge, now a step of its own ---------- */
+function renderBadgePage(wrap, ch, p) {
+  wrap.appendChild(el('div', 'phead',
+    `<div><div class="u">CHAPTER ${ch.no}</div><div class="un">${ch.name}</div></div>
+     <h2>Badge Challenge</h2><div class="n">${S.digits[p.n] !== undefined ? p.badge.digit : '?'}</div>`));
+  wrap.appendChild(el('div', 'hook',
+    `Every answer has to be right before the digit is released. That is the whole point of a badge — it has to mean something.`));
+  wrap.appendChild(badgeBlock(p));
+  if (p.cooperate) wrap.appendChild(el('div', 'team', `<span class="lab">TEAM TASK · ALL FOUR OF YOU</span>${rich(p.cooperate)}`));
 }
 
 /* ---------- setup / cover ---------- */
@@ -2319,10 +2668,11 @@ function earnedRow() {
 }
 
 /* ---------- standard page ---------- */
-function renderPage(wrap, p) {
+function renderPage(wrap, p, ch) {
+  const pos = ch ? ch.pages.indexOf(p) + 1 : 0;
   wrap.appendChild(el('div', 'phead',
-    `<div><div class="u">UNIT ${p.unit}</div><div class="un">${p.unitTitle}</div></div>
-     <h2>${p.title}</h2><div class="n">${p.n}</div>`));
+    `<div><div class="u">CHAPTER ${ch ? ch.no : p.unit}</div><div class="un">${ch ? ch.name : p.unitTitle}</div></div>
+     <h2>${p.title}</h2><div class="n">${ch ? pos + '/' + ch.pages.length : p.n}</div>`));
   wrap.appendChild(el('div', 'hook', rich(p.hook)));
 
   // core, veiled until the prediction is made
@@ -2365,13 +2715,7 @@ function renderPage(wrap, p) {
     wrap.appendChild(w);
   }
 
-  if (p.trap) {
-    const c = el('div', 'card');
-    c.appendChild(el('div', 'ctitle', 'CATCH THE ERROR'));
-    c.appendChild(el('div', 'q', rich(p.trap.text.replace(/^MISCONCEPTION TRAP\.\s*/, ''))));
-    c.appendChild(quiz('trap' + p.n, p.trap).frag);
-    wrap.appendChild(c);
-  }
+  /* the trap question used to sit here; it is asked in the chapter review now */
 
   if (p.build) {
     const b = el('div', 'card');
@@ -2392,16 +2736,17 @@ function renderPage(wrap, p) {
 
   wrap.appendChild(tierBlock(p));
 
-  if (p.cooperate) wrap.appendChild(el('div', 'team', `<span class="lab">TEAM TASK · ALL FOUR OF YOU</span>${rich(p.cooperate)}`));
+  // the team task travels with the badge when the lesson carries one
+  if (p.cooperate && !p.badge) wrap.appendChild(el('div', 'team', `<span class="lab">TEAM TASK · ALL FOUR OF YOU</span>${rich(p.cooperate)}`));
 
-  if (p.badge) wrap.appendChild(badgeBlock(p));
-
-  if (p.check) {
-    const c = el('div', 'card dash');
-    c.appendChild(el('div', 'ctitle', 'MEMORY CHECK <span class="sub">from an earlier page. no peeking.</span>'));
-    c.appendChild(el('div', 'q', rich(p.check.q)));
-    c.appendChild(quiz('chk' + p.n, p.check).frag);
-    wrap.appendChild(c);
+  /* badge and memory check used to close every lesson. Both now belong to the
+     chapter: the questions come after all its lessons, then the badge. */
+  if (ch) {
+    const isLast = ch.pages[ch.pages.length - 1] === p;
+    const nextUp = isLast
+      ? 'That is the last lesson in this chapter. The questions are next.'
+      : `Next lesson: ${rich(ch.pages[ch.pages.indexOf(p) + 1].title)}.`;
+    wrap.appendChild(el('div', 'lessonend', nextUp));
   }
 }
 
@@ -2876,14 +3221,17 @@ TOOLS.town = () => {
    station log has to survive a closed tab. Everything lives under one key; if
    storage is unavailable (private browsing, wiped profile) the course simply
    runs in memory the way it used to, rather than falling over. */
-const STORE = 'shake-station-7/v1';
+/* v2: the course became chapters, so an index means something different than
+   it did and the visited map is keyed by step rather than page number. Old
+   saves are ignored rather than restored onto the wrong step. */
+const STORE = 'shake-station-7/v2';
 let storageOK = true;
 
 function save() {
   if (!storageOK) return;
   try {
     localStorage.setItem(STORE, JSON.stringify({
-      v: 1, name: S.name, tier: S.tier, idx: S.idx,
+      v: 2, name: S.name, tier: S.tier, idx: S.idx,
       answered: S.answered, digits: S.digits, visited: S.visited,
       right: S.right, tries: S.tries, unlocked: S.unlocked
     }));
@@ -2896,10 +3244,10 @@ function load() {
   if (!raw) return false;
   try {
     const d = JSON.parse(raw);
-    if (!d || d.v !== 1) return false;
+    if (!d || d.v !== 2) return false;
     if (typeof d.name === 'string') S.name = d.name;
     if (TIERS[d.tier]) S.tier = d.tier;
-    if (Number.isInteger(d.idx) && d.idx >= -1 && d.idx < PAGES.length) S.idx = d.idx;
+    if (Number.isInteger(d.idx) && d.idx >= -1 && d.idx < STEPS.length) S.idx = d.idx;
     if (d.answered && typeof d.answered === 'object') S.answered = d.answered;
     if (d.digits && typeof d.digits === 'object') S.digits = d.digits;
     if (d.visited && typeof d.visited === 'object') S.visited = d.visited;
@@ -2926,7 +3274,7 @@ function boot() {
 /* a quiet note that the log was found, rather than silently teleporting them */
 function showResumed() {
   const t = $('#resumed'); if (!t) return;
-  const where = S.idx > 0 ? `page ${PAGES[S.idx].n}` : 'the front desk';
+  const where = S.idx > 0 ? whereAmI(STEPS[S.idx]).toLowerCase() : 'the front desk';
   t.innerHTML = `Welcome back${S.name ? ', ' + esc(S.name) : ''} — your log was still here. You are on ${where}.` +
     ` <button type="button" id="freshstart">Start over</button>`;
   t.style.display = 'block';
@@ -2945,7 +3293,7 @@ function bindKeys() {
   addEventListener('keydown', e => {
     const tag = (e.target && e.target.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea' || e.metaKey || e.ctrlKey || e.altKey) return;
-    if (e.key === 'ArrowRight' && S.idx > -1 && S.idx < PAGES.length - 1) { S.idx++; render(); e.preventDefault(); }
+    if (e.key === 'ArrowRight' && S.idx > -1 && S.idx < STEPS.length - 1) { S.idx++; render(); e.preventDefault(); }
     else if (e.key === 'ArrowLeft' && S.idx > -1) { S.idx = Math.max(-1, S.idx - 1); render(); e.preventDefault(); }
   });
 }

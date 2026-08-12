@@ -4,7 +4,7 @@
 
    Bump CACHE when the course content changes, otherwise tablets keep serving
    the old copy from disk. */
-const CACHE = 'shake-station-7-v1';
+const CACHE = 'shake-station-7-v2';   // v2: the course was reorganised into chapters
 
 const SHELL = [
   './',
