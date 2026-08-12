@@ -1,0 +1,2811 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f2a30">
+<title>Shake Station 7</title>
+<style>:root{
+  --ink:#33414a; --ochre:#c98b3a; --coral:#e8553e; --cream:#faf5e9;
+  --sand:#e6d7ba; --sea:#8fb3bf; --green:#7d9471; --deep:#1f2a30;
+  --line:rgba(51,65,74,.24);
+}
+*{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Carlito",Roboto,sans-serif;
+  background:var(--deep); color:var(--ink);
+  font-size:16px; line-height:1.45;
+  -webkit-text-size-adjust:100%;
+}
+html,body{ height:auto; min-height:100%; }
+button{ font:inherit; color:inherit; cursor:pointer; border:none; background:none; }
+h1,h2,h3{ font-family:Georgia,"Bitstream Charter",serif; line-height:1.1; }
+
+#app{ display:flex; flex-direction:column; min-height:100vh; background:var(--cream); max-width:1100px; margin:0 auto; box-shadow:0 0 60px rgba(0,0,0,.5); }
+
+/* ---------- top bar ---------- */
+.topbar{ position:sticky; top:0; z-index:20; flex:0 0 auto; background:var(--deep); color:var(--cream); padding:8px 14px; display:flex; align-items:center; gap:12px; }
+.brand{ font-family:Georgia,serif; font-weight:700; font-size:15px; letter-spacing:.02em; white-space:nowrap; }
+.trace{ flex:1 1 auto; height:34px; min-width:60px; }
+.trace canvas{ width:100%; height:100%; display:block; }
+.tstat{ font-size:9px; letter-spacing:.14em; font-weight:700; color:var(--coral); white-space:nowrap; }
+.whoami{ display:flex; align-items:center; gap:7px; font-size:11px; letter-spacing:.08em; }
+.tierdot{ width:24px; height:24px; border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:12px; background:var(--coral); color:var(--cream); }
+.tierdot.L{ background:var(--green); } .tierdot.F{ background:var(--sea); color:var(--deep); }
+
+/* ---------- progress rail ---------- */
+.rail{ position:sticky; top:50px; z-index:19; flex:0 0 auto; display:flex; gap:2px; padding:6px 10px; background:#efe8d6; border-bottom:1px solid var(--line); overflow-x:auto; }
+.rail b{ flex:1 0 auto; min-width:12px; height:7px; border-radius:4px; background:rgba(51,65,74,.16); transition:.25s; }
+.rail b.done{ background:var(--green); }
+.rail b.now{ background:var(--coral); transform:scaleY(1.9); }
+
+/* ---------- scroll body ---------- */
+.scroll{ flex:1 1 auto; }
+.wrap{ padding:16px 18px 28px; max-width:820px; margin:0 auto; }
+
+/* ---------- page header ---------- */
+.phead{ border-bottom:2px solid var(--ink); padding-bottom:8px; margin-bottom:14px; display:flex; align-items:flex-end; gap:12px; }
+.phead .u{ font-size:10px; letter-spacing:.16em; font-weight:700; color:var(--coral); }
+.phead .un{ font-size:10px; letter-spacing:.12em; font-weight:700; opacity:.6; }
+.phead h2{ font-size:27px; flex:1; }
+.phead .n{ font-family:Georgia,serif; font-size:32px; font-weight:700; color:var(--coral); }
+
+.hook{ background:var(--ink); color:var(--cream); padding:12px 14px; font-weight:700; font-size:17px; border-radius:3px; margin-bottom:14px; }
+
+/* ---------- cards ---------- */
+.card{ border:2px solid var(--ink); border-radius:3px; padding:13px 15px; margin-bottom:14px; background:#fff; }
+.card.coral{ border-color:var(--coral); }
+.card.dash{ border-style:dashed; border-width:2px; border-color:var(--coral); background:transparent; }
+.ctitle{ font-size:11px; letter-spacing:.14em; font-weight:700; color:var(--coral); margin-bottom:8px; }
+.ctitle .sub{ font-weight:400; letter-spacing:0; opacity:.65; font-size:11px; text-transform:none; }
+
+.q{ font-size:17px; margin-bottom:11px; }
+.choices{ display:flex; flex-direction:column; gap:8px; }
+.choice{ display:flex; gap:10px; align-items:flex-start; text-align:left; border:2px solid var(--line); border-radius:3px; padding:10px 12px; background:#fff; transition:.15s; font-size:15px; width:100%; }
+.choice:hover{ border-color:var(--ink); }
+.choice .k{ flex:0 0 22px; height:22px; border:2px solid currentColor; border-radius:3px; display:grid; place-items:center; font-size:12px; font-weight:700; }
+.choice.right{ border-color:var(--green); background:rgba(125,148,113,.16); }
+.choice.wrong{ border-color:var(--coral); background:rgba(232,85,62,.12); opacity:.75; }
+.choice.locked{ pointer-events:none; }
+.feedback{ margin-top:10px; padding:10px 12px; border-left:4px solid var(--green); background:rgba(125,148,113,.12); font-size:14px; border-radius:2px; }
+.feedback.miss{ border-left-color:var(--coral); background:rgba(232,85,62,.10); }
+.feedback b{ display:block; font-size:11px; letter-spacing:.12em; margin-bottom:3px; }
+
+.veil{ position:relative; }
+.veil.hidden > *{ filter:blur(7px); opacity:.35; pointer-events:none; user-select:none; }
+.veilmsg{ position:absolute; inset:0; display:grid; place-items:center; text-align:center; font-size:14px; font-weight:700; color:var(--coral); background:rgba(250,245,233,.55); border:2px dashed var(--coral); border-radius:3px; padding:14px; }
+
+.core{ font-size:16.5px; }
+.core p{ margin-bottom:11px; }
+.core b{ color:var(--coral); }
+.terms{ display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
+.term{ font-size:12px; border:1px dashed var(--line); padding:4px 8px; border-radius:3px; }
+.term b{ color:var(--ink); }
+
+.okon{ background:rgba(201,139,58,.15); border-left:5px solid var(--ochre); padding:11px 13px; font-style:italic; font-size:15px; margin-bottom:14px; border-radius:0 3px 3px 0; }
+.okon .oh{ font-style:normal; font-size:10px; letter-spacing:.14em; font-weight:700; color:var(--ochre); margin-bottom:4px; }
+.okon p{ margin-bottom:7px; } .okon p:last-child{ margin-bottom:0; }
+
+figure{ margin:0 0 14px; border:2px solid var(--ink); background:#fff; border-radius:3px; overflow:hidden; }
+figure svg{ display:block; width:100%; height:auto; }
+figcaption{ font-size:12px; padding:7px 11px; background:rgba(51,65,74,.06); border-top:1px solid var(--line); font-style:italic; }
+
+/* ---------- tier tabs ---------- */
+.tiertabs{ display:flex; gap:6px; margin-bottom:0; }
+.tiertab{ flex:1; padding:9px 6px; border:2px solid var(--line); border-bottom:none; border-radius:3px 3px 0 0; font-size:11px; font-weight:700; letter-spacing:.06em; opacity:.55; background:rgba(51,65,74,.05); }
+.tiertab.on{ opacity:1; border-color:var(--ink); background:#fff; }
+.tiertab.on.L{ background:rgba(125,148,113,.18); }
+.tiertab.on.F{ background:rgba(143,179,191,.2); }
+.tiertab.on.C{ background:rgba(232,85,62,.13); }
+.tierbody{ border:2px solid var(--ink); border-radius:0 3px 3px 3px; padding:13px 15px; background:#fff; margin-bottom:14px; }
+.tiertask{ font-size:15px; margin-bottom:12px; padding-bottom:11px; border-bottom:1px dashed var(--line); }
+.tiertask .lab{ font-size:10px; letter-spacing:.14em; font-weight:700; color:var(--coral); display:block; margin-bottom:4px; }
+
+/* ---------- team / build / mission ---------- */
+.team{ border:2px dashed var(--coral); border-radius:3px; padding:11px 13px; margin-bottom:14px; font-size:15px; }
+.team .lab{ font-size:10px; letter-spacing:.14em; font-weight:700; color:var(--coral); display:block; margin-bottom:4px; }
+.steps{ margin:8px 0 0 20px; font-size:15px; } .steps li{ margin-bottom:5px; }
+.mono{ white-space:pre-wrap; font-size:15px; }
+.warnbox{ background:rgba(232,85,62,.1); border:2px solid var(--coral); border-radius:3px; padding:12px 14px; margin-bottom:14px; }
+.warnbox ol{ margin:8px 0 8px 20px; } .warnbox li{ margin-bottom:5px; }
+.warnbox .rule{ font-weight:700; }
+.mythrow{ display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:14px; }
+.mythcard{ border:2px solid var(--line); border-radius:3px; padding:11px 13px; font-size:14px; }
+.mythcard b{ display:block; color:var(--coral); margin-bottom:5px; }
+
+/* ---------- badge ---------- */
+.badge{ border:3px solid var(--ink); border-radius:3px; padding:14px 16px; margin-bottom:14px; background:rgba(51,65,74,.05); }
+.badgehead{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:12px; }
+.badgehead .t{ font-size:14px; font-weight:700; letter-spacing:.08em; }
+.badgehead .d{ font-size:11px; color:var(--coral); font-weight:700; }
+.bq{ margin-bottom:14px; }
+.bq .n{ font-size:11px; letter-spacing:.1em; font-weight:700; opacity:.55; }
+.digitwin{ margin-top:6px; text-align:center; padding:16px; border:3px solid var(--green); border-radius:3px; background:rgba(125,148,113,.14); }
+.digitwin .big{ font-family:Georgia,serif; font-size:52px; font-weight:700; color:var(--green); line-height:1; }
+.digitwin .lb{ font-size:11px; letter-spacing:.14em; font-weight:700; }
+
+/* ---------- lock ---------- */
+.lockrow{ display:flex; gap:7px; justify-content:center; margin:14px 0; }
+.lockrow input{ width:46px; height:58px; text-align:center; font-family:Georgia,serif; font-size:26px; font-weight:700; border:3px solid var(--ink); border-radius:3px; background:#fff; color:var(--ink); }
+.lockrow input:focus{ outline:none; border-color:var(--coral); }
+.lockrow input.ok{ border-color:var(--green); background:rgba(125,148,113,.16); }
+.earned{ display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+.earned span{ width:30px; height:34px; border:2px solid var(--line); border-radius:3px; display:grid; place-items:center; font-family:Georgia,serif; font-weight:700; font-size:17px; opacity:.35; }
+.earned span.got{ opacity:1; border-color:var(--green); background:rgba(125,148,113,.14); color:var(--green); }
+
+/* ---------- tools ---------- */
+.tool{ border:3px solid var(--coral); border-radius:3px; padding:14px 15px; margin-bottom:14px; background:#fff; }
+.toolhead{ font-size:11px; letter-spacing:.14em; font-weight:700; color:var(--coral); margin-bottom:4px; }
+.toolsub{ font-size:14px; margin-bottom:11px; }
+.slider{ display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:14px; }
+.slider label{ flex:0 0 78px; font-weight:700; font-size:12px; letter-spacing:.06em; }
+.slider input[type=range]{ flex:1; accent-color:var(--coral); }
+.slider .val{ flex:0 0 66px; text-align:right; font-family:Georgia,serif; font-weight:700; }
+.btn{ display:inline-block; border:2px solid var(--ink); background:var(--ink); color:var(--cream); padding:10px 18px; border-radius:3px; font-size:14px; font-weight:700; letter-spacing:.05em; }
+.btn.ghost{ background:transparent; color:var(--ink); }
+.btn.coral{ background:var(--coral); border-color:var(--coral); }
+.btn:disabled{ opacity:.35; pointer-events:none; }
+.btnrow{ display:flex; gap:9px; flex-wrap:wrap; margin-top:11px; }
+.result{ margin-top:11px; font-size:14px; padding:10px 12px; border-radius:3px; background:rgba(51,65,74,.07); }
+.towergrid{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:10px; }
+.topt{ border:2px solid var(--line); border-radius:3px; padding:9px 10px; font-size:13px; text-align:left; }
+.topt.on{ border-color:var(--coral); background:rgba(232,85,62,.1); font-weight:700; }
+
+/* ---------- nav ---------- */
+.nav{ position:sticky; bottom:0; z-index:20; background:var(--cream); border-top:2px solid var(--ink);
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom)); display:flex; gap:10px; align-items:center;
+  box-shadow:0 -6px 18px rgba(31,42,48,.10); }
+.nav .sp{ flex:1; font-size:12px; opacity:.65; text-align:center; }
+#errbar{ display:none; background:#e8553e; color:#fff; padding:12px 16px; font:13px/1.4 monospace; white-space:pre-wrap; }
+
+/* ---------- cover / setup ---------- */
+.setup{ text-align:center; padding:26px 20px 40px; }
+.setup h1{ font-size:44px; letter-spacing:-.02em; }
+.setup .sub{ font-size:12px; letter-spacing:.2em; font-weight:700; margin:10px 0 3px; }
+.setup .ages{ font-size:11px; letter-spacing:.14em; font-weight:700; color:var(--coral); margin-bottom:18px; }
+.setup figure{ margin-bottom:20px; }
+.story{ text-align:left; font-size:16.5px; max-width:600px; margin:0 auto 22px; }
+.story p{ margin-bottom:12px; }
+.namein{ width:100%; max-width:340px; padding:12px 14px; border:3px solid var(--ink); border-radius:3px; font-size:17px; text-align:center; background:#fff; color:var(--ink); }
+.namein:focus{ outline:none; border-color:var(--coral); }
+.tierpick{ display:flex; gap:9px; justify-content:center; margin:14px 0 20px; flex-wrap:wrap; }
+.tierbtn{ border:3px solid var(--line); border-radius:3px; padding:12px 14px; text-align:center; min-width:130px; }
+.tierbtn.on{ border-color:var(--ink); background:rgba(51,65,74,.07); }
+.tierbtn .tl{ font-family:Georgia,serif; font-size:24px; font-weight:700; }
+.tierbtn .tn{ font-size:11px; letter-spacing:.1em; font-weight:700; }
+.tierbtn .ta{ font-size:11px; opacity:.65; }
+.oath{ font-style:italic; font-size:15px; border:2px solid var(--ink); border-radius:3px; padding:13px; max-width:420px; margin:0 auto 18px; text-align:left; }
+
+/* ---------- certificate ---------- */
+.cert{ border:5px double var(--ink); border-radius:3px; padding:22px; text-align:center; background:#fff; margin-bottom:14px; }
+.cert h3{ font-size:22px; letter-spacing:.06em; }
+.cert .who{ font-family:Georgia,serif; font-size:30px; font-weight:700; color:var(--coral); margin:14px 0 10px; }
+.cert .body{ font-size:14px; max-width:460px; margin:0 auto 16px; }
+.cert .sig{ font-size:12px; opacity:.7; }
+.seal{ width:96px; height:96px; margin:14px auto 0; border-radius:50%; border:3px dashed var(--coral); display:grid; place-items:center; font-size:11px; font-weight:700; letter-spacing:.12em; color:var(--coral); line-height:1.4; }
+.scoreline{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:14px; }
+.pill{ border:2px solid var(--ink); border-radius:20px; padding:6px 14px; font-size:13px; font-weight:700; }
+.pill.g{ border-color:var(--green); color:var(--green); }
+
+@media (max-width:620px){
+  .wrap{ padding:12px 13px 24px; }
+  .phead h2{ font-size:21px; } .phead .n{ font-size:24px; }
+  .hook{ font-size:15px; }
+  .core,.q{ font-size:15.5px; }
+  .setup h1{ font-size:30px; }
+  .towergrid{ grid-template-columns:1fr; }
+  .brand{ font-size:12px; }
+  .whoami .nm{ display:none; }
+}
+@media (min-width:760px){ .mythrow{ grid-template-columns:repeat(3,1fr); } }
+</style>
+</head>
+<body>
+<noscript><div style="padding:24px;font:16px/1.5 sans-serif;background:#e8553e;color:#fff">
+This page needs JavaScript. Open the file in Safari, Chrome, or any normal browser rather than a preview window.
+</div></noscript>
+<div id="app">
+  <div id="errbar"></div>
+  <div class="topbar">
+    <div class="brand">SHAKE&nbsp;STATION&nbsp;7</div>
+    <div class="trace"><canvas id="trace"></canvas></div>
+    <div class="tstat" id="tstat">QUIET</div>
+    <div class="whoami" id="whoami"></div>
+  </div>
+  <div class="rail" id="rail"></div>
+  <div class="scroll" id="scroll"></div>
+  <div class="nav" id="nav"></div>
+</div>
+<script>
+// SHAKE STATION 7 — vector diagram library
+// Palette: slate #33414a  ochre #c98b3a  coral #e8553e  cream #f7f1e3  sand #e3d5b8
+const C = { ink:'#33414a', ochre:'#c98b3a', coral:'#e8553e', cream:'#faf5e9', sand:'#e6d7ba', deep:'#1f2a30', sea:'#8fb3bf', green:'#7d9471' };
+
+// --- world map helpers (equirectangular) ---
+const MW = 800, MH = 400;
+const px = lon => (lon + 180) * (MW / 360);
+const py = lat => (90 - lat) * (MH / 180);
+const poly = (pts, fill, stroke, sw) =>
+  `<polygon points="${pts.map(p => px(p[0]).toFixed(1) + ',' + py(p[1]).toFixed(1)).join(' ')}" fill="${fill}" stroke="${stroke||C.ink}" stroke-width="${sw||1.4}" stroke-linejoin="round"/>`;
+
+const LAND = {
+  namerica: [[-168,66],[-158,71],[-130,70],[-100,72],[-80,73],[-62,60],[-55,47],[-66,44],[-76,35],[-81,25],[-97,26],[-105,20],[-114,30],[-124,40],[-124,48],[-136,58],[-152,60],[-168,66]],
+  samerica: [[-92,15],[-83,9],[-77,8],[-60,10],[-50,0],[-35,-6],[-39,-16],[-48,-25],[-58,-38],[-63,-42],[-70,-53],[-75,-52],[-73,-40],[-71,-20],[-80,-5],[-78,2],[-84,10],[-92,15]],
+  africa: [[-17,15],[-16,22],[-10,30],[0,36],[10,37],[20,32],[32,31],[35,25],[43,12],[51,11],[42,-2],[40,-15],[35,-25],[25,-34],[18,-34],[12,-18],[9,-1],[8,4],[-5,5],[-13,9],[-17,15]],
+  eurasia: [[-10,36],[0,44],[-5,49],[-2,58],[10,58],[5,62],[20,70],[40,72],[70,75],[100,78],[135,73],[160,70],[178,66],[178,60],[160,57],[142,50],[130,42],[122,30],[110,20],[105,9],[100,13],[95,16],[89,22],[80,9],[72,20],[62,25],[50,30],[36,37],[28,40],[16,38],[12,45],[3,43],[-10,36]],
+  australia: [[113,-22],[114,-34],[129,-32],[138,-35],[146,-39],[151,-37],[153,-28],[145,-15],[135,-12],[130,-11],[125,-14],[113,-22]],
+  antarctica: [[-180,-70],[-150,-75],[-100,-73],[-60,-64],[-20,-70],[20,-70],[60,-67],[110,-66],[150,-70],[180,-72],[180,-88],[-180,-88]],
+  greenland: [[-55,60],[-45,60],[-20,70],[-22,82],[-45,84],[-58,82],[-58,70],[-55,60]]
+};
+
+const worldLand = (fill) => Object.values(LAND).map(p => poly(p, fill || C.sand)).join('');
+
+const grid = () => {
+  let g = '';
+  for (let lon = -180; lon <= 180; lon += 30) g += `<line x1="${px(lon)}" y1="0" x2="${px(lon)}" y2="${MH}" stroke="${C.ink}" stroke-width="0.4" opacity="0.28"/>`;
+  for (let lat = -90; lat <= 90; lat += 30) g += `<line x1="0" y1="${py(lat)}" x2="${MW}" y2="${py(lat)}" stroke="${C.ink}" stroke-width="0.4" opacity="0.28"/>`;
+  g += `<line x1="0" y1="${py(0)}" x2="${MW}" y2="${py(0)}" stroke="${C.ink}" stroke-width="1" opacity="0.5" stroke-dasharray="6 4"/>`;
+  for (let lon = -180; lon <= 180; lon += 60) g += `<text x="${px(lon)+3}" y="${MH-5}" font-size="10" fill="${C.ink}" opacity="0.6">${Math.abs(lon)}${lon<0?'W':lon>0?'E':''}</text>`;
+  for (let lat = -60; lat <= 60; lat += 30) g += `<text x="3" y="${py(lat)-3}" font-size="10" fill="${C.ink}" opacity="0.6">${Math.abs(lat)}${lat<0?'S':lat>0?'N':''}</text>`;
+  return g;
+};
+
+// plate boundary lines (approximate, teaching-grade)
+const PLATE_LINES = [
+  [[-30,65],[-28,45],[-25,20],[-20,0],[-14,-20],[-13,-40],[-16,-55],[-5,-58],[20,-55],[60,-50],[90,-52],[120,-58],[150,-60],[170,-62]],
+  [[170,-62],[178,-30],[175,-20],[178,0],[172,10],[150,5],[140,-8],[130,-8],[125,5],[122,15],[126,28],[135,40],[145,45],[155,52],[165,55],[178,58]],
+  [[-168,55],[-150,58],[-135,52],[-127,45],[-120,34],[-110,24],[-105,15],[-95,15],[-85,10],[-78,5],[-73,-10],[-72,-30],[-70,-45],[-68,-55]],
+  [[-16,-55],[-70,-58],[-68,-55]],
+  [[-10,36],[15,38],[30,36],[45,38],[60,32],[75,32],[90,28],[100,22],[110,15]],
+  [[35,32],[38,20],[42,12],[45,-5],[38,-15],[35,-30]],
+  [[-180,50],[-168,55]]
+];
+const plateLines = (stroke, w, dash) => PLATE_LINES.map(l =>
+  `<polyline points="${l.map(p => px(p[0]).toFixed(1)+','+py(p[1]).toFixed(1)).join(' ')}" fill="none" stroke="${stroke||C.coral}" stroke-width="${w||2.6}" stroke-linecap="round" stroke-linejoin="round" ${dash?`stroke-dasharray="${dash}"`:''}/>`).join('');
+
+const QUAKES = [
+  ['Valdivia',-73,-38],['Anchorage',-148,61],['Tohoku',143,38],['Sumatra',96,3],['Kamchatka',160,52],
+  ['Maule',-73,-36],['Cascadia',-125,45],['Luzon',121,16],['Tonga',-175,-20],['Michoacan',-102,18]
+];
+
+const ART = {};
+
+const wrap = (inner, vb) => `<svg viewBox="${vb||'0 0 800 400'}" xmlns="http://www.w3.org/2000/svg" class="fig">${inner}</svg>`;
+
+// ---------- 1. COVER ----------
+ART.cover = () => wrap(`
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#dfe8ea"/><stop offset="100%" stop-color="${C.cream}"/></linearGradient></defs>
+  <rect width="800" height="400" fill="url(#sky)"/>
+  <circle cx="640" cy="90" r="28" fill="none" stroke="${C.ochre}" stroke-width="2"/>
+  <path d="M0 300 Q 120 292 240 300 T 480 302 T 800 296 L800 400 L0 400Z" fill="${C.sea}" opacity="0.5"/>
+  <path d="M0 400 L0 250 L90 236 L170 258 L250 232 L330 268 L400 250 L400 400Z" fill="${C.ochre}" opacity="0.35" stroke="${C.ink}" stroke-width="1.5"/>
+  <path d="M400 400 L400 250 L470 262 L560 238 L650 266 L740 244 L800 262 L800 400Z" fill="${C.ochre}" opacity="0.22" stroke="${C.ink}" stroke-width="1.5"/>
+  <g transform="translate(250,180)">
+    <rect x="0" y="0" width="120" height="70" fill="${C.cream}" stroke="${C.ink}" stroke-width="2.5"/>
+    <path d="M-12 0 L60 -34 L132 0 Z" fill="${C.coral}" opacity="0.75" stroke="${C.ink}" stroke-width="2.5"/>
+    <rect x="18" y="22" width="30" height="26" fill="${C.sea}" stroke="${C.ink}" stroke-width="2"/>
+    <rect x="72" y="22" width="30" height="48" fill="${C.ink}" opacity="0.75"/>
+    <line x1="60" y1="-34" x2="60" y2="-80" stroke="${C.ink}" stroke-width="2.5"/>
+    <circle cx="60" cy="-84" r="5" fill="${C.coral}"/>
+    <text x="60" y="60" font-size="13" text-anchor="middle" fill="${C.ink}" font-weight="700">7</text>
+  </g>
+  <g transform="translate(60,340)">
+    <text font-size="11" fill="${C.ink}" opacity="0.75">FAULT LINE</text>
+    <path d="M0 10 L60 22 L120 6 L190 26 L260 8 L330 24" fill="none" stroke="${C.coral}" stroke-width="3" stroke-dasharray="10 6"/>
+  </g>
+  <g transform="translate(430,60)">
+    <rect x="0" y="0" width="320" height="86" fill="${C.cream}" stroke="${C.ink}" stroke-width="1.6" opacity="0.92"/>
+    <text x="10" y="18" font-size="10" fill="${C.ink}" opacity="0.7">LIVE TRACE — STATION 7</text>
+    <path d="M10 55 L300 55" stroke="${C.ink}" stroke-width="1.6"/>
+    <text x="10" y="76" font-size="9" fill="${C.ink}" opacity="0.6">flat for 11 months</text>
+  </g>`);
+
+// ---------- 2. EARTH LAYERS ----------
+ART.layers = () => wrap(`
+  <g transform="translate(240,200)">
+    <circle r="170" fill="${C.ochre}" opacity="0.30" stroke="${C.ink}" stroke-width="2"/>
+    <circle r="118" fill="${C.ochre}" opacity="0.55" stroke="${C.ink}" stroke-width="1.6"/>
+    <circle r="62" fill="${C.coral}" opacity="0.55" stroke="${C.ink}" stroke-width="1.6"/>
+    <circle r="30" fill="${C.coral}" stroke="${C.ink}" stroke-width="1.6"/>
+    <circle r="176" fill="none" stroke="${C.ink}" stroke-width="5"/>
+    <path d="M0 -176 A176 176 0 0 1 0 176" fill="none" stroke="${C.ink}" stroke-width="0"/>
+  </g>
+  <g stroke="${C.ink}" stroke-width="1.1" fill="none">
+    <line x1="240" y1="24" x2="560" y2="24"/><line x1="240" y1="90" x2="560" y2="90"/>
+    <line x1="278" y1="150" x2="560" y2="150"/><line x1="252" y1="200" x2="560" y2="200"/>
+  </g>
+  <g font-size="15" fill="${C.ink}">
+    <text x="566" y="28" font-weight="700">CRUST</text>
+    <text x="566" y="44" font-size="11" opacity="0.75">5 to 70 km. Thinner than an eggshell.</text>
+    <text x="566" y="94" font-weight="700">MANTLE</text>
+    <text x="566" y="110" font-size="11" opacity="0.75">2900 km. Solid rock that creeps.</text>
+    <text x="566" y="154" font-weight="700">OUTER CORE</text>
+    <text x="566" y="170" font-size="11" opacity="0.75">2200 km. Genuinely liquid metal.</text>
+    <text x="566" y="204" font-weight="700">INNER CORE</text>
+    <text x="566" y="220" font-size="11" opacity="0.75">1200 km. Solid iron. About 5000 C.</text>
+  </g>
+  <g transform="translate(566,268)">
+    <rect x="0" y="0" width="224" height="96" fill="none" stroke="${C.ink}" stroke-width="1.2" stroke-dasharray="4 3"/>
+    <text x="10" y="20" font-size="11" fill="${C.ink}" font-weight="700">DEEPEST HOLE EVER DUG</text>
+    <line x1="12" y1="34" x2="12" y2="84" stroke="${C.ink}" stroke-width="1"/>
+    <line x1="12" y1="34" x2="18" y2="34" stroke="${C.coral}" stroke-width="4"/>
+    <text x="26" y="40" font-size="10" fill="${C.coral}">12 km  (us)</text>
+    <line x1="12" y1="60" x2="60" y2="60" stroke="${C.ink}" stroke-width="4"/>
+    <text x="68" y="64" font-size="10" fill="${C.ink}">35 km (base of crust)</text>
+    <text x="12" y="82" font-size="9" fill="${C.ink}" opacity="0.7">We have never been through it.</text>
+  </g>`);
+
+// ---------- 3. CONVECTION ----------
+ART.convection = () => wrap(`
+  <rect x="60" y="60" width="680" height="270" fill="${C.ochre}" opacity="0.18" stroke="${C.ink}" stroke-width="2"/>
+  <rect x="60" y="60" width="680" height="26" fill="${C.sand}" stroke="${C.ink}" stroke-width="2"/>
+  <text x="70" y="78" font-size="12" fill="${C.ink}" font-weight="700">CRUST</text>
+  <rect x="60" y="330" width="680" height="26" fill="${C.coral}" opacity="0.8" stroke="${C.ink}" stroke-width="2"/>
+  <text x="70" y="348" font-size="12" fill="${C.cream}" font-weight="700">HEAT FROM THE CORE</text>
+  <g fill="none" stroke-width="3.5" stroke-linecap="round">
+    <path d="M200 320 L200 110" stroke="${C.coral}"/>
+    <path d="M200 110 L330 110" stroke="${C.coral}" opacity="0.6"/>
+    <path d="M330 110 L330 320" stroke="${C.sea}"/>
+    <path d="M330 320 L200 320" stroke="${C.sea}" opacity="0.6"/>
+    <path d="M470 320 L470 110" stroke="${C.coral}"/>
+    <path d="M470 110 L600 110" stroke="${C.coral}" opacity="0.6"/>
+    <path d="M600 110 L600 320" stroke="${C.sea}"/>
+    <path d="M600 320 L470 320" stroke="${C.sea}" opacity="0.6"/>
+  </g>
+  <g fill="${C.coral}">
+    <polygon points="200,96 194,116 206,116"/><polygon points="470,96 464,116 476,116"/>
+  </g>
+  <g fill="${C.sea}">
+    <polygon points="330,334 324,314 336,314"/><polygon points="600,334 594,314 606,314"/>
+  </g>
+  <text x="150" y="200" font-size="12" fill="${C.coral}" font-weight="700" transform="rotate(-90 150 200)">HOT ROCK RISES</text>
+  <text x="380" y="200" font-size="12" fill="${C.sea}" font-weight="700" transform="rotate(-90 380 200)">COOL ROCK SINKS</text>
+  <text x="265" y="240" font-size="13" fill="${C.ink}" text-anchor="middle" font-weight="700">CONVECTION</text>
+  <text x="265" y="258" font-size="13" fill="${C.ink}" text-anchor="middle" font-weight="700">CELL</text>
+  <g transform="translate(620,150)" opacity="0.8">
+    <text font-size="10" fill="${C.ink}">Speed of this rock:</text>
+    <text y="15" font-size="10" fill="${C.ink}" font-weight="700">a few cm per year</text>
+    <text y="30" font-size="10" fill="${C.ink}">(fingernail speed)</text>
+  </g>`);
+
+// ---------- 4. PLATE MAP ----------
+ART.plates = () => wrap(`
+  <rect width="800" height="400" fill="${C.sea}" opacity="0.22"/>
+  ${worldLand(C.sand)}
+  ${plateLines(C.coral, 3)}
+  <g font-size="10" fill="${C.ink}" font-weight="700">
+    <text x="120" y="120">NORTH AMERICAN</text><text x="160" y="290">SOUTH AMERICAN</text>
+    <text x="400" y="250">AFRICAN</text><text x="520" y="100">EURASIAN</text>
+    <text x="640" y="285">AUSTRALIAN</text><text x="60" y="215">PACIFIC</text>
+    <text x="700" y="200">PACIFIC</text><text x="590" y="215">INDIAN</text>
+    <text x="360" y="380">ANTARCTIC</text><text x="285" y="195">NAZCA</text>
+  </g>
+  <rect x="600" y="12" width="188" height="42" fill="${C.cream}" stroke="${C.ink}" stroke-width="1.2"/>
+  <line x1="610" y1="30" x2="640" y2="30" stroke="${C.coral}" stroke-width="3"/>
+  <text x="646" y="34" font-size="10" fill="${C.ink}">plate boundary</text>
+  <text x="610" y="48" font-size="9" fill="${C.ink}" opacity="0.7">trace these in red</text>`);
+
+// ---------- 5. PANGAEA ----------
+ART.pangaea = () => wrap(`
+  <text x="20" y="24" font-size="12" font-weight="700" fill="${C.ink}">250 MILLION YEARS AGO</text>
+  <text x="430" y="24" font-size="12" font-weight="700" fill="${C.ink}">TODAY</text>
+  <line x1="400" y1="34" x2="400" y2="380" stroke="${C.ink}" stroke-width="1" stroke-dasharray="4 4"/>
+  <g transform="translate(40,60) scale(0.9)">
+    <path d="M120 20 L180 10 L230 40 L250 90 L235 130 L250 170 L230 220 L190 265 L150 275 L120 250 L100 200 L60 180 L40 130 L55 80 L90 40 Z" fill="${C.sand}" stroke="${C.ink}" stroke-width="2"/>
+    <path d="M120 20 L180 10 L230 40 L250 90 L200 100 L150 80 L110 60 Z" fill="${C.ochre}" opacity="0.35" stroke="${C.ink}" stroke-width="1"/>
+    <text x="150" y="55" font-size="10" fill="${C.ink}">N.AM</text>
+    <text x="205" y="130" font-size="10" fill="${C.ink}">EUR</text>
+    <text x="120" y="150" font-size="10" fill="${C.ink}">AFR</text>
+    <text x="75" y="145" font-size="10" fill="${C.ink}">S.AM</text>
+    <text x="185" y="200" font-size="10" fill="${C.ink}">IND</text>
+    <text x="140" y="245" font-size="10" fill="${C.ink}">ANT</text>
+    <text x="200" y="250" font-size="10" fill="${C.ink}">AUS</text>
+    <g stroke="${C.coral}" stroke-width="2" fill="none">
+      <ellipse cx="105" cy="150" rx="34" ry="16" transform="rotate(-20 105 150)"/>
+      <ellipse cx="140" cy="215" rx="42" ry="15" transform="rotate(8 140 215)"/>
+    </g>
+    <text x="96" y="120" font-size="9" fill="${C.coral}" font-weight="700">Mesosaurus</text>
+    <text x="118" y="242" font-size="9" fill="${C.coral}" font-weight="700">Glossopteris</text>
+    <text x="150" y="300" font-size="13" fill="${C.ink}" font-weight="700" text-anchor="middle">PANGAEA</text>
+  </g>
+  <g transform="translate(420,55) scale(0.44)">
+    <rect width="800" height="400" fill="${C.sea}" opacity="0.18"/>
+    ${worldLand(C.sand)}
+    <g stroke="${C.coral}" stroke-width="5" fill="none">
+      <ellipse cx="${px(-45)}" cy="${py(-15)}" rx="55" ry="34"/>
+      <ellipse cx="${px(15)}" cy="${py(-20)}" rx="55" ry="34"/>
+    </g>
+  </g>
+  <text x="430" y="290" font-size="11" fill="${C.ink}">The same fossil reptile, on two continents,</text>
+  <text x="430" y="306" font-size="11" fill="${C.ink}">separated by an entire ocean it could not swim.</text>
+  <text x="430" y="330" font-size="11" fill="${C.coral}" font-weight="700">Alfred Wegener, 1912. Rejected until the 1960s.</text>`);
+
+// ---------- 6. BOUNDARIES ----------
+ART.boundaries = () => {
+  const block = (x, title, word, dir) => {
+    const arrows = dir === 'div'
+      ? `<g stroke="${C.coral}" stroke-width="4" fill="${C.coral}"><line x1="${x+40}" y1="120" x2="${x+8}" y2="120"/><polygon points="${x+2},120 ${x+16},113 ${x+16},127"/><line x1="${x+160}" y1="120" x2="${x+192}" y2="120"/><polygon points="${x+198},120 ${x+184},113 ${x+184},127"/></g>`
+      : dir === 'con'
+      ? `<g stroke="${C.coral}" stroke-width="4" fill="${C.coral}"><line x1="${x+8}" y1="120" x2="${x+40}" y2="120"/><polygon points="${x+46},120 ${x+32},113 ${x+32},127"/><line x1="${x+192}" y1="120" x2="${x+160}" y2="120"/><polygon points="${x+154},120 ${x+168},113 ${x+168},127"/></g>`
+      : `<g stroke="${C.coral}" stroke-width="4" fill="${C.coral}"><line x1="${x+30}" y1="112" x2="${x+80}" y2="112"/><polygon points="${x+88},112 ${x+74},105 ${x+74},119"/><line x1="${x+170}" y1="132" x2="${x+120}" y2="132"/><polygon points="${x+112},132 ${x+126},125 ${x+126},139"/></g>`;
+    const shapes = dir === 'div'
+      ? `<rect x="${x+4}" y="150" width="86" height="70" fill="${C.sand}" stroke="${C.ink}" stroke-width="2"/>
+         <rect x="${x+110}" y="150" width="86" height="70" fill="${C.sand}" stroke="${C.ink}" stroke-width="2"/>
+         <path d="M${x+90} 220 L${x+100} 150 L${x+110} 220 Z" fill="${C.coral}" opacity="0.8" stroke="${C.ink}" stroke-width="1.5"/>
+         <text x="${x+100}" y="244" font-size="9" text-anchor="middle" fill="${C.ink}">new crust rises</text>`
+      : dir === 'con'
+      ? `<rect x="${x+4}" y="150" width="96" height="52" fill="${C.sand}" stroke="${C.ink}" stroke-width="2"/>
+         <path d="M${x+100} 150 L${x+196} 150 L${x+196} 202 L${x+150} 202 Z" fill="${C.sand}" stroke="${C.ink}" stroke-width="2"/>
+         <path d="M${x+100} 202 L${x+150} 202 L${x+186} 250 L${x+140} 250 Z" fill="${C.ink}" opacity="0.35"/>
+         <path d="M${x+96} 150 L${x+112} 122 L${x+128} 150 Z" fill="${C.coral}" stroke="${C.ink}" stroke-width="1.5"/>
+         <text x="${x+100}" y="268" font-size="9" text-anchor="middle" fill="${C.ink}">one plate dives under</text>`
+      : `<path d="M${x+4} 150 L${x+96} 150 L${x+104} 220 L${x+4} 220 Z" fill="${C.sand}" stroke="${C.ink}" stroke-width="2"/>
+         <path d="M${x+104} 150 L${x+196} 150 L${x+196} 220 L${x+112} 220 Z" fill="${C.sand}" stroke="${C.ink}" stroke-width="2"/>
+         <line x1="${x+100}" y1="150" x2="${x+108}" y2="220" stroke="${C.coral}" stroke-width="3.5"/>
+         <text x="${x+100}" y="244" font-size="9" text-anchor="middle" fill="${C.ink}">stick, then jerk</text>`;
+    return `<g><rect x="${x}" y="46" width="200" height="240" fill="none" stroke="${C.ink}" stroke-width="1.2"/>
+      <text x="${x+100}" y="70" font-size="13" text-anchor="middle" font-weight="700" fill="${C.ink}">${title}</text>
+      <text x="${x+100}" y="90" font-size="11" text-anchor="middle" fill="${C.coral}" font-weight="700">${word}</text>
+      ${arrows}${shapes}</g>`;
+  };
+  return wrap(`
+  <text x="20" y="28" font-size="12" fill="${C.ink}" font-weight="700">DO THE HAND SIGN FIRST. THEN READ THE WORD.</text>
+  ${block(20,'PULL APART','DIVERGENT','div')}
+  ${block(290,'PUSH TOGETHER','CONVERGENT','con')}
+  ${block(560,'SLIDE PAST','TRANSFORM','trans')}
+  <g font-size="10" fill="${C.ink}" opacity="0.8">
+    <text x="20" y="310">Iceland. The Great Rift Valley.</text>
+    <text x="290" y="310">The Himalayas. The Andes. Japan.</text>
+    <text x="560" y="310">The San Andreas Fault.</text>
+  </g>
+  <g transform="translate(20,326)">
+    <rect width="760" height="56" fill="none" stroke="${C.ink}" stroke-width="1" stroke-dasharray="4 3"/>
+    <text x="10" y="20" font-size="10" font-weight="700" fill="${C.ink}">COPY THE HAND SIGN HERE:</text>
+    <text x="150" y="20" font-size="10" fill="${C.ink}" opacity="0.6">draw your hands</text>
+    <text x="410" y="20" font-size="10" fill="${C.ink}" opacity="0.6">draw your hands</text>
+    <text x="640" y="20" font-size="10" fill="${C.ink}" opacity="0.6">draw your hands</text>
+  </g>`);
+};
+
+// ---------- 7. LANDFORMS ----------
+ART.landforms = () => wrap(`
+  <rect x="0" y="0" width="800" height="400" fill="none"/>
+  <rect x="20" y="150" width="760" height="200" fill="${C.ochre}" opacity="0.18" stroke="${C.ink}" stroke-width="1.5"/>
+  <path d="M20 150 L120 150 L150 118 L185 150 L300 150 L340 200 L400 150 L470 150 L520 96 L570 150 L700 150 L740 132 L780 150" fill="${C.sand}" stroke="${C.ink}" stroke-width="2.2"/>
+  <path d="M20 150 L120 150 L120 350 L20 350 Z" fill="${C.sea}" opacity="0.35"/>
+  <path d="M300 150 L340 200 L400 150" fill="${C.sea}" opacity="0.5" stroke="${C.ink}" stroke-width="2"/>
+  <path d="M185 150 L245 150 L300 150 L280 250 L215 250 Z" fill="none"/>
+  <g stroke="${C.ink}" stroke-width="1.6" fill="none" stroke-dasharray="6 4">
+    <path d="M300 152 L360 300"/>
+  </g>
+  <path d="M150 118 L150 96 M150 96 L143 108 M150 96 L157 108" stroke="${C.coral}" stroke-width="2" fill="none"/>
+  <polygon points="520,96 500,150 540,150" fill="${C.coral}" opacity="0.85" stroke="${C.ink}" stroke-width="1.5"/>
+  <path d="M520 96 L512 74 M520 96 L528 72 M520 96 L520 66" stroke="${C.coral}" stroke-width="2"/>
+  <g font-size="11" fill="${C.ink}" font-weight="700">
+    <text x="26" y="176">OCEAN</text>
+    <text x="316" y="222" fill="${C.coral}">TRENCH</text>
+    <text x="470" y="88">VOLCANO</text>
+    <text x="128" y="112">MOUNTAINS</text>
+    <text x="690" y="126">RIFT VALLEY</text>
+    <text x="330" y="316" fill="${C.ink}" opacity="0.7">subducting plate</text>
+  </g>
+  <g font-size="9" fill="${C.ink}" opacity="0.75">
+    <text x="26" y="192">seafloor sags where the plate dives</text>
+    <text x="450" y="104">water from the slab melts the rock above</text>
+    <text x="118" y="128">two continents, nothing sinks, rock goes up</text>
+  </g>
+  <g transform="translate(20,362)">
+    <text font-size="10" fill="${C.ink}" font-weight="700">MATCH: mountain / volcano / trench / rift valley  →  divergent, convergent, transform</text>
+  </g>`);
+
+// ---------- 8. BLANK GRID MAP ----------
+ART.worldgrid = () => wrap(`
+  <rect width="800" height="400" fill="${C.cream}"/>
+  ${worldLand('#ffffff')}
+  ${grid()}
+  <rect x="0" y="0" width="800" height="400" fill="none" stroke="${C.ink}" stroke-width="2"/>
+  <text x="8" y="16" font-size="10" fill="${C.ink}" opacity="0.7">PLOT ALL TEN. JOIN THEM. LOOK AT THE SHAPE.</text>`);
+
+ART.worldgrid_solved = () => wrap(`
+  <rect width="800" height="400" fill="${C.cream}"/>
+  ${worldLand('#ffffff')}
+  ${grid()}
+  ${QUAKES.map(q => `<circle cx="${px(q[1]).toFixed(1)}" cy="${py(q[2]).toFixed(1)}" r="6" fill="${C.coral}" stroke="${C.ink}" stroke-width="1.2"/>`).join('')}
+  <rect x="0" y="0" width="800" height="400" fill="none" stroke="${C.ink}" stroke-width="2"/>`);
+
+// ---------- 9. ELASTIC REBOUND ----------
+ART.rebound = () => {
+  const panel = (x, year, fence, cap) => `
+    <g><rect x="${x}" y="60" width="240" height="230" fill="${C.sand}" opacity="0.5" stroke="${C.ink}" stroke-width="1.5"/>
+      <line x1="${x}" y1="175" x2="${x+240}" y2="175" stroke="${C.coral}" stroke-width="3" stroke-dasharray="8 5"/>
+      <text x="${x+8}" y="82" font-size="12" font-weight="700" fill="${C.ink}">${year}</text>
+      ${fence}
+      <text x="${x+120}" y="308" font-size="10" text-anchor="middle" fill="${C.ink}">${cap}</text>
+    </g>`;
+  const posts = (pts) => pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${C.ink}"/>`).join('');
+  const f1 = `<line x1="140" y1="90" x2="140" y2="270" stroke="${C.ink}" stroke-width="2.5"/>${posts([[140,100],[140,140],[140,175],[140,210],[140,255]])}`;
+  const f2 = `<path d="M330 90 L330 140 Q332 172 352 175 Q372 178 374 210 L374 270" fill="none" stroke="${C.ink}" stroke-width="2.5"/>${posts([[330,100],[331,140],[352,175],[373,210],[374,255]])}`;
+  const f3 = `<line x1="560" y1="90" x2="560" y2="173" stroke="${C.ink}" stroke-width="2.5"/><line x1="608" y1="177" x2="608" y2="270" stroke="${C.ink}" stroke-width="2.5"/>
+    <line x1="560" y1="173" x2="608" y2="177" stroke="${C.coral}" stroke-width="2" stroke-dasharray="3 3"/>
+    <text x="586" y="166" font-size="9" fill="${C.coral}" text-anchor="middle">4.5 m offset</text>`;
+  return wrap(`
+  <text x="20" y="34" font-size="12" font-weight="700" fill="${C.ink}">A FENCE BUILT STRAIGHT ACROSS A FAULT</text>
+  ${panel(20,'1900', f1, 'Built dead straight. Fault is quiet.')}
+  ${panel(280,'2000', f2, 'Plates crept. Rock bent. Energy stored.')}
+  ${panel(540,'2001', f3, 'SNAP. Both halves straight, no longer joined.')}
+  <text x="20" y="340" font-size="11" fill="${C.coral}" font-weight="700">The bending took 100 years and made no sound. The snap took 12 seconds and was the earthquake.</text>
+  <text x="20" y="360" font-size="10" fill="${C.ink}" opacity="0.75">Elastic rebound. The rock does not stay bent, it springs back, and the springing back is what shakes the ground.</text>`);
+};
+
+// ---------- 10. EPICENTRE ----------
+ART.epicentre = () => wrap(`
+  <rect x="40" y="40" width="720" height="60" fill="#dfe8ea"/>
+  <rect x="40" y="100" width="720" height="250" fill="${C.ochre}" opacity="0.2" stroke="${C.ink}" stroke-width="2"/>
+  <line x1="40" y1="100" x2="760" y2="100" stroke="${C.ink}" stroke-width="3"/>
+  <g transform="translate(380,72)">
+    <rect x="-16" y="-14" width="32" height="28" fill="${C.cream}" stroke="${C.ink}" stroke-width="1.6"/>
+    <path d="M-20 -14 L0 -30 L20 -14Z" fill="${C.sand}" stroke="${C.ink}" stroke-width="1.6"/>
+  </g>
+  <g transform="translate(440,72)"><rect x="-12" y="-20" width="24" height="34" fill="${C.cream}" stroke="${C.ink}" stroke-width="1.6"/></g>
+  <line x1="180" y1="100" x2="620" y2="330" stroke="${C.ink}" stroke-width="2.5" stroke-dasharray="9 5"/>
+  <text x="600" y="350" font-size="11" fill="${C.ink}" font-weight="700">FAULT PLANE</text>
+  <g transform="translate(400,240)">
+    <polygon points="0,-16 4.7,-4.9 16,-4.9 6.6,2 10.5,13 0,6.5 -10.5,13 -6.6,2 -16,-4.9 -4.7,-4.9" fill="${C.coral}" stroke="${C.ink}" stroke-width="1.2"/>
+  </g>
+  <g stroke="${C.coral}" stroke-width="1.6" fill="none" opacity="0.7">
+    <circle cx="400" cy="240" r="42"/><circle cx="400" cy="240" r="72"/><circle cx="400" cy="240" r="102"/><circle cx="400" cy="240" r="132"/>
+  </g>
+  <line x1="400" y1="240" x2="400" y2="100" stroke="${C.ink}" stroke-width="2" stroke-dasharray="5 4"/>
+  <circle cx="400" cy="100" r="7" fill="${C.coral}" stroke="${C.ink}" stroke-width="2"/>
+  <g font-size="12" fill="${C.ink}" font-weight="700">
+    <text x="414" y="94">EPICENTRE</text>
+    <text x="422" y="246">HYPOCENTRE</text>
+  </g>
+  <g font-size="10" fill="${C.ink}" opacity="0.8">
+    <text x="414" y="110">a point on the surface. nothing broke here.</text>
+    <text x="422" y="262">also called the focus. this is where rock broke.</text>
+  </g>
+  <g stroke="${C.ink}" stroke-width="1"><line x1="360" y1="100" x2="360" y2="240"/></g>
+  <text x="300" y="180" font-size="11" fill="${C.ink}" font-weight="700">DEPTH</text>
+  <text x="290" y="196" font-size="10" fill="${C.ink}" opacity="0.8">12 km here</text>
+  <text x="50" y="380" font-size="10" fill="${C.ink}" opacity="0.8">Shallow quake: energy arrives concentrated.  Deep quake: same energy spread through hundreds of km of rock, so it arrives weaker.</text>`);
+
+// ---------- 11. WAVES ----------
+ART.waves = () => {
+  const row = (y, label, sub, draw, speed) => `
+    <g><text x="20" y="${y-24}" font-size="12" font-weight="700" fill="${C.ink}">${label}</text>
+      <text x="20" y="${y-10}" font-size="10" fill="${C.ink}" opacity="0.75">${sub}</text>
+      ${draw}
+      <text x="700" y="${y+4}" font-size="11" fill="${C.coral}" font-weight="700">${speed}</text></g>`;
+  let pcomp = '';
+  for (let i = 0; i < 26; i++) {
+    const base = 200 + i * 17;
+    const squeeze = Math.sin(i * 0.7) * 5;
+    pcomp += `<line x1="${base + squeeze}" y1="72" x2="${base + squeeze}" y2="112" stroke="${C.ink}" stroke-width="2" opacity="0.85"/>`;
+  }
+  let srope = 'M200 210';
+  for (let i = 0; i <= 26; i++) srope += ` L${200 + i * 17} ${210 + Math.sin(i * 0.55) * 26}`;
+  let surf = 'M200 320';
+  for (let i = 0; i <= 26; i++) surf += ` L${200 + i * 17} ${320 + Math.sin(i * 0.34) * 20}`;
+  return wrap(`
+  ${row(92,'P WAVE  (Primary)','squeezes and stretches, like a pushed slinky', pcomp + `<line x1="200" y1="130" x2="642" y2="130" stroke="${C.coral}" stroke-width="1" stroke-dasharray="3 3"/>`, 'about 6 km/s')}
+  ${row(212,'S WAVE  (Secondary)','shakes sideways, like a flicked rope. dies in liquid.', `<path d="${srope}" fill="none" stroke="${C.ink}" stroke-width="2.6"/>`, 'about 3.5 km/s')}
+  ${row(322,'SURFACE WAVES','roll along the top only. these are the destroyers.', `<path d="${surf}" fill="none" stroke="${C.coral}" stroke-width="3.4"/><path d="${surf}" fill="none" stroke="${C.ink}" stroke-width="1" opacity="0.4" transform="translate(0,10)"/>`, 'slowest')}
+  <g transform="translate(20,140)"><text font-size="10" fill="${C.ink}" opacity="0.7">arrives 1st</text></g>
+  <g transform="translate(20,254)"><text font-size="10" fill="${C.ink}" opacity="0.7">arrives 2nd</text></g>
+  <g transform="translate(20,362)"><text font-size="10" fill="${C.ink}" opacity="0.7">arrives last</text></g>
+  <text x="200" y="378" font-size="10" fill="${C.ink}" opacity="0.8">Bang. Then jolt. Then a slow roll. If you felt all three in that order, you now know exactly what happened.</text>`);
+};
+
+// ---------- 12. SEISMOGRAM ----------
+ART.seismogram = () => {
+  let path = 'M40 200';
+  for (let x = 40; x < 260; x += 4) path += ` L${x} ${200 + (Math.sin(x) * 1.2)}`;
+  for (let x = 260; x < 340; x += 3) path += ` L${x} ${200 + Math.sin(x * 1.5) * 16}`;
+  for (let x = 340; x < 430; x += 3) path += ` L${x} ${200 + Math.sin(x * 1.2) * 9}`;
+  for (let x = 430; x < 560; x += 3) path += ` L${x} ${200 + Math.sin(x * 0.9) * 48}`;
+  for (let x = 560; x < 700; x += 4) path += ` L${x} ${200 + Math.sin(x * 0.5) * 62 * Math.exp(-(x - 560) / 90)}`;
+  for (let x = 700; x <= 780; x += 5) path += ` L${x} ${200 + Math.sin(x) * 1.4}`;
+  return wrap(`
+  <rect x="20" y="90" width="770" height="220" fill="${C.cream}" stroke="${C.ink}" stroke-width="1.5"/>
+  <line x1="20" y1="200" x2="790" y2="200" stroke="${C.ink}" stroke-width="0.6" opacity="0.4"/>
+  <path d="${path}" fill="none" stroke="${C.ink}" stroke-width="1.6"/>
+  <line x1="262" y1="100" x2="262" y2="300" stroke="${C.sea}" stroke-width="2" stroke-dasharray="6 4"/>
+  <line x1="432" y1="100" x2="432" y2="300" stroke="${C.coral}" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="266" y="116" font-size="12" font-weight="700" fill="${C.sea}">P ARRIVES</text>
+  <text x="436" y="116" font-size="12" font-weight="700" fill="${C.coral}">S ARRIVES</text>
+  <g><line x1="262" y1="330" x2="432" y2="330" stroke="${C.ink}" stroke-width="2"/>
+     <line x1="262" y1="324" x2="262" y2="336" stroke="${C.ink}" stroke-width="2"/>
+     <line x1="432" y1="324" x2="432" y2="336" stroke="${C.ink}" stroke-width="2"/>
+     <text x="347" y="350" font-size="12" text-anchor="middle" font-weight="700" fill="${C.ink}">THE GAP  =  DISTANCE</text></g>
+  <text x="560" y="130" font-size="11" fill="${C.ink}" font-weight="700">SURFACE WAVES</text>
+  <text x="560" y="146" font-size="9" fill="${C.ink}" opacity="0.7">biggest, slowest, most damage</text>
+  <text x="60" y="130" font-size="10" fill="${C.ink}" opacity="0.7">flat = quiet</text>
+  <g transform="translate(20,362)">
+    <line x1="0" y1="0" x2="70" y2="0" stroke="${C.ink}" stroke-width="2"/>
+    <line x1="0" y1="-5" x2="0" y2="5" stroke="${C.ink}" stroke-width="2"/>
+    <line x1="70" y1="-5" x2="70" y2="5" stroke="${C.ink}" stroke-width="2"/>
+    <text x="80" y="4" font-size="11" fill="${C.ink}">= 10 seconds     Measure the gap. Multiply by 8. That is roughly the distance in km.</text>
+  </g>
+  <text x="20" y="80" font-size="11" font-weight="700" fill="${C.ink}">STATION 7 — ONE REAL EVENT</text>`);
+};
+
+// ---------- 13. MAGNITUDE ----------
+ART.magnitude = () => {
+  const steps = [
+    [2,'Machines only. You feel nothing.', 26],
+    [4,'Hanging lamps swing. Windows rattle.', 44],
+    [5,'Furniture moves. Weak walls crack.', 62],
+    [6,'Serious damage over tens of km.', 92],
+    [7,'Severe. Damage over hundreds of km.', 140],
+    [8,'Devastating. Felt across a continent.', 210],
+    [9,'Rare. Changes coastlines. Alters the day length.', 280]
+  ];
+  let g = '';
+  steps.forEach((s, i) => {
+    const x = 70 + i * 100;
+    const h = s[2];
+    g += `<rect x="${x}" y="${330 - h}" width="66" height="${h}" fill="${i < 2 ? C.green : i < 4 ? C.ochre : C.coral}" opacity="${0.5 + i * 0.07}" stroke="${C.ink}" stroke-width="1.4"/>`;
+    g += `<text x="${x + 33}" y="${348}" font-size="16" font-weight="700" text-anchor="middle" fill="${C.ink}">${s[0]}</text>`;
+    g += `<text x="${x + 33}" y="${330 - h - 8}" font-size="8" text-anchor="middle" fill="${C.ink}" opacity="0.8">x32</text>`;
+  });
+  return wrap(`
+  <text x="20" y="30" font-size="12" font-weight="700" fill="${C.ink}">MAGNITUDE: THE ENERGY STAIRCASE. EACH STEP IS ABOUT 32 TIMES THE ONE BEFORE.</text>
+  <line x1="60" y1="330" x2="780" y2="330" stroke="${C.ink}" stroke-width="2"/>
+  ${g}
+  <g font-size="9" fill="${C.ink}" opacity="0.85">
+    ${steps.map((s,i)=>`<text x="${70+i*100+33}" y="${364}" font-size="7.5" text-anchor="middle">${s[1].slice(0,26)}</text>`).join('')}
+  </g>
+  <g transform="translate(500,44)">
+    <rect width="284" height="76" fill="none" stroke="${C.ink}" stroke-width="1.2" stroke-dasharray="4 3"/>
+    <text x="10" y="20" font-size="11" font-weight="700" fill="${C.coral}">MAGNITUDE vs INTENSITY</text>
+    <text x="10" y="38" font-size="9.5" fill="${C.ink}">MAGNITUDE: one number. The whole quake.</text>
+    <text x="10" y="54" font-size="9.5" fill="${C.ink}">INTENSITY: different on every street.</text>
+    <text x="10" y="70" font-size="9.5" fill="${C.ink}" opacity="0.75">Depth, distance and ground type decide intensity.</text>
+  </g>`);
+};
+
+// ---------- 14. TRIANGULATION ----------
+// MAP SCALE: exactly 1 svg unit = 1 km. Radii below are the correct answers.
+const TRI = {
+  epi: { x: 360, y: 180 },
+  stations: [
+    { x: 299.9, y: 158.1, n: 'ALPHA',   gap: 8,  r: 64  },
+    { x: 475.9, y: 148.9, n: 'BRAVO',   gap: 15, r: 120 },
+    { x: 352.3, y: 267.7, n: 'CHARLIE', gap: 11, r: 88  }
+  ]
+};
+const triBase = (showAnswer) => {
+  let g = '';
+  TRI.stations.forEach(s => {
+    if (showAnswer) g += `<circle cx="${s.x}" cy="${s.y}" r="${s.r}" fill="none" stroke="${C.coral}" stroke-width="2" opacity="0.85"/>`;
+    g += `<polygon points="${s.x},${s.y - 10} ${s.x + 9},${s.y + 7} ${s.x - 9},${s.y + 7}" fill="${C.ink}"/>`;
+    g += `<circle cx="${s.x}" cy="${s.y}" r="2" fill="${C.cream}"/>`;
+    g += `<text x="${s.x + 13}" y="${s.y - 3}" font-size="11" font-weight="700" fill="${C.ink}">${s.n}</text>`;
+    g += `<text x="${s.x + 13}" y="${s.y + 10}" font-size="9" fill="${C.ink}" opacity="0.8">P to S gap: ${s.gap} s</text>`;
+    if (showAnswer) g += `<text x="${s.x + 13}" y="${s.y + 22}" font-size="9" fill="${C.coral}">= ${s.r} km</text>`;
+  });
+  const x = showAnswer ? `<g transform="translate(${TRI.epi.x},${TRI.epi.y})">
+      <line x1="-13" y1="-13" x2="13" y2="13" stroke="${C.coral}" stroke-width="4.5"/>
+      <line x1="13" y1="-13" x2="-13" y2="13" stroke="${C.coral}" stroke-width="4.5"/></g>
+      <text x="${TRI.epi.x + 18}" y="${TRI.epi.y + 26}" font-size="12" font-weight="700" fill="${C.coral}">EPICENTRE</text>` : '';
+  return wrap(`
+  <rect x="20" y="30" width="760" height="330" fill="${C.cream}" stroke="${C.ink}" stroke-width="1.5"/>
+  <g opacity="0.16">${Array.from({length:16},(_,i)=>`<line x1="${20+i*50}" y1="30" x2="${20+i*50}" y2="360" stroke="${C.ink}" stroke-width="0.6"/>`).join('')}
+  ${Array.from({length:7},(_,i)=>`<line x1="20" y1="${30+i*50}" x2="780" y2="${30+i*50}" stroke="${C.ink}" stroke-width="0.6"/>`).join('')}</g>
+  ${g}${x}
+  <g transform="translate(596,290)">
+    <rect width="176" height="60" fill="${C.cream}" stroke="${C.ink}" stroke-width="1.2"/>
+    <text x="12" y="17" font-size="9" font-weight="700" fill="${C.ink}">MAP SCALE</text>
+    <line x1="12" y1="34" x2="62" y2="34" stroke="${C.ink}" stroke-width="2.5"/>
+    <line x1="12" y1="28" x2="12" y2="40" stroke="${C.ink}" stroke-width="2"/>
+    <line x1="62" y1="28" x2="62" y2="40" stroke="${C.ink}" stroke-width="2"/>
+    <text x="70" y="38" font-size="10" fill="${C.ink}">= 50 km</text>
+    <text x="12" y="52" font-size="8.5" fill="${C.coral}" font-weight="700">one grid square = 50 km</text>
+  </g>
+  <text x="30" y="382" font-size="10" fill="${C.ink}" opacity="0.9">RULE OF 8: distance in km = gap in seconds x 8.   One circle: no idea. Two circles: two suspects. Three circles: one answer.</text>
+  <text x="30" y="24" font-size="10" font-weight="700" fill="${C.ink}">${showAnswer ? 'SOLVED — do not show this to them before they try it' : 'DRAW YOUR THREE CIRCLES HERE'}</text>`);
+};
+ART.triangulation = () => triBase(false);
+ART.triangulation_solved = () => triBase(true);
+
+// ---------- 15. PREDICTION MYTHS ----------
+ART.prediction = () => {
+  const card = (x, title, truth, icon) => `
+    <g><rect x="${x}" y="50" width="240" height="300" fill="${C.cream}" stroke="${C.ink}" stroke-width="1.5"/>
+      <rect x="${x}" y="50" width="240" height="30" fill="${C.coral}" opacity="0.85"/>
+      <text x="${x+120}" y="70" font-size="11" font-weight="700" text-anchor="middle" fill="${C.cream}">MYTH</text>
+      <text x="${x+120}" y="104" font-size="12" font-weight="700" text-anchor="middle" fill="${C.ink}">${title}</text>
+      ${icon}
+      <line x1="${x+16}" y1="216" x2="${x+224}" y2="216" stroke="${C.ink}" stroke-width="1" stroke-dasharray="3 3"/>
+      <text x="${x+16}" y="236" font-size="10" font-weight="700" fill="${C.green}">THE TRUTH</text>
+      ${truth.map((t,i)=>`<text x="${x+16}" y="${254+i*15}" font-size="9.5" fill="${C.ink}">${t}</text>`).join('')}
+    </g>`;
+  return wrap(`
+  <text x="20" y="34" font-size="12" font-weight="700" fill="${C.ink}">THREE MYTHS THAT WILL NOT DIE</text>
+  ${card(20,'EARTHQUAKE WEATHER',
+    ['Quakes start 10 km or more','underground. Weather does not','reach that far. They happen in','every season and every climate,','including under the sea.'],
+    `<g transform="translate(${20+120},160)"><circle r="26" fill="${C.ochre}" opacity="0.6" stroke="${C.ink}" stroke-width="1.5"/><path d="M-40 30 Q0 14 40 30" fill="none" stroke="${C.ink}" stroke-width="2"/><line x1="-34" y1="-34" x2="34" y2="34" stroke="${C.coral}" stroke-width="4"/></g>`)}
+  ${card(280,'ANIMALS PREDICT IT',
+    ['Animals feel the fast P wave a','second or two before we do.','That is detection, not prediction.','No controlled study has ever shown','days of warning.'],
+    `<g transform="translate(${280+120},160)"><ellipse rx="30" ry="20" fill="${C.sand}" stroke="${C.ink}" stroke-width="1.5"/><circle cx="-10" cy="-6" r="3" fill="${C.ink}"/><path d="M22 -14 L34 -30 L30 -10" fill="${C.sand}" stroke="${C.ink}" stroke-width="1.5"/><line x1="-34" y1="-34" x2="34" y2="34" stroke="${C.coral}" stroke-width="4"/></g>`)}
+  ${card(540,'CALIFORNIA FALLS IN',
+    ['The San Andreas slides sideways.','Los Angeles moves north about','5 cm a year. In 15 million years','it will be beside San Francisco.','Nothing sinks. Nothing falls off.'],
+    `<g transform="translate(${540+120},160)"><path d="M-40 -20 L0 -26 L6 30 L-40 34Z" fill="${C.sand}" stroke="${C.ink}" stroke-width="1.5"/><path d="M10 -34 L44 -30 L40 26 L14 22Z" fill="${C.sand}" stroke="${C.ink}" stroke-width="1.5"/><line x1="4" y1="-34" x2="10" y2="34" stroke="${C.coral}" stroke-width="3"/><path d="M18 -46 L18 -60 M14 -56 L18 -62 L22 -56" stroke="${C.ink}" stroke-width="2" fill="none"/></g>`)}
+  <text x="20" y="374" font-size="10" fill="${C.ink}" opacity="0.85">What science CAN do: forecast the probability of a large quake in a region over the next 30 years. That is real, useful, and it sets building codes.</text>`);
+};
+
+// ---------- 16. TSUNAMI ----------
+ART.tsunami = () => {
+  let deep = 'M40 120';
+  for (let x = 40; x <= 400; x += 6) deep += ` L${x} ${120 - Math.sin((x - 40) / 58) * 7}`;
+  let shall = 'M400 120';
+  for (let x = 400; x <= 700; x += 4) {
+    const amp = 7 + Math.pow((x - 400) / 300, 2) * 78;
+    shall += ` L${x} ${120 - Math.sin((x - 400) / (58 - (x - 400) / 8)) * amp}`;
+  }
+  return wrap(`
+  <rect x="40" y="120" width="720" height="180" fill="${C.sea}" opacity="0.35"/>
+  <path d="M40 300 L400 300 L560 268 L700 200 L760 176 L760 340 L40 340Z" fill="${C.ochre}" opacity="0.45" stroke="${C.ink}" stroke-width="1.6"/>
+  <path d="${deep}" fill="none" stroke="${C.ink}" stroke-width="2.4"/>
+  <path d="${shall}" fill="none" stroke="${C.coral}" stroke-width="3"/>
+  <line x1="40" y1="120" x2="760" y2="120" stroke="${C.ink}" stroke-width="0.8" opacity="0.5" stroke-dasharray="4 4"/>
+  <g transform="translate(160,250)">
+    <line x1="0" y1="0" x2="0" y2="-118" stroke="${C.coral}" stroke-width="2.5"/>
+    <polygon points="0,-126 -6,-112 6,-112" fill="${C.coral}"/>
+    <line x1="-70" y1="14" x2="70" y2="14" stroke="${C.ink}" stroke-width="3"/>
+    <polygon points="-70,20 -46,44 -94,44" fill="none" stroke="${C.ink}" stroke-width="2"/>
+    <text x="0" y="60" font-size="10" text-anchor="middle" fill="${C.ink}" font-weight="700">SEAFLOOR JUMPS UP</text>
+    <text x="0" y="74" font-size="9" text-anchor="middle" fill="${C.ink}" opacity="0.8">the whole water column lifts</text>
+  </g>
+  <g font-size="11" font-weight="700" fill="${C.ink}">
+    <text x="60" y="90">DEEP OCEAN</text><text x="470" y="60">SHALLOW WATER</text>
+  </g>
+  <g font-size="9" fill="${C.ink}" opacity="0.85">
+    <text x="60" y="106">half a metre tall, 200 km long, 800 km/h.</text>
+    <text x="60" y="352">A ship sails over it and feels nothing.</text>
+    <text x="470" y="76">front slows, back catches up, length becomes height.</text>
+    <text x="470" y="352">It does not curl and break. It keeps coming.</text>
+  </g>
+  <g transform="translate(640,236)">
+    <rect x="-6" y="-24" width="26" height="30" fill="${C.cream}" stroke="${C.ink}" stroke-width="1.4"/>
+    <path d="M-10 -24 L7 -40 L24 -24Z" fill="${C.sand}" stroke="${C.ink}" stroke-width="1.4"/>
+  </g>`);
+};
+
+// ---------- 17. LIQUEFACTION ----------
+ART.liquefaction = () => {
+  const bldg = (x, y, tilt, label) => `<g transform="translate(${x},${y}) rotate(${tilt})">
+      <rect x="-24" y="-68" width="48" height="68" fill="${C.cream}" stroke="${C.ink}" stroke-width="2"/>
+      ${[0,1,2].map(r=>[0,1].map(c=>`<rect x="${-16+c*20}" y="${-58+r*21}" width="12" height="13" fill="${C.sea}" opacity="0.6" stroke="${C.ink}" stroke-width="0.8"/>`).join('')).join('')}
+    </g><text x="${x}" y="${y+22}" font-size="10" text-anchor="middle" fill="${C.ink}" font-weight="700">${label}</text>`;
+  let dots = '';
+  for (let i = 0; i < 240; i++) {
+    const x = 412 + Math.random() * 366, y = 274 + Math.random() * 92;
+    dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(1 + Math.random() * 1.6).toFixed(1)}" fill="${C.ink}" opacity="0.32"/>`;
+  }
+  return wrap(`
+  <text x="20" y="26" font-size="12" font-weight="700" fill="${C.ink}">SAME EARTHQUAKE. SAME STREET. DIFFERENT GROUND.</text>
+  <text x="20" y="44" font-size="10" fill="${C.ink}" opacity="0.85">Shaking makes wet sand grains lose contact. Water gets between them. For about a minute the ground stops being a solid.</text>
+  <g transform="translate(430,56)">
+    <rect width="352" height="112" fill="none" stroke="${C.ink}" stroke-width="1.2" stroke-dasharray="4 3"/>
+    <text x="10" y="18" font-size="10" font-weight="700" fill="${C.ink}">TRY IT: cup of wet sand, a coin on top, tap steadily.</text>
+    <rect x="18" y="42" width="52" height="34" fill="${C.sand}" stroke="${C.ink}" stroke-width="1.4"/>
+    <circle cx="44" cy="40" r="6" fill="${C.ochre}" stroke="${C.ink}" stroke-width="1.2"/>
+    <text x="14" y="90" font-size="9" fill="${C.ink}">before</text>
+    <rect x="150" y="42" width="52" height="34" fill="${C.sand}" stroke="${C.ink}" stroke-width="1.4"/>
+    <circle cx="176" cy="66" r="6" fill="${C.ochre}" stroke="${C.ink}" stroke-width="1.2"/>
+    <text x="146" y="90" font-size="9" fill="${C.ink}">after: gone</text>
+    <text x="226" y="46" font-size="9" fill="${C.coral}" font-weight="700">Now try a light</text>
+    <text x="226" y="58" font-size="9" fill="${C.coral}" font-weight="700">plastic cap.</text>
+    <text x="226" y="70" font-size="9" fill="${C.coral}">It rises instead.</text>
+    <text x="226" y="86" font-size="9" fill="${C.ink}">That is why pipes come</text>
+    <text x="226" y="98" font-size="9" fill="${C.ink}">up through roads.</text>
+  </g>
+  <rect x="20" y="266" width="370" height="104" fill="${C.sand}" stroke="${C.ink}" stroke-width="1.8"/>
+  <g opacity="0.5">${Array.from({length:9},(_,i)=>`<path d="M${30+i*42} 278 q 20 14 40 0" fill="none" stroke="${C.ink}" stroke-width="1"/>`).join('')}</g>
+  <text x="205" y="388" font-size="11" text-anchor="middle" font-weight="700" fill="${C.ink}">SOLID ROCK</text>
+  <rect x="410" y="266" width="370" height="104" fill="${C.sea}" opacity="0.28" stroke="${C.ink}" stroke-width="1.8"/>
+  ${dots}
+  <text x="595" y="388" font-size="11" text-anchor="middle" font-weight="700" fill="${C.coral}">LOOSE WET SAND</text>
+  ${bldg(110,266,0,'stands')}
+  ${bldg(280,266,0,'stands')}
+  ${bldg(495,278,14,'tilts and sinks')}
+  ${bldg(700,280,-19,'tilts and sinks')}
+  <g transform="translate(600,330)">
+    <ellipse rx="26" ry="10" fill="none" stroke="${C.coral}" stroke-width="2.4"/>
+    <line x1="0" y1="-10" x2="0" y2="-36" stroke="${C.coral}" stroke-width="2.4"/>
+    <polygon points="0,-44 -6,-30 6,-30" fill="${C.coral}"/>
+    <text x="-24" y="-52" font-size="9" fill="${C.coral}" font-weight="700">empty tank floats UP</text>
+  </g>`);
+};
+
+// ---------- 18. BUILDINGS ----------
+ART.buildings = () => {
+  const floors = (x, y, n, w, brace) => {
+    let s = '';
+    for (let i = 0; i < n; i++) {
+      const fy = y - (i + 1) * 30;
+      s += `<rect x="${x}" y="${fy}" width="${w}" height="30" fill="none" stroke="${C.ink}" stroke-width="2"/>`;
+      if (brace) s += `<line x1="${x}" y1="${fy + 30}" x2="${x + w}" y2="${fy}" stroke="${C.coral}" stroke-width="2.2"/>`;
+    }
+    return s;
+  };
+  return wrap(`
+  <text x="20" y="28" font-size="12" font-weight="700" fill="${C.ink}">THREE ENGINEERING DEFENCES</text>
+  <g><text x="30" y="56" font-size="11" font-weight="700" fill="${C.coral}">1. BASE ISOLATION</text>
+    ${floors(40,290,6,110,false)}
+    <rect x="30" y="290" width="130" height="14" fill="${C.ink}" opacity="0.25"/>
+    ${[0,1,2,3].map(i=>`<g transform="translate(${48+i*30},304)"><rect x="-11" y="0" width="22" height="24" fill="${C.coral}" opacity="0.7" stroke="${C.ink}" stroke-width="1.4"/>
+      ${[0,1,2].map(j=>`<line x1="-11" y1="${6+j*6}" x2="11" y2="${6+j*6}" stroke="${C.ink}" stroke-width="0.9"/>`).join('')}</g>`).join('')}
+    <rect x="20" y="328" width="160" height="20" fill="${C.sand}" stroke="${C.ink}" stroke-width="1.6"/>
+    <g stroke="${C.ink}" stroke-width="2" fill="${C.ink}"><line x1="30" y1="360" x2="70" y2="360"/><polygon points="76,360 62,354 62,366"/><text x="86" y="364" font-size="9" stroke="none">ground moves</text></g>
+    <text x="30" y="380" font-size="9" fill="${C.coral}">building mostly does not</text></g>
+  <g><text x="300" y="56" font-size="11" font-weight="700" fill="${C.coral}">2. TUNED MASS DAMPER</text>
+    ${floors(310,290,8,110,false)}
+    <rect x="300" y="328" width="130" height="20" fill="${C.sand}" stroke="${C.ink}" stroke-width="1.6"/>
+    <line x1="365" y1="66" x2="365" y2="96" stroke="${C.ink}" stroke-width="1.6"/>
+    <circle cx="365" cy="110" r="17" fill="${C.ink}" opacity="0.75" stroke="${C.ink}" stroke-width="1.5"/>
+    <path d="M338 110 q 27 26 54 0" fill="none" stroke="${C.coral}" stroke-width="2" stroke-dasharray="4 3"/>
+    <text x="392" y="106" font-size="9" fill="${C.ink}">heavy ball</text>
+    <text x="392" y="118" font-size="9" fill="${C.ink}">swings the</text>
+    <text x="392" y="130" font-size="9" fill="${C.ink}">opposite way</text>
+    <text x="300" y="376" font-size="9" fill="${C.coral}">it cancels the sway</text></g>
+  <g><text x="570" y="56" font-size="11" font-weight="700" fill="${C.coral}">3. CROSS BRACING</text>
+    ${floors(580,290,6,110,true)}
+    <rect x="570" y="328" width="130" height="20" fill="${C.sand}" stroke="${C.ink}" stroke-width="1.6"/>
+    <g transform="translate(716,150)">
+      <rect x="0" y="0" width="46" height="46" fill="none" stroke="${C.ink}" stroke-width="2"/>
+      <text x="23" y="62" font-size="9" text-anchor="middle" fill="${C.ink}">folds</text>
+      <path d="M0 90 L46 90 L58 130 L12 130Z" fill="none" stroke="${C.ink}" stroke-width="2" stroke-dasharray="3 3"/>
+      <rect x="0" y="150" width="46" height="46" fill="none" stroke="${C.ink}" stroke-width="2"/>
+      <line x1="0" y1="196" x2="46" y2="150" stroke="${C.coral}" stroke-width="2.4"/>
+      <text x="23" y="212" font-size="9" text-anchor="middle" fill="${C.coral}">holds</text>
+    </g>
+    <text x="570" y="376" font-size="9" fill="${C.coral}">a triangle cannot change shape</text></g>`);
+};
+
+// ---------- 19. DROP COVER HOLD ----------
+ART.dropcover = () => {
+  const panel = (x, y, title, body, draw) => `
+    <g><rect x="${x}" y="${y}" width="370" height="160" fill="${C.cream}" stroke="${C.ink}" stroke-width="1.5"/>
+      <rect x="${x}" y="${y}" width="370" height="26" fill="${C.ink}"/>
+      <text x="${x+10}" y="${y+18}" font-size="11" font-weight="700" fill="${C.cream}">${title}</text>
+      ${draw}
+      ${body.map((b,i)=>`<text x="${x+150}" y="${y+56+i*17}" font-size="10" fill="${C.ink}">${b}</text>`).join('')}
+    </g>`;
+  const person = (cx, cy, s) => `<g transform="translate(${cx},${cy}) scale(${s})">
+      <circle cx="0" cy="-26" r="11" fill="${C.ochre}" stroke="${C.ink}" stroke-width="1.6"/>
+      <path d="M-16 0 Q0 -18 16 0 L16 12 L-16 12Z" fill="${C.coral}" opacity="0.75" stroke="${C.ink}" stroke-width="1.6"/>
+      <path d="M-16 -4 Q-24 -22 -8 -30" fill="none" stroke="${C.ink}" stroke-width="2.4"/>
+      <path d="M16 -4 Q24 -22 8 -30" fill="none" stroke="${C.ink}" stroke-width="2.4"/></g>`;
+  return wrap(`
+  ${panel(20,20,'INDOORS — DROP, COVER, HOLD ON',
+    ['1. DROP to hands and knees.','2. COVER under a sturdy table.','3. HOLD ON to the leg. It will slide.','Stay until the shaking fully stops.'],
+    `<g><rect x="46" y="96" width="96" height="7" fill="${C.sand}" stroke="${C.ink}" stroke-width="1.8"/>
+      <line x1="52" y1="103" x2="52" y2="140" stroke="${C.ink}" stroke-width="2.4"/>
+      <line x1="136" y1="103" x2="136" y2="140" stroke="${C.ink}" stroke-width="2.4"/>
+      ${person(94,128,0.72)}
+      <line x1="30" y1="140" x2="160" y2="140" stroke="${C.ink}" stroke-width="2"/></g>`)}
+  ${panel(410,20,'IN BED — STAY THERE',
+    ['Do not get up and walk in the dark.','There is broken glass on the floor.','Stay in bed, turn face down,','and cover your head with a pillow.'],
+    `<g><rect x="440" y="112" width="110" height="24" fill="${C.sand}" stroke="${C.ink}" stroke-width="1.8"/>
+      <rect x="434" y="98" width="30" height="18" rx="4" fill="${C.cream}" stroke="${C.ink}" stroke-width="1.6"/>
+      <circle cx="470" cy="106" r="9" fill="${C.ochre}" stroke="${C.ink}" stroke-width="1.5"/>
+      <rect x="452" y="94" width="34" height="12" rx="5" fill="${C.coral}" opacity="0.8" stroke="${C.ink}" stroke-width="1.4"/></g>`)}
+  ${panel(20,200,'OUTDOORS — GET INTO THE OPEN',
+    ['Move away from buildings, walls,','trees, streetlights and power lines.','The most dangerous place is right','beside a building. Drop and cover.'],
+    `<g>${person(90,300,0.72)}
+      <rect x="30" y="248" width="26" height="66" fill="${C.cream}" stroke="${C.ink}" stroke-width="1.6"/>
+      <line x1="20" y1="316" x2="160" y2="316" stroke="${C.ink}" stroke-width="2"/>
+      <path d="M62 250 l8 -10 M70 246 l6 -12" stroke="${C.coral}" stroke-width="2"/>
+      <text x="106" y="252" font-size="8" fill="${C.coral}">falling debris</text></g>`)}
+  ${panel(410,200,'IN A CAR — PULL OVER AND STAY IN',
+    ['Stop somewhere open. Not on or under','a bridge, and not beside a wall.','Stay inside with your seatbelt on.','Wait until the shaking stops.'],
+    `<g><path d="M436 300 l12 -22 h56 l14 22 z" fill="${C.coral}" opacity="0.7" stroke="${C.ink}" stroke-width="1.6"/>
+      <rect x="430" y="300" width="94" height="16" rx="4" fill="${C.cream}" stroke="${C.ink}" stroke-width="1.6"/>
+      <circle cx="452" cy="318" r="7" fill="${C.ink}"/><circle cx="504" cy="318" r="7" fill="${C.ink}"/>
+      <line x1="416" y1="326" x2="546" y2="326" stroke="${C.ink}" stroke-width="2"/></g>`)}
+  <text x="20" y="382" font-size="10" fill="${C.coral}" font-weight="700">THE DOORWAY IS OUT OF DATE. It came from old mud-brick houses. A modern doorway is no stronger than the wall and shields you from nothing.</text>`);
+};
+
+// ---------- 20. CAPSTONE MAP ----------
+ART.capstone = () => {
+  let sanddots = '';
+  for (let i = 0; i < 300; i++) {
+    const t = Math.random();
+    const x = 250 + t * 300 + (Math.random() - 0.5) * 90;
+    const y = 120 + t * 200 + (Math.random() - 0.5) * 70;
+    if (x > 150 && x < 720 && y > 60 && y < 340) sanddots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.6" fill="${C.ink}" opacity="0.3"/>`;
+  }
+  return wrap(`
+  <rect width="800" height="400" fill="${C.cream}"/>
+  <path d="M0 0 L150 0 L120 120 L150 260 L110 400 L0 400Z" fill="${C.sea}" opacity="0.4" stroke="${C.ink}" stroke-width="1.6"/>
+  <text x="34" y="200" font-size="13" font-weight="700" fill="${C.ink}" opacity="0.7">SEA</text>
+  <path d="M600 0 L800 0 L800 400 L620 400 L660 240 L600 120Z" fill="${C.green}" opacity="0.35" stroke="${C.ink}" stroke-width="1.6"/>
+  <text x="690" y="200" font-size="12" font-weight="700" fill="${C.ink}">HARD ROCK HILLS</text>
+  <text x="690" y="216" font-size="9" fill="${C.ink}" opacity="0.75">stable, steep, far from the sea</text>
+  ${sanddots}
+  <path d="M170 60 Q290 160 380 220 T620 380" fill="none" stroke="${C.sea}" stroke-width="16" opacity="0.55"/>
+  <text x="300" y="196" font-size="10" font-weight="700" fill="${C.ink}" transform="rotate(32 300 196)">RIVER — OLD SOFT SAND</text>
+  <path d="M120 380 L300 250 L470 140 L600 40" fill="none" stroke="${C.coral}" stroke-width="4" stroke-dasharray="14 7"/>
+  <text x="430" y="128" font-size="11" font-weight="700" fill="${C.coral}" transform="rotate(-33 430 128)">FAULT LINE</text>
+  <path d="M110 400 L150 300 L240 320 L300 400Z" fill="${C.ochre}" opacity="0.22" stroke="${C.ink}" stroke-width="1.2"/>
+  <text x="150" y="366" font-size="9" fill="${C.ink}">LOW FLAT COASTAL GROUND</text>
+  <g opacity="0.2">${Array.from({length:17},(_,i)=>`<line x1="${i*50}" y1="0" x2="${i*50}" y2="400" stroke="${C.ink}" stroke-width="0.5"/>`).join('')}
+  ${Array.from({length:9},(_,i)=>`<line x1="0" y1="${i*50}" x2="800" y2="${i*50}" stroke="${C.ink}" stroke-width="0.5"/>`).join('')}</g>
+  <rect x="0" y="0" width="800" height="400" fill="none" stroke="${C.ink}" stroke-width="2.5"/>
+  <g transform="translate(596,352)">
+    <rect width="196" height="42" fill="${C.cream}" stroke="${C.ink}" stroke-width="1.2"/>
+    <text x="8" y="15" font-size="8.5" font-weight="700" fill="${C.ink}">PLACE: hospital, school, fire station,</text>
+    <text x="8" y="27" font-size="8.5" font-weight="700" fill="${C.ink}">housing, power station, meeting point,</text>
+    <text x="8" y="38" font-size="8.5" font-weight="700" fill="${C.ink}">road out.  8000 people must live here.</text>
+  </g>
+  <g transform="translate(20,20)"><path d="M14 0 L14 30 M14 0 L8 10 M14 0 L20 10" stroke="${C.ink}" stroke-width="2" fill="none"/><text x="10" y="44" font-size="10" font-weight="700" fill="${C.ink}">N</text></g>`);
+};
+
+const SEISMO_TRACE = (level, w, h) => {
+  if (level <= 0) return `<path d="M0 ${h/2} L${w} ${h/2}" fill="none" stroke="${C.ink}" stroke-width="1.2"/>`;
+  let d = `M0 ${h/2}`;
+  for (let x = 0; x <= w; x += 2) {
+    const env = level <= 2 ? (x > w * 0.55 && x < w * 0.72 ? 1 : 0.06)
+      : level <= 5 ? Math.max(0.08, Math.sin(x / w * Math.PI) )
+      : 1;
+    const a = (h / 2 - 2) * (level / 10) * env * (0.5 + 0.5 * Math.sin(x * (0.4 + level * 0.05)));
+    d += ` L${x} ${(h / 2 + a * Math.sin(x * (0.9 + level * 0.12))).toFixed(2)}`;
+  }
+  return `<path d="${d}" fill="none" stroke="${level >= 8 ? C.coral : C.ink}" stroke-width="${level >= 8 ? 1.6 : 1.2}"/>`;
+};
+
+// SHAKE STATION 7 — pages 1 to 5
+const PAGES_A = [
+{
+  n: 1, unit: 0, cover: true,
+  unitTitle: "ARRIVAL",
+  title: "Shake Station 7",
+  hook: "The ground you are standing on is moving right now.",
+  art: "cover",
+  artCaption: "Station 7 sits on the cliff. The sea is on one side. A fault line is on the other.",
+  coverBody: `You have been posted to Shake Station 7.
+
+It is a small hut on a cliff. Inside there is one desk, one machine that draws a wobbly line all day, and one scientist called Dr. Okonkwo who drinks tea out of a chipped mug.
+
+She has been waiting for you.
+
+"Good. You are here," she says. "I need four assistants and I have four. Sign the log. Then take this."
+
+She hands you a metal case. It is locked with six numbers.
+
+"Everything you really need is inside. I am not giving you the code. You will earn one number for every unit you finish. Get to the last page and the case opens. Skip pages and it stays shut forever."
+
+She sips her tea.
+
+"One more thing. The line on that machine has been quiet for eleven months. Nothing local, anyway. Keep an eye on it."`,
+  oath: `I will guess before I am told.
+I will write down what went wrong.
+I will not pretend to understand something I do not.`,
+  seismo: 0
+},
+{
+  n: 2, unit: 1, unitTitle: "WHAT IS DOWN THERE",
+  title: "A Planet With Skin",
+  hook: "Dig straight down for 35 km and you fall out of the world you know.",
+  predict: {
+    text: "The hard rock we live on wraps all the way around the Earth. How thick do you think it is compared to the whole planet?",
+    options: [
+      "About one tenth of the way down to the centre",
+      "About one hundredth of the way down",
+      "Thinner, next to the whole Earth, than an eggshell is next to an egg"
+    ],
+    answer: 2,
+    reveal: "Thinner than an eggshell. An eggshell is about 1 part in 150 of an egg. The Earth's crust is about 1 part in 400 of the Earth's full width. We live on the thinnest part of our own planet."
+  },
+  core: `Cut the Earth in half and you find four layers.
+
+The <b>crust</b> is on the outside. That is the rock under your shoes, under the grass, under the sea. It is thin. Very thin.
+
+Under it is the <b>mantle</b>. Hot rock, and most of the planet is made of it.
+
+Below that is the outer core, which really is liquid metal. And right in the middle is the inner core, a ball of iron squeezed so hard it stays solid even at 5000 degrees.
+
+You will never see any of it. Nobody has. The deepest hole ever drilled did not even get through the crust.`,
+  terms: [["crust", "The thin hard rock on top"], ["mantle", "Hot rock under the crust"]],
+  art: "layers",
+  artCaption: "The Earth, sliced open. Not to scale, because if it were, you could not see the crust at all.",
+  okonkwo: "The deepest hole humans ever dug went down 12 km. The crust is about 35 km thick under land. We have never been through it.",
+  doors: {
+    little: {
+      print: "Colour the four layers. Crust brown. Mantle orange. Outer core yellow. Inner core red. Then count how many layers you coloured and write the number in the box.",
+      q: { text: "How many layers does the Earth have?", options: ["Two", "Three", "Four"], answer: 2, why: "Crust, mantle, outer core, inner core." }
+    },
+    field: {
+      print: "Label the four layers on the drawing. Then write one sentence: which layer are you sitting on right now, and how do you know?",
+      q: { text: "Which layer are you sitting on right now?", options: ["The mantle", "The crust", "The outer core"], answer: 1, why: "Everything you have ever touched sits on the crust." }
+    },
+    chief: {
+      print: "The Earth's radius is about 6400 km. Continental crust is about 35 km. Work out roughly what fraction of the way to the centre the crust reaches. Then answer this: why do textbook drawings of the Earth always draw the crust far too thick?",
+      q: { text: "Earth radius is about 6400 km. Crust is about 35 km. Roughly what fraction is the crust?", options: ["About 1 part in 20", "About 1 part in 200", "About 1 part in 2000"], answer: 1, why: "6400 divided by 35 is about 183. Drawings exaggerate it because an accurate crust would be a line too thin to see." }
+    }
+  },
+  cooperate: null,
+  check: null,
+  seismo: 0
+},
+{
+  n: 3, unit: 1, unitTitle: "WHAT IS DOWN THERE",
+  title: "Rock That Flows",
+  hook: "The mantle is solid rock. It is also moving. Both of those are true.",
+  predict: {
+    text: "Put a pot of thick soup on a low heat and watch the top. What happens?",
+    options: [
+      "Nothing moves until it boils",
+      "Blobs rise in the middle and sink at the sides",
+      "The whole surface spins in one direction"
+    ],
+    answer: 1,
+    reveal: "Hot soup rises in the middle, spreads out, cools, and sinks at the edges. It goes round and round in a loop. That loop is called a convection cell, and the mantle does exactly the same thing."
+  },
+  core: `Here is the strange part. The mantle is not liquid. It is solid rock. You could stand on it.
+
+But it is so hot, and it is under so much pressure, that over thousands of years it creeps. Like very cold honey. Like a glacier. Slow, but never stopping.
+
+Heat from the core pushes rock upward. Near the crust it cools and sinks again. Round and round. This is called <b>convection</b>.
+
+Those slow loops of creeping rock are the engine. Everything else in this book, every earthquake and every mountain, is powered by them.`,
+  terms: [["convection", "Hot stuff rises, cool stuff sinks"]],
+  art: "convection",
+  artCaption: "Convection cells in the mantle. Red arrows go up. Blue arrows come down.",
+  okonkwo: "People say the plates float on a sea of lava. That is wrong. It is solid rock that creeps. Please do not repeat the lava thing.",
+  trap: {
+    text: "MISCONCEPTION TRAP. Your cousin says: The plates float on top of a big ocean of melted lava. Is he right?",
+    options: ["Yes, that is right", "No, the mantle is solid rock that creeps very slowly", "No, the mantle is made of water"],
+    answer: 1,
+    why: "The mantle is solid. It flows the way a glacier flows, over enormous amounts of time. Melted rock exists in pockets, not as a global ocean."
+  },
+  doors: {
+    little: {
+      print: "Draw arrows on the pot of soup to show which way the blobs move. Up in the middle. Down at the sides. Then colour the hot part red and the cool part blue.",
+      q: { text: "In a pot of soup, where does the hot soup go?", options: ["Down", "Up", "Sideways only"], answer: 1, why: "Hot things rise. Cool things sink. That is convection." }
+    },
+    field: {
+      print: "Write two sentences. Sentence one: what makes the mantle rock move? Sentence two: why does it move so slowly?",
+      q: { text: "What powers the movement in the mantle?", options: ["Wind on the surface", "Heat escaping from below", "The pull of the Moon"], answer: 1, why: "Heat from the core, plus heat made inside the mantle rocks themselves as they slowly decay." }
+    },
+    chief: {
+      print: "Mantle rock creeps at a few centimetres a year. Your fingernails grow at about four centimetres a year. Write a short argument explaining how something moving that slowly can break a bridge in ten seconds. Hint: think about where the energy is stored in between.",
+      q: { text: "Mantle rock creeps a few cm a year. How can that cause violent shaking?", options: ["It suddenly speeds up to 100 km per hour", "Slow movement stores energy in bent rock for centuries, then it releases at once", "The shaking comes from a different cause entirely"], answer: 1, why: "Slow loading, sudden release. A bent ruler holds energy quietly, then snaps in an instant." }
+    }
+  },
+  check: { from: 2, q: "From page 2. True or false: the outer core is liquid metal.", options: ["True", "False"], answer: 0, why: "True. The outer core is genuinely liquid. The mantle above it is not." },
+  seismo: 0
+},
+{
+  n: 4, unit: 1, unitTitle: "WHAT IS DOWN THERE",
+  title: "The Cracked Shell",
+  hook: "The hard outside of the Earth is not one piece. It is about fifteen pieces, and they do not fit tightly.",
+  predict: {
+    text: "If the hard crust sits on top of slowly creeping mantle rock, what do you think happens to the crust?",
+    options: [
+      "It stays perfectly still",
+      "It cracks into pieces that get dragged around",
+      "It melts"
+    ],
+    answer: 1,
+    reveal: "It cracks. The pieces then get pulled about, mostly by their own cold edges sinking back down into the mantle, helped along by the creeping rock underneath. This goes on for millions of years."
+  },
+  core: `The crust is broken. So is the cold stiff top of the mantle that is welded underneath it.
+
+Together they make one rigid sheet about 100 km thick, and that sheet is broken into big curved pieces, like the shell of a boiled egg you have rolled on the table. Each piece is called a <b>tectonic plate</b>.
+
+There are about fifteen large ones and dozens of small ones. Some carry whole continents. Some are mostly under the ocean.
+
+They all move. Slowly, in different directions, never stopping.
+
+And every single place where two plates touch is a place where earthquakes happen. Draw the edges of the plates and you have drawn a map of nearly every earthquake on Earth.`,
+  terms: [["tectonic plate", "One broken piece of the crust"]],
+  art: "plates",
+  artCaption: "The world, with the plate edges marked. Your job is to trace them.",
+  okonkwo: "Look at the map. Now look at where the mountains are. Notice anything?",
+  doors: {
+    little: {
+      print: "Trace over the thick plate lines with a red pencil. Then find the piece of crust you live on and colour it in.",
+      q: { text: "The crust is broken into pieces. What do we call one piece?", options: ["A continent", "A tectonic plate", "A mantle"], answer: 1, why: "A tectonic plate. A continent is just land. A plate can carry land and sea both." }
+    },
+    field: {
+      print: "Name four plates on the map. Then write down which plate your house is sitting on, and which plate is closest to it.",
+      q: { text: "Which is the largest tectonic plate?", options: ["The African Plate", "The Pacific Plate", "The Indian Plate"], answer: 1, why: "The Pacific Plate is the biggest, and it is almost entirely under the ocean." }
+    },
+    chief: {
+      print: "Plates carry continents but they are not the same thing as continents. Find one plate on the map that carries both land and ocean floor. Then explain, in three sentences, why the edge of a continent is usually NOT the edge of a plate.",
+      q: { text: "Is the edge of a continent the same as the edge of a plate?", options: ["Yes, always", "No, most plates carry both land and seafloor", "Only in the Pacific"], answer: 1, why: "The Atlantic coast of South America is a continent edge, but the plate boundary is far out in the middle of the Atlantic." }
+    }
+  },
+  cooperate: "LITTLE SEISMOLOGIST traces the red lines. STATION CHIEF cannot finish their task until the lines are traced. Wait for them. Do not do it yourself.",
+  check: { from: 3, q: "From page 3. What is the name for hot rock rising and cool rock sinking in a loop?", options: ["Conduction", "Convection", "Collision"], answer: 1, why: "Convection. The engine under everything." },
+  badge: {
+    digit: 4,
+    title: "BADGE 1 CHALLENGE: JUNIOR GEOLOGIST",
+    questions: [
+      { text: "Put the layers in order from the outside in.", options: ["Crust, mantle, outer core, inner core", "Mantle, crust, inner core, outer core", "Crust, outer core, mantle, inner core"], answer: 0, why: "Crust, mantle, outer core, inner core." },
+      { text: "Which layer is liquid?", options: ["The crust", "The mantle", "The outer core"], answer: 2, why: "Only the outer core is truly liquid." },
+      { text: "TRAP. My teacher says the crust is the thickest layer. Is that right?", options: ["Yes", "No, it is by far the thinnest"], answer: 1, why: "The crust is the thinnest layer by an enormous margin." },
+      { text: "What drags the plates around?", options: ["Ocean currents", "Convection in the mantle", "The spin of the Earth"], answer: 1, why: "Convection, plus the pull of sinking plate edges." },
+      { text: "TRAP. If the mantle is solid, plates cannot move. True or false?", options: ["True", "False, solid rock can still creep over long time spans"], answer: 1, why: "Solid does not mean rigid forever. Given millennia, rock flows." }
+    ]
+  },
+  seismo: 0
+},
+{
+  n: 5, unit: 2, unitTitle: "THE PIECES MOVE",
+  title: "The Man Nobody Believed",
+  hook: "In 1912 a German scientist said the continents were moving. Everyone laughed at him.",
+  predict: {
+    text: "Look at the shape of South America and the shape of Africa on the map. What do you notice?",
+    options: [
+      "Nothing, they are just random shapes",
+      "They would fit together if you slid them",
+      "They are exactly the same size"
+    ],
+    answer: 1,
+    reveal: "They fit. The bulge of Brazil slots into the curve of West Africa. Alfred Wegener saw this and would not let it go."
+  },
+  core: `Alfred Wegener noticed the coastlines fitted. That was not enough on its own. Shapes can fit by accident.
+
+So he went looking for more.
+
+He found the same fossil plants on both sides of the ocean. He found the same rock layers in Brazil and in Africa. He found scratches from ancient glaciers in hot countries, pointing in directions that only made sense if the land had once been somewhere else.
+
+He said all the land had once been joined in one giant continent. He called it <b>Pangaea</b>.
+
+Then he published it, in 1912. And the scientists of the world told him he was ridiculous, for about fifty years.
+
+He was right. He died before anyone admitted it.`,
+  terms: [["Pangaea", "One giant continent, long ago"], ["fossil", "The stone shape of something once alive"]],
+  art: "pangaea",
+  artCaption: "Pangaea, about 250 million years ago, with the fossil evidence marked.",
+  okonkwo: "Being right early is not the same as being believed. Remember that.",
+  doors: {
+    little: {
+      print: "Cut out the continent shapes at the back of this book. Fit them together like a jigsaw. Glue your Pangaea into the box.",
+      q: { text: "What was the giant continent called?", options: ["Atlantis", "Pangaea", "Australia"], answer: 1, why: "Pangaea. It means all the land." }
+    },
+    field: {
+      print: "Wegener used three kinds of evidence. Coastline shapes, matching fossils, matching rocks. Which of the three do you think is the strongest, and why? Write four sentences.",
+      q: { text: "Why were matching fossils better evidence than matching coastlines?", options: ["Fossils are prettier", "Coastline shapes could fit by chance, but identical species on two continents needs an explanation", "Fossils are older"], answer: 1, why: "One coincidence is weak. The same freshwater reptile on two continents separated by an ocean is very hard to explain any other way." }
+    },
+    chief: {
+      print: "Wegener had good evidence and was rejected anyway. The reason: he could not explain WHAT was pushing the continents. Write a paragraph on this question. Should scientists reject a good idea because nobody has found the mechanism yet? Argue one side properly.",
+      q: { text: "Why was Wegener rejected despite good evidence?", options: ["His evidence was fake", "He could not explain what force moved the continents", "He was not a real scientist"], answer: 1, why: "No mechanism. Seafloor spreading and mantle convection were not discovered until the 1950s and 60s." }
+    }
+  },
+  check: { from: 4, q: "From page 4. Roughly how many large tectonic plates are there?", options: ["About 5", "About 15", "About 150"], answer: 1, why: "About fifteen large ones, plus many small ones." },
+  seismo: 0
+}
+];
+
+// SHAKE STATION 7 — pages 6 to 10
+const PAGES_B = [
+{
+  n: 6, unit: 2, unitTitle: "THE PIECES MOVE",
+  title: "Three Ways To Meet",
+  hook: "Two plates touching can only do three things. Learn the hand signs first.",
+  predict: {
+    text: "Press your palms flat together in front of you. Now think: what are the only three things your hands can do while they stay touching?",
+    options: [
+      "Push, pull, slide",
+      "Push, twist, jump",
+      "Only push and pull"
+    ],
+    answer: 0,
+    reveal: "Push together, pull apart, slide past. That is the whole list. Plates have exactly the same three options, and geologists have a long word for each one."
+  },
+  core: `Do the hand signs before you read the words.
+
+Pull your hands apart. A gap opens. Hot rock rises to fill it and makes new crust. That is a <b>divergent</b> boundary. Iceland is being torn in two by one right now.
+
+Push your hands together. Something has to give. One plate dives under the other, or both crumple upward into mountains. That is a <b>convergent</b> boundary. The Himalayas are made this way.
+
+Now slide one hand past the other, keeping them touching. They stick, then jerk, then stick again. That is a transform boundary. California has a famous one.
+
+Three signs. Three words. That is the whole grammar of the planet.`,
+  terms: [["divergent", "Plates pulling apart"], ["convergent", "Plates pushing together"]],
+  art: "boundaries",
+  artCaption: "Divergent, convergent, transform. Copy the hand sign under each one.",
+  okonkwo: "I have taught this for twenty years. The children who do the hand signs remember it. The ones who only read it do not.",
+  trap: {
+    text: "MISCONCEPTION TRAP. Someone tells you: earthquakes only happen where plates crash into each other. Are they right?",
+    options: ["Yes", "No, all three boundary types produce earthquakes", "No, only sliding boundaries make earthquakes"],
+    answer: 1,
+    why: "All three make earthquakes. Sliding boundaries like the San Andreas are extremely active, and they are neither crashing nor pulling apart."
+  },
+  doors: {
+    little: {
+      print: "Do all three hand signs out loud with a grown up. Then draw two arrows in each empty box to show which way the plates are going. Pointing away, pointing together, pointing past.",
+      q: { text: "Your hands pull apart and a gap opens. What kind of boundary is that?", options: ["Pushing together", "Pulling apart", "Sliding past"], answer: 1, why: "Pulling apart. The long word is divergent." }
+    },
+    field: {
+      print: "Match each boundary type to what it builds. Then write one real place on Earth for each of the three.",
+      q: { text: "Which boundary type builds brand new crust?", options: ["Divergent", "Convergent", "Transform"], answer: 0, why: "At divergent boundaries molten rock rises into the gap and freezes into new seafloor." }
+    },
+    chief: {
+      print: "At a convergent boundary between an ocean plate and a continent plate, the ocean plate always dives underneath. Work out why. Clue: ocean crust is basalt and continental crust is granite, and one is denser than the other. Write your reasoning.",
+      q: { text: "When ocean crust meets continental crust, which one dives under?", options: ["Continental, it is heavier", "Oceanic, it is denser", "Whichever is moving faster"], answer: 1, why: "Oceanic crust is denser basalt, so it sinks beneath the lighter granite continent. This is called subduction." }
+    }
+  },
+  cooperate: "The 6 year old calls out a hand sign. The 11 year olds must shout the correct scientific word within three seconds. Swap roles. Keep score.",
+  check: { from: 5, q: "From page 5. Why did scientists reject Wegener?", options: ["His fossils were fake", "He could not explain what force moved the continents", "He never published his work"], answer: 1, why: "No mechanism. It took fifty years to find one." },
+  seismo: 0
+},
+{
+  n: 7, unit: 2, unitTitle: "THE PIECES MOVE",
+  title: "What The Crashes Build",
+  hook: "Everest is getting taller. A few millimetres a year, and it will not stop.",
+  predict: {
+    text: "India is crashing into Asia at about 5 cm a year and has been for 50 million years. What do you think the ground between them looks like?",
+    options: [
+      "Flat, it got worn down",
+      "Crumpled upward into the tallest mountains on Earth",
+      "A deep hole"
+    ],
+    answer: 1,
+    reveal: "Crumpled. Two continents met, neither would sink, so the rock between them buckled upward. That buckle is the Himalayas, and India is still pushing."
+  },
+  core: `Every boundary builds something. Learn to read the landscape and you can read the plates.
+
+Pull apart on land and the ground drops into a long valley. The Great Rift Valley in Africa is one, and Africa is slowly tearing along it.
+
+Push together with an ocean plate and it dives down. Where it dives, the seafloor sags into a <b>trench</b>. The Mariana Trench is nearly 11 km deep. Behind the trench, the sinking plate gets hot and squeezes out water. That water makes the rock above it melt, and the melt rises as volcanoes in a curved line.
+
+Push two continents together and neither one sinks. The rock has nowhere to go except up. Mountains.
+
+Slide past and you build almost nothing. You just store trouble.`,
+  terms: [["trench", "A deep groove in the seafloor"], ["subduction", "One plate sinking under another"]],
+  art: "landforms",
+  artCaption: "One cross section, three boundaries, and everything they build.",
+  okonkwo: "Everest holds marine fossils near the summit. That rock was seabed. Think about what had to happen.",
+  doors: {
+    little: {
+      print: "Draw a line from each picture to its name. Mountain. Volcano. Deep trench. Valley. Then colour the tallest one.",
+      q: { text: "What happens when two continents crash into each other?", options: ["A deep hole forms", "Mountains push up", "Nothing"], answer: 1, why: "Neither will sink, so the rock buckles upward." }
+    },
+    field: {
+      print: "There are marine fossils near the top of Mount Everest. Explain in four sentences how a sea creature ended up 8 km in the air.",
+      q: { text: "Seashell fossils are found near the summit of Everest. Why?", options: ["Birds carried them up", "That rock was once seabed and got pushed up by the collision", "The sea used to be that high"], answer: 1, why: "The Tethys Sea floor was crushed between India and Asia and lifted into the sky." }
+    },
+    chief: {
+      print: "Everest grows about 4 mm each year but is not getting 4 mm taller each year. Erosion removes rock at the same time. Write a short explanation of how a mountain can be rising and shrinking at once, and what decides the final height.",
+      q: { text: "The Himalayas rise a few mm a year. Why are they not far taller after 50 million years?", options: ["The uplift stopped long ago", "Erosion removes rock almost as fast as uplift adds it", "Mountains have a maximum legal height"], answer: 1, why: "Uplift and erosion fight each other. Gravity also limits how tall rock can pile before it spreads sideways." }
+    }
+  },
+  check: { from: 6, q: "From page 6. Which boundary type slides past without building much?", options: ["Divergent", "Convergent", "Transform"], answer: 2, why: "Transform. It builds little and stores a great deal of stress." },
+  seismo: 0
+},
+{
+  n: 8, unit: 2, unitTitle: "THE PIECES MOVE",
+  title: "Plot It Yourself",
+  hook: "Here are ten real earthquakes. Nobody is going to tell you what the pattern means.",
+  predict: {
+    text: "Before you plot anything. Do you think big earthquakes are scattered randomly across the world, or do they follow lines?",
+    options: [
+      "Scattered randomly",
+      "They follow lines",
+      "They are all in one country"
+    ],
+    answer: 1,
+    reveal: "Do not read this box until you have plotted all ten points. Then come back."
+  },
+  core: `Below is a blank world map with a grid.
+
+Here are ten real earthquakes. Plot each one with a dot. Take your time and be accurate.
+
+1. Valdivia, Chile. 38 S, 73 W.
+2. Anchorage, Alaska. 61 N, 148 W.
+3. Tohoku, Japan. 38 N, 143 E.
+4. Sumatra, Indonesia. 3 N, 96 E.
+5. Kamchatka, Russia. 52 N, 160 E.
+6. Maule, Chile. 36 S, 73 W.
+7. Cascadia, USA. 45 N, 125 W.
+8. Luzon, Philippines. 16 N, 121 E.
+9. Tonga, South Pacific. 20 S, 175 W.
+10. Michoacan, Mexico. The 1985 quake that wrecked Mexico City 350 km away. 18 N, 102 W.
+
+Now join your dots, going round the edge of the Pacific Ocean in order. One of the ten will not fit on your loop. Leave that one out and draw a circle round it.
+
+Write down the shape you made, and which dot refused to join it, before you turn the page.`,
+  terms: [["Ring of Fire", "The earthquake circle round the Pacific"]],
+  art: "worldgrid",
+  artCaption: "Plot all ten. Then join them. The answer draws itself.",
+  okonkwo: "I am not telling you. Plot it.",
+  doors: {
+    little: {
+      print: "A grown up reads out each place. You stick a red dot sticker on the map where they point. Ten dots. Then say out loud what shape the dots make.",
+      q: { text: "When you join the dots, what shape appears?", options: ["A straight line across the top", "A ring around the Pacific Ocean", "A star"], answer: 1, why: "A ring. Nine dots make the ring. Sumatra is the tenth and it sits on a different ocean. About ninety percent of the world's earthquakes happen along the ring." }
+    },
+    field: {
+      print: "After plotting, answer this. Nine of the ten sit around one ocean. Which ocean? Now compare your dots to the plate map on page 4. What do you notice?",
+      q: { text: "Which ocean is the ring around?", options: ["The Atlantic", "The Pacific", "The Indian"], answer: 1, why: "The Pacific. The edges of the Pacific Plate are ringed with subduction zones." }
+    },
+    chief: {
+      print: "Your ring has a gap in it. Find where. Then answer the hard question: the Atlantic Ocean also has a plate boundary running down its middle, yet almost no huge earthquakes. Why is a spreading ridge so much quieter than a subduction zone?",
+      q: { text: "Why does the mid-Atlantic ridge produce far smaller quakes than the Pacific rim?", options: ["It has no plate boundary", "Spreading boundaries are thin and shallow, so they store less stress than a giant locked subduction fault", "The water muffles them"], answer: 1, why: "Subduction zones lock over enormous areas and can slip all at once. Spreading ridges release stress in small, frequent, shallow events." }
+    }
+  },
+  cooperate: "The 8 year old reads out the coordinates. The 6 year old places the stickers. The 11 year olds cannot start their question until all ten dots are on the map.",
+  check: { from: 7, q: "From page 7. What is the deep groove in the seafloor called where a plate dives down?", options: ["A rift", "A trench", "A ridge"], answer: 1, why: "A trench. The Mariana Trench is the deepest place on Earth." },
+  badge: {
+    digit: 7,
+    title: "BADGE 2 CHALLENGE: PLATE TRACKER",
+    questions: [
+      { text: "Two plates pull apart. What is the word?", options: ["Convergent", "Divergent", "Transform"], answer: 1, why: "Divergent." },
+      { text: "What did Wegener call the giant continent?", options: ["Gondwana", "Pangaea", "Laurasia"], answer: 1, why: "Pangaea." },
+      { text: "TRAP. My friend says the Ring of Fire is a ring of volcanoes only, no earthquakes. Correct?", options: ["Correct", "Wrong, it is the most earthquake-heavy zone on Earth as well"], answer: 1, why: "About 90 percent of the world's earthquakes happen along it." },
+      { text: "Ocean crust meets continental crust. Which dives?", options: ["Oceanic", "Continental"], answer: 0, why: "Oceanic crust is denser and subducts." },
+      { text: "TRAP. Someone says the continents stopped moving once Pangaea broke up. True?", options: ["True", "False, they are still moving right now"], answer: 1, why: "The Atlantic widens a few centimetres every year. Measured by satellite." }
+    ]
+  },
+  seismo: 0
+},
+{
+  n: 9, unit: 3, unitTitle: "HOW A QUAKE IS BORN",
+  title: "Stick, Bend, SNAP",
+  hook: "An earthquake is not the ground moving. It is the ground finally letting go.",
+  predict: {
+    text: "Take a stick of dry spaghetti in both hands and bend it slowly. Predict: at the moment it breaks, where does the energy go?",
+    options: [
+      "It disappears",
+      "It shoots out as a snap you can feel and hear",
+      "It stays in the broken pieces"
+    ],
+    answer: 1,
+    reveal: "It shoots out. You feel the jolt in your fingers and you hear the crack. The energy you put in over ten seconds of bending comes back out in a thousandth of a second. That is an earthquake in your hands."
+  },
+  core: `Two tectonic plates are sliding past each other. But at the crack between them, called a <b>fault</b>, the rock is rough. It catches. It sticks.
+
+The plates keep moving anyway. So the rock near the fault starts to bend. Fences built across the fault slowly warp. Roads develop a kink.
+
+It bends for ten years. Fifty years. Three hundred years. Energy piles into the bent rock and stays there, quiet.
+
+Then the rock reaches its limit and the stuck part lets go. Everything that was bent snaps straight in seconds, and the stored energy blasts outward in every direction.
+
+That is the earthquake. Not the moving. The snapping back.
+
+The proper name for it is <b>elastic rebound</b>.`,
+  terms: [["fault", "A crack where rock slips"], ["elastic rebound", "Bent rock snapping straight"]],
+  art: "rebound",
+  artCaption: "A fence built straight across a fault. Watch what happens to it over 100 years.",
+  okonkwo: "Look at the line on my machine. It twitched this morning. First time in eleven months. Probably nothing.",
+  trap: {
+    text: "MISCONCEPTION TRAP. In a film, the ground splits open into a huge crack and a car falls in. Does that happen?",
+    options: ["Yes, that is what a fault is", "No, faults slip sideways or up and down, they do not gape open and swallow things", "Only in California"],
+    answer: 1,
+    why: "Faults grind past each other under enormous pressure. They do not yawn open. Small cracks appear at the surface, but nothing swallows a car. Films lie about this constantly."
+  },
+  doors: {
+    little: {
+      print: "Snap a piece of dry spaghetti with a grown up. Feel the jolt. Then draw the fence in the third box the way you think it looks AFTER the snap.",
+      q: { text: "When does the shaking happen?", options: ["While the rock is slowly bending", "At the moment the rock snaps back", "Before anything moves"], answer: 1, why: "The bending is silent. The snap is the earthquake." }
+    },
+    field: {
+      print: "A fence was built dead straight across a fault in 1900. By 2000 it is bent into an S shape. In 2001 there is an earthquake. Draw the fence in 1900, in 2000, and in 2002. Label each drawing.",
+      q: { text: "A straight fence across a fault slowly bends over 100 years. After the quake, what does it look like?", options: ["Still bent the same way", "Straight again but broken and offset at the fault", "Bent the other way"], answer: 1, why: "Both halves snap back to straight, but they no longer line up. The offset shows how much slip occurred." }
+    },
+    chief: {
+      print: "A fault has been locked for 150 years. The plates move 3 cm a year. Work out the total slip that must be released. Then explain why a fault locked for 300 years is far more dangerous than one that slips a little every year.",
+      q: { text: "A fault locked 150 years, plates moving 3 cm per year. How much slip is stored?", options: ["About 45 cm", "About 4.5 m", "About 45 m"], answer: 1, why: "150 times 3 cm equals 450 cm, which is 4.5 metres. Longer locking means bigger release." }
+    }
+  },
+  check: { from: 8, q: "From page 8. Roughly what share of the world's earthquakes happen around the Ring of Fire?", options: ["About 10 percent", "About 50 percent", "About 90 percent"], answer: 2, why: "About 90 percent." },
+  seismo: 1
+},
+{
+  n: 10, unit: 3, unitTitle: "HOW A QUAKE IS BORN",
+  title: "Where It Really Happened",
+  hook: "The news says the earthquake happened in the city. The news is wrong.",
+  predict: {
+    text: "An earthquake is reported at a town. Where do you think the rock actually broke?",
+    options: [
+      "Right at the town, on the surface",
+      "Deep underground, maybe 10 km or more below",
+      "In the sky above the town"
+    ],
+    answer: 1,
+    reveal: "Deep underground. The break happens on a fault plane kilometres down. The town is just the spot on the surface that sits directly above it."
+  },
+  core: `Two words that get muddled constantly. Get them right and you will be ahead of most adults.
+
+The <b>hypocentre</b> is where the rock actually broke. It is underground, often 10 to 30 km down, sometimes far deeper. It is also called the focus.
+
+The <b>epicentre</b> is the point on the surface directly above the hypocentre. It is a spot on a map. Nothing broke there. It is just the closest place on the surface to where things did break.
+
+Why does it matter? Depth changes everything. A shallow quake dumps its energy right under your feet. A deep quake spreads the same energy through hundreds of kilometres of rock before it reaches you, so it arrives weaker and smeared out.
+
+Same magnitude. Very different day.`,
+  terms: [["hypocentre", "Where the rock actually broke"], ["epicentre", "The surface point directly above"]],
+  art: "epicentre",
+  artCaption: "A slice through the ground. Label the fault, the hypocentre, and the epicentre.",
+  okonkwo: "Reporters say epicentre when they mean centre of the disaster. It is not the same thing. Correct them politely.",
+  doors: {
+    little: {
+      print: "There is a star deep underground. Draw a straight line from the star up to the surface. Put a red X where your line reaches the top. That X is the epicentre.",
+      q: { text: "The epicentre is on the surface or underground?", options: ["On the surface", "Underground"], answer: 0, why: "On the surface, directly above the break." }
+    },
+    field: {
+      print: "Label the diagram: fault plane, hypocentre, epicentre, and the depth arrow. Then write one sentence explaining why depth matters.",
+      q: { text: "Two quakes, same magnitude. One is 10 km deep, one is 200 km deep. Which shakes the surface harder?", options: ["The 10 km one", "The 200 km one", "Exactly the same"], answer: 0, why: "Shallow energy arrives concentrated. Deep energy spreads out and weakens on the long journey up." }
+    },
+    chief: {
+      print: "In 2011 a magnitude 6.3 quake devastated Christchurch, New Zealand. Five months earlier a magnitude 7.1 quake nearby caused far less damage. The 7.1 released roughly 16 times more energy. Using depth and distance, write an explanation of how the smaller quake did more harm.",
+      q: { text: "How can a magnitude 6.3 do more damage than a nearby magnitude 7.1?", options: ["The scale is unreliable", "Shallower, and directly under the city rather than out of town", "The 7.1 was measured wrongly"], answer: 1, why: "The 6.3 was about 5 km deep and almost under the city centre. Depth and location beat raw magnitude." }
+    }
+  },
+  cooperate: null,
+  check: { from: 9, q: "From page 9. What is the proper name for bent rock snapping straight?", options: ["Convection", "Elastic rebound", "Subduction"], answer: 1, why: "Elastic rebound." },
+  seismo: 2
+}
+];
+
+// SHAKE STATION 7 — pages 11 to 15
+const PAGES_C = [
+{
+  n: 11, unit: 3, unitTitle: "HOW A QUAKE IS BORN",
+  title: "Three Kinds Of Shake",
+  hook: "The first wave to reach you is not the one that hurts you.",
+  predict: {
+    text: "Stretch a slinky along the floor. Push one end sharply forward. Then shake the other end side to side. Which wave do you think travels faster through rock?",
+    options: [
+      "The push and pull one",
+      "The side to side one",
+      "Exactly the same speed"
+    ],
+    answer: 0,
+    reveal: "The push and pull wave wins, every time, in every material. It is called the P wave because it arrives first. Primary."
+  },
+  core: `Two kinds of wave leave the hypocentre. When they reach the surface they make a third kind that runs along the top. All three travel at different speeds, so they arrive one after another.
+
+<b>P waves</b> come first. They squeeze and stretch the rock forward and back, like a slinky being pushed. Fast, about 6 km per second. They can travel through solid rock and through liquid. They rattle windows and make a bang. They rarely knock things down.
+
+<b>S waves</b> come second. They shake the rock sideways, like a rope you flick. Slower, about 3.5 km per second. They cannot travel through liquid at all, which is how we discovered the outer core is liquid.
+
+Surface waves arrive last and travel along the top only. They roll the ground like a sea swell and they do most of the damage.
+
+Feel a bang, then a jolt, then a slow roll? You just felt all three.`,
+  terms: [["P wave", "Fast push and pull wave"], ["S wave", "Slower sideways wave"]],
+  art: "waves",
+  artCaption: "P wave squeezes. S wave shakes sideways. Surface wave rolls.",
+  okonkwo: "The gap between the P and the S is the most useful few seconds in my whole profession. Remember that. It comes back on page 14.",
+  trap: {
+    text: "MISCONCEPTION TRAP. A boy says: the first wave you feel is always the strongest. Right or wrong?",
+    options: ["Right", "Wrong, the first wave is the P wave and it is usually the weakest"],
+    answer: 1,
+    why: "P waves arrive first and are the mildest. The slow surface waves arriving last are the destroyers. That is why the shaking often gets worse before it stops."
+  },
+  doors: {
+    little: {
+      print: "Play the wave game. A grown up holds one end of a skipping rope. You shake it side to side. That is an S wave. Now push a slinky. That is a P wave. Draw a squiggle for each one in the boxes.",
+      q: { text: "Which wave arrives first?", options: ["The P wave", "The S wave", "The surface wave"], answer: 0, why: "P for Primary. It is the fastest." }
+    },
+    field: {
+      print: "Fill in the table. For each wave write: its speed order, how it moves the ground, and whether it does much damage. Then answer: why do the letters P and S make sense?",
+      q: { text: "Which wave does most of the damage to buildings?", options: ["P waves", "S waves", "Surface waves"], answer: 2, why: "Surface waves. They roll along the top, they are large, and they last longest." }
+    },
+    chief: {
+      print: "S waves cannot pass through liquid. From 1906 onwards scientists noticed that beyond about a third of the way round the world from a quake, S waves stop arriving altogether. This is called the S wave shadow zone. Explain what this proves about the inside of the Earth, and write down which page of this book you already met that fact on.",
+      q: { text: "S waves stop arriving beyond a certain distance. What does that prove?", options: ["The Earth is hollow", "There is a liquid layer inside, the outer core", "S waves get tired"], answer: 1, why: "S waves die in liquid. The shadow zone is how we know the outer core is molten. You met the outer core on page 2." }
+    }
+  },
+  cooperate: "S wave rope game needs two people holding and one shaking. Youngest shakes. Oldest counts how many waves pass a marked point in ten seconds.",
+  check: { from: 5, q: "From page 5. Name two kinds of evidence Wegener used, apart from coastline shapes.", options: ["Fossils and rock layers", "Photographs and maps", "Volcanoes and rivers"], answer: 0, why: "Matching fossils and matching rock layers on separate continents." },
+  seismo: 2
+},
+{
+  n: 12, unit: 3, unitTitle: "HOW A QUAKE IS BORN",
+  title: "Reading The Squiggle",
+  hook: "A seismogram looks like a scribble. It is actually a sentence.",
+  predict: {
+    text: "A machine draws a line on moving paper. The machine shakes during an earthquake. What would happen to the line if the pen stayed perfectly still while the paper and machine shook?",
+    options: [
+      "The line would stay straight",
+      "The line would draw the shaking as a squiggle",
+      "The pen would fall off"
+    ],
+    answer: 1,
+    reveal: "That is the trick. The pen hangs from a heavy weight, and heavy things resist being moved. So while the ground and the paper jerk about, the pen holds still and draws the shaking as a squiggle."
+  },
+  core: `A <b>seismograph</b> is a machine that stays still while the world moves.
+
+A heavy weight hangs on a spring. When the ground jolts, the frame and the paper jolt with it, but the weight is too lazy to follow. The pen attached to it traces a record of exactly how the ground moved.
+
+That record is called a <b>seismogram</b>, and you can read it.
+
+Flat line means nothing happening. First small wobble is the P wave arriving. A bigger jump some seconds later is the S wave. Then the huge slow swings, the surface waves.
+
+The height of the squiggle tells you how strong. The gap between P and S tells you how far away. That second one is the important one.`,
+  terms: [["seismograph", "Machine that records shaking"], ["seismogram", "The paper record it draws"]],
+  art: "seismogram",
+  artCaption: "One real seismogram. Mark the P arrival, the S arrival, and the gap between them.",
+  okonkwo: "Build your own. Box, string, weight, marker, and someone to pull the paper. It works. Mine sits on that shelf and it is thirty years old.",
+  build: {
+    title: "BUILD IT: THE BOX SEISMOGRAPH",
+    materials: "One cardboard box, string, a marker pen, a heavy cup or a bag of coins, scissors, a long strip of paper cut from a cereal packet.",
+    steps: [
+      "Cut the top and one side off the box so you can see inside.",
+      "Punch two holes in the top. Thread string through and hang the marker so the tip just touches the box floor.",
+      "Tape the heavy cup to the marker to make it lazier.",
+      "Feed the paper strip under the marker tip.",
+      "One person pulls the paper slowly and steadily. Another person shakes the box.",
+      "Compare a gentle shake and a hard shake. Compare a fast pull and a slow pull."
+    ],
+    predict: "Before you shake it, predict: will pulling the paper faster make the squiggle taller or wider?",
+    result: "Faster pulling stretches the squiggle sideways but does not change its height. Height comes from how hard you shake. Width comes from paper speed. Real stations record time on the paper so the width always means the same thing.",
+    wrong: "What went wrong? Write it here. Marker not touching? Paper jamming? Weight too light? Record it."
+  },
+  doors: {
+    little: {
+      print: "Colour the biggest wobble on the seismogram red and the smallest wobble blue. Then draw your own squiggle for a tiny earthquake and a huge earthquake.",
+      q: { text: "A tall squiggle on the paper means the shaking was...", options: ["Weak", "Strong"], answer: 1, why: "Taller squiggle, stronger shaking." }
+    },
+    field: {
+      print: "On the printed seismogram, mark P with a blue arrow and S with a red arrow. Measure the gap in seconds using the scale bar. Write the number in the box.",
+      q: { text: "What does the gap between the P arrival and the S arrival tell you?", options: ["How strong the quake was", "How far away it was", "What time it happened"], answer: 1, why: "Bigger gap means further away, because the fast wave gets a longer head start over a longer journey." }
+    },
+    chief: {
+      print: "P waves travel about 6 km per second and S waves about 3.5 km per second. If the gap between them at your station is 20 seconds, work out roughly how far away the quake was. Show your working. Then explain why a station 10 km from the quake sees almost no gap at all.",
+      q: { text: "P travels 6 km/s, S travels 3.5 km/s. The gap is 20 seconds. Roughly how far away is the quake?", options: ["About 40 km", "About 170 km", "About 600 km"], answer: 1, why: "The S wave falls about 0.119 s further behind for every km it travels. 20 divided by 0.119 gives roughly 168 km. Close to the rule of thumb: gap in seconds times 8." }
+    }
+  },
+  check: { from: 10, q: "From page 10. What is the underground point where the rock actually broke called?", options: ["The epicentre", "The hypocentre", "The fault line"], answer: 1, why: "The hypocentre, also called the focus." },
+  badge: {
+    digit: 2,
+    title: "BADGE 3 CHALLENGE: WAVE READER",
+    questions: [
+      { text: "Put the waves in arrival order.", options: ["S, P, surface", "P, S, surface", "Surface, P, S"], answer: 1, why: "P first, S second, surface last." },
+      { text: "Which wave cannot travel through liquid?", options: ["P wave", "S wave"], answer: 1, why: "S waves die in liquid. That is how we found the outer core." },
+      { text: "TRAP. A boy says the epicentre is where the rock broke. Correct him.", options: ["He is right", "Wrong, that is the hypocentre. The epicentre is on the surface above it"], answer: 1, why: "Hypocentre is underground. Epicentre is the surface point above." },
+      { text: "What makes the pen on a seismograph stay still?", options: ["A motor holds it", "A heavy weight resists being moved", "It is glued down"], answer: 1, why: "Inertia. Heavy things resist changing motion." },
+      { text: "TRAP. Someone says a big earthquake means the fault opened up like a mouth. True?", options: ["True", "False, faults slip past each other, they do not gape open"], answer: 1, why: "Films invented the gaping crack. Real faults grind." }
+    ]
+  },
+  seismo: 3
+},
+{
+  n: 13, unit: 4, unitTitle: "MEASURING THE MONSTER",
+  title: "Big Is Not The Same As Bad",
+  hook: "A magnitude 7 in an empty desert can kill nobody. A magnitude 6 under a city can kill thousands.",
+  predict: {
+    text: "Magnitude 6 to magnitude 7 is one step up the scale. How much more energy do you think that is?",
+    options: [
+      "About twice as much",
+      "About 10 times as much",
+      "About 32 times as much"
+    ],
+    answer: 2,
+    reveal: "About 32 times. The scale does not go up in ones, it multiplies. A magnitude 8 releases about 1000 times the energy of a magnitude 6."
+  },
+  core: `There are two completely different questions and people mix them up daily.
+
+Question one: how much energy did the fault release? That is <b>magnitude</b>. It is one number for the whole earthquake, no matter where you stand. Scientists now use moment magnitude, which measures how much rock slipped and how far. The old Richter scale is still what people say, but it stops working properly on very large events.
+
+Question two: how bad was the shaking where you were? That is <b>intensity</b>. It is measured on the Mercalli scale, from I to XII, and it is different in every street. It depends on depth, distance, and what kind of ground you are standing on.
+
+One earthquake. One magnitude. A hundred different intensities.
+
+The magnitude decides how much energy exists. Everything else decides who suffers.`,
+  terms: [["magnitude", "How much energy was released"], ["intensity", "How hard the shaking felt here"]],
+  art: "magnitude",
+  artCaption: "The energy staircase. Each step up is about 32 times the one below.",
+  okonkwo: "When a reporter says magnitude, they mean the fault. When they say devastating, they mean intensity. Two different words for two different things.",
+  trap: {
+    text: "MISCONCEPTION TRAP. Someone says: a magnitude 8 earthquake is twice as strong as a magnitude 4. Fix that sentence.",
+    options: ["It is correct", "A magnitude 8 releases about a million times the energy of a magnitude 4", "A magnitude 8 is 4 times stronger"],
+    answer: 1,
+    why: "Four steps up. 32 x 32 x 32 x 32 is about a million. The scale is logarithmic, which means each step multiplies rather than adds."
+  },
+  doors: {
+    little: {
+      print: "Colour the magnitude staircase. Small quakes green. Medium quakes yellow. Huge quakes red. Then draw what you think a magnitude 2 feels like and what a magnitude 8 feels like.",
+      q: { text: "Is a magnitude 8 a little bit bigger than a magnitude 7, or a LOT bigger?", options: ["A little bit", "A lot bigger"], answer: 1, why: "About 32 times more energy. That is a lot." }
+    },
+    field: {
+      print: "Match each description to a Mercalli intensity level. Hanging lamps swing gently. Nobody feels it, machines only. Walls crack and chimneys fall. Buildings collapse and the ground cracks. Then write which of these is about magnitude and which is about intensity.",
+      q: { text: "Two towns feel the same earthquake. Town A is on solid rock, Town B is on soft mud. Which shakes harder?", options: ["Town A on rock", "Town B on mud", "Both the same"], answer: 1, why: "Soft ground amplifies shaking. The waves slow down and grow taller, like a sea wave reaching a beach." }
+    },
+    chief: {
+      print: "Work through this. Magnitude 5 to magnitude 8 is three steps. Calculate the approximate energy ratio. Then explain, in a short paragraph, why the Richter scale was replaced by moment magnitude for large earthquakes.",
+      q: { text: "Roughly how much more energy is a magnitude 8 than a magnitude 5?", options: ["About 1000 times", "About 32000 times", "About 300 times"], answer: 1, why: "32 x 32 x 32 is about 32768. Richter was replaced because it saturates: above about magnitude 7 it stops distinguishing between large events." }
+    }
+  },
+  check: { from: 11, q: "From page 11. Which wave does most of the damage?", options: ["P wave", "S wave", "Surface wave"], answer: 2, why: "Surface waves. Slow, large, and long-lasting." },
+  seismo: 4
+},
+{
+  n: 14, unit: 4, unitTitle: "MEASURING THE MONSTER",
+  title: "Three Circles",
+  hook: "One station cannot find an earthquake. Two cannot either. Three can.",
+  predict: {
+    text: "You know an earthquake happened exactly 200 km from your station. Where could it be?",
+    options: [
+      "At one exact spot",
+      "Anywhere on a circle of radius 200 km around you",
+      "Somewhere to the north"
+    ],
+    answer: 1,
+    reveal: "Anywhere on the circle. One station gives you a distance but no direction. This is the whole problem, and the solution is beautiful."
+  },
+  core: `This is the most satisfying thing in seismology and you are about to do it yourself.
+
+Step one. At each station, look at the seismogram and measure the gap between the P wave and the S wave.
+
+Step two. Turn that gap into a distance. Longer gap means further away. Use the conversion strip below.
+
+Step three. Draw a circle around each station, with a radius equal to that distance.
+
+One circle tells you almost nothing. Two circles cross at two points, so you are down to two suspects. Three circles cross at exactly one point.
+
+That point is the epicentre.
+
+This is called <b>triangulation</b>, and it is the idea behind every earthquake location you have ever seen on the news.`,
+  terms: [["triangulation", "Finding a spot using three distances"]],
+  art: "triangulation",
+  artCaption: "Three stations. Three gaps. Three circles. One answer.",
+  okonkwo: "Do this one slowly. Sharp pencil. Proper compass. When the three circles meet you will feel something.",
+  activity: {
+    title: "THE REAL MISSION",
+    body: `Three stations recorded the same earthquake this morning.
+
+STATION ALPHA. P to S gap: 8 seconds.
+STATION BRAVO. P to S gap: 15 seconds.
+STATION CHARLIE. P to S gap: 11 seconds.
+
+CONVERSION RULE: distance in km is roughly the gap in seconds multiplied by 8.
+
+Work out the three distances. Convert each to centimetres using the map scale in the corner. Set your compass. Draw three circles.
+
+Mark the epicentre with a red X.`
+  },
+  doors: {
+    little: {
+      print: "You are the compass helper. Hold the map flat and steady while the older ones draw. Then find the red X they made and draw a little house next to it. Count how many circles crossed there.",
+      q: { text: "How many circles do you need to find the exact spot?", options: ["One", "Two", "Three"], answer: 2, why: "Three. Two circles leave you with two possible answers." }
+    },
+    field: {
+      print: "Do the three multiplications. 8 x 8, 15 x 8, 11 x 8. Write the three distances. Then draw the three circles with a compass and mark where they meet.",
+      q: { text: "A station reports a 15 second gap. Using the rule of 8, how far away is the quake?", options: ["About 60 km", "About 120 km", "About 240 km"], answer: 1, why: "15 x 8 = 120 km." }
+    },
+    chief: {
+      print: "Do the mission, then answer this. In real life the three circles almost never meet at a single perfect point. They form a small triangle instead. Give two reasons why, and explain what a seismologist should report as the epicentre when that happens.",
+      q: { text: "In real life three circles rarely meet perfectly. Why?", options: ["Seismologists are careless", "Wave speed varies with rock type, and timing has small errors, so each distance is slightly off", "The Earth is not round"], answer: 1, why: "Rock is not uniform, so wave speeds vary. Real networks use many stations and compute a best-fit location with an error estimate." }
+    }
+  },
+  cooperate: "This page needs all four of you. Youngest holds the map. Two Chiefs each draw a circle and check the other's arithmetic. The 8 year old draws the third circle and marks the X.",
+  check: { from: 12, q: "From page 12. What keeps a seismograph pen still while the ground shakes?", options: ["A motor", "A heavy weight", "A magnet"], answer: 1, why: "A heavy hanging weight resists motion." },
+  seismo: 5
+},
+{
+  n: 15, unit: 4, unitTitle: "MEASURING THE MONSTER",
+  title: "Why Nobody Can Tell You Tomorrow",
+  hook: "We can say a big quake is likely in the next thirty years. We cannot say next Tuesday. That gap is not laziness.",
+  predict: {
+    text: "Scientists can predict eclipses hundreds of years ahead, to the second. Why can they not do the same with earthquakes?",
+    options: [
+      "Nobody has tried hard enough",
+      "The Moon follows simple rules, rock breaking does not",
+      "They can, they just keep it secret"
+    ],
+    answer: 1,
+    reveal: "The Moon obeys a few clean equations. A fault is thousands of square kilometres of rough, cracked, wet, uneven rock, and the exact moment it fails depends on details nobody can measure from the surface."
+  },
+  core: `Earthquakes come in families.
+
+A <b>foreshock</b> is a smaller quake before the big one. The problem: you can only tell it was a foreshock afterwards. At the time it looks exactly like an ordinary small quake.
+
+The mainshock is the biggest one.
+
+An <b>aftershock</b> is one of the many smaller quakes that follow, as the rock around the break finishes its elastic rebound and settles. They can go on for months. Most are harmless. Some are not. Every one of them gets located by triangulation, usually within a minute.
+
+Here is the honest position. Seismologists forecast probability over years, and they do it well. Prediction of a date and time does not exist, and there is currently no good reason to think it will.
+
+Anyone who tells you they can predict earthquakes is selling something.`,
+  terms: [["foreshock", "A small quake before the big one"], ["aftershock", "Smaller quakes following the main one"]],
+  art: "prediction",
+  artCaption: "Three myths that will not die, and the truth beside each one.",
+  okonkwo: `A confession. In 2009 I told a village council that the sequence they were feeling was probably just a swarm and would fade out.
+
+Eleven days later the mainshock arrived.
+
+I was wrong. Not lying, not careless, just wrong, because the honest answer was I do not know and I said something more comfortable instead. I have never done it again.`,
+  myths: [
+    { myth: "Earthquake weather. Hot still days cause earthquakes.", truth: "No connection exists. Quakes start 10 km or more underground, where weather does not reach. They happen in every season and every climate." },
+    { myth: "Animals can predict earthquakes.", truth: "Animals often react seconds before humans, because they feel the fast P wave first. That is detection, not prediction. No animal has ever given reliable warning days ahead in a controlled study." },
+    { myth: "California will break off and fall into the sea.", truth: "The San Andreas is a sliding boundary. Los Angeles is moving north toward San Francisco at about 5 cm a year. In roughly 15 million years they will be neighbours. Nothing sinks." }
+  ],
+  doors: {
+    little: {
+      print: "Three myths are drawn in the boxes. Careful, it is a trick. Put a big X through every picture that is NOT true. Then count your Xs and say the number out loud.",
+      q: { text: "Can animals tell us an earthquake is coming next week?", options: ["Yes", "No, they just feel the first wave a second or two before we do"], answer: 1, why: "Detection, not prediction." }
+    },
+    field: {
+      print: "Write a short reply to a friend who says: my grandmother says the weather has been strange so an earthquake is coming. Be kind but be clear.",
+      q: { text: "What is the difference between a foreshock and an ordinary small quake?", options: ["Foreshocks are always stronger", "You can only tell the difference afterwards, once a bigger one follows", "Foreshocks are deeper"], answer: 1, why: "There is no way to identify a foreshock at the time. That is precisely what makes prediction so hard." }
+    },
+    chief: {
+      print: "After the 2009 earthquake in L'Aquila, six Italian scientists and one government official were put on trial in 2011 for what had been said publicly beforehand. All seven were convicted in 2012. On appeal in 2014 the six scientists were cleared, and only the official's conviction stood. Write a paragraph: what should a scientist say to the public when the honest answer is we do not know?",
+      q: { text: "Seismologists CAN do which of these?", options: ["Predict a date and time", "Forecast the probability of a large quake in a region over decades", "Both"], answer: 1, why: "Probabilistic forecasting works and drives building codes. Deterministic prediction does not exist." }
+    }
+  },
+  check: { from: 13, q: "From page 13. One step up the magnitude scale is roughly how much more energy?", options: ["Twice", "10 times", "32 times"], answer: 2, why: "About 32 times." },
+  badge: {
+    digit: 9,
+    title: "BADGE 4 CHALLENGE: STATION ANALYST",
+    questions: [
+      { text: "How many stations do you need to locate an epicentre?", options: ["One", "Two", "Three"], answer: 2, why: "Three circles, one crossing point." },
+      { text: "Magnitude measures energy released. What measures the shaking where you stand?", options: ["Intensity", "Depth", "Frequency"], answer: 0, why: "Intensity, on the Mercalli scale." },
+      { text: "TRAP. My uncle says his dog predicted an earthquake last year. What do you tell him?", options: ["Amazing, dogs can predict quakes", "The dog probably felt the P wave a second or two early. That is detection, not prediction"], answer: 1, why: "Seconds of head start, not days." },
+      { text: "A 24 second P to S gap. Using the rule of 8, how far?", options: ["About 96 km", "About 192 km", "About 240 km"], answer: 1, why: "24 x 8 = 192 km." },
+      { text: "TRAP. Someone says scientists know exactly when the next big one will hit but governments hide it. Response?", options: ["Probably true", "No. Probability forecasts over decades exist. Date prediction does not, for anyone"], answer: 1, why: "There is no hidden method. The physics genuinely does not allow it yet." }
+    ]
+  },
+  seismo: 6
+}
+];
+
+// SHAKE STATION 7 — pages 16 to 20
+const PAGES_D = [
+{
+  n: 16, unit: 5, unitTitle: "WHAT THE SHAKING DOES",
+  title: "When The Sea Stands Up",
+  hook: "If the sea suddenly pulls back and shows you the seabed, you may have only a few minutes. Sometimes less.",
+  predict: {
+    text: "Fill a tray with water. Now lift a tile on the bottom sharply upward. What happens to the water above it?",
+    options: [
+      "Nothing, water is too heavy",
+      "The whole column of water above lifts and spreads outward as a wave",
+      "It makes a small ripple only"
+    ],
+    answer: 1,
+    reveal: "The entire column lifts. That is the difference between a tsunami and a normal wave. Wind waves are only the top few metres of water moving. A tsunami is the whole depth of the ocean, from surface to seabed, moving at once."
+  },
+  core: `An underwater earthquake, usually where two tectonic plates meet, shoves the seafloor upward. The water above has nowhere to go except up and then out.
+
+In deep water a <b>tsunami</b> is almost invisible. Half a metre tall. Ships sail over it and feel nothing. But it can be 200 km from crest to crest, and it travels at about 800 km per hour, as fast as a jet.
+
+Then it reaches shallow water. The front slows down. The back catches up. All that length piles into height.
+
+The wave that was half a metre tall in the deep ocean can arrive as a wall of water many metres high, and it does not curl and break like a surf wave. It keeps coming, like the sea has decided to be somewhere else.
+
+Then it drains back out, and takes everything with it.`,
+  terms: [["tsunami", "A wave made by the seafloor moving"]],
+  art: "tsunami",
+  artCaption: "Deep water: long and low. Shallow water: short and tall. Same energy, different shape.",
+  okonkwo: "In 2004 a ten year old girl called Tilly Smith recognised the receding water from a geography lesson two weeks earlier. She told her parents. That beach was evacuated. About a hundred people lived because a child had been paying attention.",
+  warning: {
+    title: "THE THREE NATURAL WARNINGS",
+    items: [
+      "You feel a strong earthquake near the coast. Do not wait for a siren. Move inland and uphill.",
+      "The sea pulls back and exposes seabed you have never seen before. Do not go and look. Run.",
+      "You hear a roar from the sea like a train or an aeroplane. Go, now, uphill."
+    ],
+    rule: "A tsunami is not one wave. The second or third is often the biggest, and they can arrive an hour apart. Do not go back down. And it does not always pull back first. Sometimes the water simply rises with no warning at all, which is why warning number one is the one you must never ignore."
+  },
+  doors: {
+    little: {
+      print: "Do the tray experiment with a grown up. Then draw what you should do if the sea runs away from the beach. Draw yourself running to high ground, not walking toward the water.",
+      q: { text: "The sea suddenly pulls far back from the beach. What do you do?", options: ["Go and look at the fish", "Run inland and uphill straight away", "Take a photo first"], answer: 1, why: "The sea pulling back means the trough of a tsunami arrived first. You have minutes." }
+    },
+    field: {
+      print: "Explain in five sentences why a tsunami is dangerous even though it is only half a metre tall in the open ocean. Use the words shallow, slow, and pile up.",
+      q: { text: "Why is a tsunami nearly invisible to a ship in deep water?", options: ["It travels underwater only", "It is very long and very low, so the ship rises and falls gently over many minutes", "Ships are too big to feel it"], answer: 1, why: "A half metre rise spread over 200 km of wavelength is a gentle swell. The energy is enormous but the shape is flat." }
+    },
+    chief: {
+      print: "A tsunami travels at about 800 km/h in deep water. An earthquake occurs 3000 km from a coastline. Calculate how long the coast has to evacuate. Then explain why a quake 50 km offshore is far more dangerous even if it is smaller.",
+      q: { text: "A tsunami travels 800 km/h. The quake is 3000 km away. How long until it arrives?", options: ["About 1 hour", "About 3 hours 45 minutes", "About 10 hours"], answer: 1, why: "3000 divided by 800 equals 3.75 hours. A quake 50 km offshore gives you minutes instead, which is why local natural warnings matter more than sirens." }
+    }
+  },
+  check: { from: 14, q: "From page 14. What is the name for finding a spot using three distances?", options: ["Triangulation", "Navigation", "Calibration"], answer: 0, why: "Triangulation." },
+  seismo: 6
+},
+{
+  n: 17, unit: 5, unitTitle: "WHAT THE SHAKING DOES",
+  title: "Ground That Turns To Soup",
+  hook: "Two houses, same street, same earthquake. One is fine. One has sunk a metre into the ground.",
+  predict: {
+    text: "Put a coin on top of a cup of wet sand. Now tap the side of the cup steadily for thirty seconds. Predict what happens to the coin.",
+    options: [
+      "Nothing, sand is solid",
+      "It sinks into the sand",
+      "It slides to the edge"
+    ],
+    answer: 1,
+    reveal: "It sinks. Shaking makes the sand grains lose contact with each other and the water gets between them. For a few seconds the sand stops behaving like a solid and behaves like a liquid. Anything heavy sinks. Anything light, like an empty pipe, floats up."
+  },
+  core: `The earthquake is only the beginning. What happens next depends entirely on what your house is standing on.
+
+<b>Liquefaction</b> is the coin trick, at city scale. Loose wet sandy ground gets shaken until it behaves like a liquid. Buildings tilt and sink. Underground pipes and empty tanks float up through the road. Then the shaking stops and it all sets solid again, with everything in the wrong place.
+
+Landslides come next. Shaking pushes a slope that was already close to giving way.
+
+And then fire. Earthquakes snap gas pipes and electrical cables at the same moment they break the water mains needed to fight the fire. In San Francisco in 1906 the fire destroyed far more of the city than the shaking did.
+
+One earthquake. One magnitude. Two completely different intensities, one street apart.
+
+Same quake. Different ground. Completely different day.`,
+  terms: [["liquefaction", "Shaken wet ground acting like liquid"]],
+  art: "liquefaction",
+  artCaption: "Solid ground on the left. Loose wet sand on the right. Watch the buildings.",
+  okonkwo: "This is why I care so much where a school is built. The rock under it matters as much as the walls.",
+  trap: {
+    text: "MISCONCEPTION TRAP. A girl says: it does not matter where you build, a strong enough building survives anything. Is she right?",
+    options: ["Yes, engineering solves everything", "No, a strong building on liquefying ground will simply tilt over intact"],
+    answer: 1,
+    why: "In Niigata in 1964 whole apartment blocks toppled over slowly and lay on their sides with almost no structural damage. The buildings were fine. The ground left."
+  },
+  doors: {
+    little: {
+      print: "Do the sand and coin experiment. Then draw the coin before and after. Now put a light plastic bottle cap on the sand and tap again. Draw what happens to that.",
+      q: { text: "You tap a cup of wet sand with a coin on top. What happens?", options: ["The coin sinks", "The coin floats", "Nothing"], answer: 0, why: "Heavy things sink into liquefied ground. Light hollow things float up." }
+    },
+    field: {
+      print: "Two houses on the same street. One is on solid rock, one on old river sand. The same earthquake hits. Describe what happens to each, and explain why using the word liquefaction.",
+      q: { text: "During liquefaction, empty underground fuel tanks often do what?", options: ["Sink deeper", "Float up through the road surface", "Explode"], answer: 1, why: "They are hollow and light. In liquid ground they rise, and they have broken through roads in several real earthquakes." }
+    },
+    chief: {
+      print: "In 1906 San Francisco, more damage came from fire than from shaking. Write a paragraph explaining the chain of events, including why the fire could not be stopped. Then suggest two things a modern city could do to break that chain.",
+      q: { text: "Why was the 1906 San Francisco fire so hard to fight?", options: ["No firefighters were available", "The same shaking that started the fires also broke the water mains", "It was raining oil"], answer: 1, why: "Broken gas lines started fires. Broken water mains meant no pressure in the hydrants. Modern cities use automatic gas shutoff valves and independent emergency water systems." }
+    }
+  },
+  cooperate: "One person taps the cup at a steady beat. One person watches the coin. The 6 year old counts the taps out loud so the rhythm stays even. It will not work if the tapping is uneven.",
+  check: { from: 15, q: "From page 15. True or false: hot still weather can cause earthquakes.", options: ["True", "False"], answer: 1, why: "False. Earthquakes start kilometres underground where weather has no effect." },
+  badge: {
+    digit: 1,
+    title: "BADGE 5 CHALLENGE: HAZARD OFFICER",
+    questions: [
+      { text: "What causes a tsunami?", options: ["Strong wind", "The seafloor suddenly moving up or down", "The tide"], answer: 1, why: "Displacement of the seafloor lifts the whole water column." },
+      { text: "The sea pulls back off the beach. What does it mean?", options: ["Low tide", "A tsunami trough arrived first. Run uphill", "Good time to collect shells"], answer: 1, why: "Run. You may have only minutes." },
+      { text: "TRAP. Someone says the first tsunami wave is always the biggest. Right?", options: ["Right", "Wrong, the second or third is often larger and they arrive far apart"], answer: 1, why: "People have died returning between waves. Stay high." },
+      { text: "What is liquefaction?", options: ["Rock melting into lava", "Shaken wet loose ground temporarily behaving like a liquid", "Water flooding a city"], answer: 1, why: "The grains lose contact and the ground loses strength." },
+      { text: "TRAP. A friend says fire has nothing to do with earthquakes. Reply?", options: ["Correct", "Wrong. Broken gas lines start fires and broken water mains stop anyone fighting them"], answer: 1, why: "Fire has repeatedly caused more destruction than the shaking itself." }
+    ]
+  },
+  seismo: 7
+},
+{
+  n: 18, unit: 6, unitTitle: "FIGHTING BACK",
+  title: "Buildings That Dance",
+  hook: "The strongest building is not the stiffest one. It is the one that knows how to move.",
+  predict: {
+    text: "Two towers on a shake table. One is rigid concrete. One can sway and bend. Which survives?",
+    options: [
+      "The rigid one, it resists the force",
+      "The bendy one, it absorbs the energy by moving",
+      "Neither"
+    ],
+    answer: 1,
+    reveal: "The bendy one, almost always. A rigid building has to absorb all the energy by cracking. A flexible building turns the energy into motion instead. And where it does get bent too far, good steel bends and stays bent rather than snapping. Engineers call that second property ductility, and it is the single biggest idea in earthquake design."
+  },
+  core: `Engineers have four main weapons.
+
+<b>Base isolation</b> is the best one. The building sits on huge rubber and steel pads instead of touching the foundation directly. The ground slides about underneath without taking the building with it. The building sways slowly and the people inside barely notice.
+
+A tuned mass <b>damper</b> is a giant weight hung near the top of a skyscraper. When the building leans left, the weight swings right, and it cancels the sway.
+
+Cross bracing turns rectangles into triangles. A rectangle can be pushed into a leaning parallelogram. A triangle cannot deform without breaking something, so it holds its shape.
+
+Shape and symmetry matter too. Simple, regular, symmetrical buildings survive. Odd shapes twist and tear themselves apart at the corners.
+
+And none of it saves you from liquefaction. If the ground turns to soup, a perfect building simply lies down in it.`,
+  terms: [["base isolation", "Building sits on shock absorbers"], ["damper", "A weight that cancels the sway"]],
+  art: "buildings",
+  artCaption: "Base isolation, tuned mass damper, cross bracing. Three ways to survive.",
+  okonkwo: "Push on a rectangle made of straws. It folds. Add one diagonal straw. Now push. That diagonal is worth more than all the concrete in the world.",
+  build: {
+    title: "BUILD IT: THE SHAKE TABLE CHALLENGE",
+    materials: "A tray of set jelly, dry spaghetti, mini marshmallows or blu tack, a ruler, a stopwatch.",
+    steps: [
+      "Everyone builds a tower on a small card base. Spaghetti for the beams, marshmallows for the joints.",
+      "Minimum height 25 cm. Put a coin on top as the roof load.",
+      "Place each tower on the jelly tray, one at a time.",
+      "Shake the tray side to side at a steady rhythm. Same rhythm for every tower.",
+      "Time how many seconds each tower survives before the coin falls.",
+      "Record the results. Then rebuild the worst one using what the best one did."
+    ],
+    predict: "Predict first, before any shaking. Write down whose tower will last longest, and why.",
+    result: "Towers with triangles beat towers with rectangles. Wide bases beat narrow ones. Symmetrical beats lopsided. If a tall thin tower beat a short fat one, look at whether it was swaying in time with your shaking. That is resonance, and it is why some buildings fall while their neighbours stand.",
+    wrong: "What went wrong? Which joint failed first on each tower? Write it down. This is the most useful thing on the page."
+  },
+  doors: {
+    little: {
+      print: "Build a square out of four straws and push it. Draw what happens. Now add one straw across the corner and push again. Draw what happens. Which one is stronger?",
+      q: { text: "Which shape does not fold when you push it?", options: ["A square", "A triangle"], answer: 1, why: "A triangle cannot change shape without breaking a side. That is why bracing works." }
+    },
+    field: {
+      print: "Label the three engineering defences on the diagram. Then run the tower challenge and fill in the results table: builder, height, seconds survived, first joint to fail.",
+      q: { text: "What does base isolation actually do?", options: ["Makes the building heavier", "Lets the ground move without dragging the building with it", "Bolts the building to bedrock"], answer: 1, why: "The pads decouple the building from the ground. Ground moves, building mostly does not." }
+    },
+    chief: {
+      print: "Every building has a natural sway rhythm. Earthquakes shake at many rhythms at once. When the two match, the building's sway grows enormously. This is resonance. Explain why tall flexible buildings and short stiff buildings are damaged by DIFFERENT earthquakes, and what an engineer can do about it.",
+      q: { text: "In Mexico City in 1985, mid-height buildings collapsed while very tall and very short ones nearby survived. Why?", options: ["The mid-height ones were badly built", "The soft lake-bed soil shook at a rhythm matching mid-height buildings, causing resonance", "Random luck"], answer: 1, why: "The old lake bed filtered the waves to a slow rhythm that matched buildings of roughly 6 to 15 storeys. Matching rhythms means the sway builds with each cycle." }
+    }
+  },
+  cooperate: "Four towers, four builders. The 6 year old is the official timekeeper with the stopwatch and their count is final. The 8 year old shakes the tray, and must shake identically for every tower or the test is not fair.",
+  check: { from: 17, q: "From page 17. What is it called when shaken wet ground behaves like a liquid?", options: ["Subduction", "Liquefaction", "Convection"], answer: 1, why: "Liquefaction." },
+  seismo: 8
+},
+{
+  n: 19, unit: 6, unitTitle: "FIGHTING BACK",
+  title: "Thirty Seconds",
+  hook: "The line on the machine just went off the paper. This is not a drill. Well. It is a drill. But do it properly.",
+  predict: {
+    text: "The ground starts shaking hard and you are indoors. What is the safest thing to do?",
+    options: [
+      "Run outside as fast as you can",
+      "Stand in a doorway",
+      "Drop to the floor, get under a sturdy table, and hold on"
+    ],
+    answer: 2,
+    reveal: "Drop, Cover, Hold On. Running outside is how most people get hurt, because the dangerous zone is right outside the building where glass and bricks fall. The doorway advice is out of date and comes from old adobe houses. In a modern building a doorway is no stronger than any other wall and has nothing to shield you from falling objects."
+  },
+  core: `In some countries a phone or a siren gives you a few seconds of warning. That alarm means drop, right now, do not stop to read it. Everywhere else there is no warning at all. Either way you get about thirty seconds and whatever you already knew.
+
+DROP. Get down on your hands and knees before the shaking knocks you down. From here you can still move.
+
+COVER. Get under a sturdy table and hold on to a leg. No table? Get next to an interior wall, away from windows, and cover your head and neck with your arms. In modern buildings most injuries come from things falling on people. Where buildings are old and unreinforced, collapse is still the biggest killer, which is why page 18 matters as much as this one.
+
+HOLD ON. Keep hold of the table and move with it. It will slide.
+
+Stay put until the shaking fully stops. Then check yourself, then check others, then leave calmly and stay away from walls, glass, and power lines.
+
+If you are in bed, stay there and put a pillow over your head. If you are outdoors, move to open ground. If you are in a car, pull over away from bridges and stay inside.`,
+  terms: [["Drop Cover Hold On", "The three moves that keep you alive"]],
+  art: "dropcover",
+  artCaption: "Indoors. In bed. Outdoors. In a car. Four situations, four correct answers.",
+  okonkwo: "Practise this until it is boring. Boring is the point. In a real event you will not think, you will do whatever you have already done a hundred times.",
+  drill: {
+    title: "THE REAL DRILL. DO IT NOW.",
+    body: `Someone shouts EARTHQUAKE without warning at some point today.
+
+Everyone drops, covers, and holds on. Someone times it.
+
+Do it again tomorrow, in a different room. Do it once with the lights off.
+
+Then fill this in as a family:
+
+OUR MEETING POINT OUTSIDE THE HOUSE: ______________
+OUR MEETING POINT IF WE CANNOT GET HOME: ______________
+OUR OUT OF AREA CONTACT (someone far away everyone can call): ______________
+WHERE OUR GO BAG LIVES: ______________
+
+GO BAG CONTENTS: water, torch, whistle, spare batteries, first aid kit, copies of documents, some cash, sturdy shoes, a warm layer, any medicine anyone needs.
+
+WHY A WHISTLE: because after a few hours of shouting, nobody can hear you. A whistle carries much further and takes no energy.`
+  },
+  doors: {
+    little: {
+      print: "Do the drill three times. Then draw your safe spot in your bedroom and your safe spot in the kitchen. Put a big star on each one.",
+      q: { text: "The ground starts shaking. What do you do first?", options: ["Run outside", "Drop down onto your hands and knees", "Stand still"], answer: 1, why: "Drop first, before it knocks you over. Then cover, then hold on." }
+    },
+    field: {
+      print: "Walk through every room of your house and find the safest spot in each. Write them in the list. Then find three things that could fall on someone and tell a grown up which ones should be fixed to the wall.",
+      q: { text: "Why is running outside during shaking a bad idea?", options: ["You might get lost", "The area just outside a building is where glass, bricks, and signs fall", "Outside is colder"], answer: 1, why: "The perimeter of a building is the most dangerous place to be. Stay in, get under, hold on." }
+    },
+    chief: {
+      print: "You are responsible for the whole family for the first hour after a big quake. Write a numbered action plan. First 60 seconds. Next 10 minutes. Next hour. Include: who checks on whom, what to shut off, what not to do, and how you would communicate if the phone network is down.",
+      q: { text: "Why does the doorway advice persist even though it is wrong for modern homes?", options: ["It is still correct", "It came from old adobe buildings where the doorframe was the only reinforced part. Modern doorways offer no extra strength and no overhead protection", "Doorways are magnetic"], answer: 1, why: "A famous photograph of a collapsed adobe house with only the doorway left standing created advice that outlived the buildings it applied to." }
+    }
+  },
+  check: { from: 16, q: "From page 16. How fast does a tsunami travel in deep ocean?", options: ["About 80 km/h", "About 800 km/h", "About 8000 km/h"], answer: 1, why: "About 800 km/h, roughly the speed of a passenger jet." },
+  badge: {
+    digit: 3,
+    title: "BADGE 6 CHALLENGE: STATION CHIEF",
+    questions: [
+      { text: "Shaking starts. First move?", options: ["Run outside", "Drop", "Stand in a doorway"], answer: 1, why: "Drop, Cover, Hold On." },
+      { text: "Which shape resists being pushed out of shape?", options: ["Square", "Triangle"], answer: 1, why: "Triangles cannot deform without a side breaking." },
+      { text: "TRAP. A friend says stand in a doorway, everyone knows that. Reply?", options: ["Good advice", "Out of date. It came from adobe houses. Get under a table instead"], answer: 1, why: "Modern doorways give no strength advantage and no overhead cover." },
+      { text: "What does base isolation do?", options: ["Makes buildings taller", "Separates the building from the shaking ground with flexible pads", "Adds concrete"], answer: 1, why: "Decoupling. Ground moves, building mostly stays put." },
+      { text: "TRAP. Someone says once the shaking stops it is all over. True?", options: ["True", "False. Aftershocks, fire, gas leaks, and damaged structures are all still ahead"], answer: 1, why: "The minutes after are often the most dangerous. Aftershocks bring down already weakened buildings." }
+    ]
+  },
+  seismo: 10
+},
+{
+  n: 20, unit: 7, unitTitle: "CERTIFICATION", capstone: true,
+  title: "The Case Opens",
+  hook: "You have six digits. Dr. Okonkwo is waiting.",
+  core: `The shaking stopped four minutes ago. Dr. Okonkwo puts down her mug and looks at you.
+
+"Well," she says. "That was a magnitude 6.1, about 30 km out, roughly 12 km deep. The intensity out here was mild. In town it will not have been. The station held. You all did the drill without being told. Good."
+
+She slides the metal case across the desk.
+
+"Open it."
+
+Inside there is no equipment. There is a map, and a letter.
+
+THE LETTER
+
+A town of 8000 people is going to be built on the coastline shown on this map. A fault line runs through the valley. There is hard rock on the eastern hills, old soft river sand along the river, and low flat ground beside the sea.
+
+You decide where everything goes. Nobody is going to check your answer against a key, because there isn't one. There is only better reasoning and worse reasoning.
+
+PLACE THESE: the hospital, the school, the fire station, the housing, the power station, the emergency meeting point, the road out.
+
+RULES: nothing sits directly on the fault. The hospital and fire station must still work the day after a large earthquake. The school must not be on liquefiable ground. Somebody has to live somewhere, so you cannot simply avoid every risk.
+
+THEN DEFEND IT: pick your three hardest decisions and write a short paragraph on each explaining why you chose that spot and what you gave up to get it.`,
+  art: "capstone",
+  artCaption: "The valley. Fault line in red. Hard rock shaded. Soft sand dotted. Sea to the west.",
+  okonkwo: "Every real town is a set of compromises somebody made, usually before anyone thought about the fault. You are getting to do it in the right order. Do not waste that.",
+  doors: {
+    little: {
+      print: "Colour the map. Green for hills, yellow for sand, blue for sea. Draw the houses, the school with a flag, and the hospital with a cross. Then draw the safe path from the school to the meeting point.",
+      q: { text: "Where should the school NOT be built?", options: ["On the hard rock hills", "On the soft river sand", "Near a road"], answer: 1, why: "Soft wet sand liquefies. That is liquefaction, from page 17. Hard rock is the safest foundation." }
+    },
+    field: {
+      print: "Place all seven items on the map. Then write one sentence for each explaining why it is there. Your sentences must use at least four words from the vocabulary list.",
+      q: { text: "Why must the fire station be on the most stable ground?", options: ["Fire engines are heavy", "It has to still function immediately after the quake, when fires start", "It looks better"], answer: 1, why: "Emergency services that fail in the event are worse than useless. They must survive to be of any use." }
+    },
+    chief: {
+      print: "Full brief. Place everything, then write your three defences. Then do the hard part: identify the weakest decision you made, the one you are least sure about, and explain what evidence would change your mind. A plan with no admitted weak point is a plan nobody has thought about properly.",
+      q: { text: "You cannot make every part of the town safe. What is the correct engineering response?", options: ["Refuse to build the town", "Rank what must survive, and concentrate protection there while accepting managed risk elsewhere", "Build everything identically"], answer: 1, why: "Risk management, not risk elimination. Hospitals and schools get the best ground and the strictest codes. That is how real building codes actually work." }
+    }
+  },
+  certificate: {
+    title: "CERTIFICATE OF SEISMOLOGY",
+    body: "This certifies that the holder can explain what a tectonic plate is, read a seismogram, locate an epicentre by triangulation, tell magnitude apart from intensity, spot three earthquake myths, and knows exactly what to do in the first thirty seconds.",
+    signature: "Dr. A. Okonkwo, Shake Station 7"
+  },
+  final: `Dr. Okonkwo signs your certificate and hands it over.
+
+"One last thing," she says. "Everything in this book is what we knew this year. Some of it will be improved on. Some of it might turn out to be wrong. That is not a weakness of science, it is the whole method.
+
+Wegener was laughed at for fifty years and he was right.
+
+Somebody will be right about something we currently laugh at. It could be one of you.
+
+Now go home and check your bookshelf is bolted to the wall."`,
+  seismo: 0
+}
+];
+
+/* SHAKE STATION 7 — interactive runtime */
+const PAGES = [...PAGES_A, ...PAGES_B, ...PAGES_C, ...PAGES_D];
+const CODE = PAGES.filter(p => p.badge).map(p => p.badge.digit).join('');
+const TIERS = { L: ['little', 'LITTLE SEISMOLOGIST', 'ages 6 to 7'], F: ['field', 'FIELD SEISMOLOGIST', 'ages 8 to 9'], C: ['chief', 'STATION CHIEF', 'ages 10 to 11'] };
+
+const S = {
+  name: '', tier: 'F', idx: -1,
+  answered: {},          // key -> {pick, right}
+  digits: {},            // pageNumber -> digit
+  visited: {},
+  right: 0, tries: 0,
+  unlocked: false
+};
+
+const $ = s => document.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h !== undefined) e.innerHTML = h; return e; };
+const rich = s => String(s).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>');
+const paras = s => rich(s).split('\n\n').map(x => `<p>${x.replace(/\n/g, '<br>')}</p>`).join('');
+const KEY = 'ABCD';
+
+/* ============ live seismogram ============ */
+let traceLevel = 0, traceT = 0, traceCv, traceCx;
+function initTrace() {
+  traceCv = $('#trace'); if (!traceCv) return;
+  traceCx = traceCv.getContext('2d');
+  const draw = () => {
+    const w = traceCv.width = traceCv.clientWidth * 2;
+    const h = traceCv.height = traceCv.clientHeight * 2;
+    traceT += 0.055;
+    traceCx.clearRect(0, 0, w, h);
+    traceCx.lineWidth = traceLevel >= 8 ? 3 : 2;
+    traceCx.strokeStyle = traceLevel >= 8 ? '#e8553e' : traceLevel >= 4 ? '#c98b3a' : '#faf5e9';
+    traceCx.globalAlpha = traceLevel === 0 ? .55 : 1;
+    traceCx.beginPath();
+    for (let x = 0; x <= w; x += 2) {
+      const p = x / w;
+      let a = 0;
+      if (traceLevel > 0) {
+        const burst = traceLevel < 4 ? (Math.sin(p * 22 + traceT) > .93 ? 1 : .05)
+          : traceLevel < 8 ? .35 + .65 * Math.abs(Math.sin(p * 3 + traceT * .4)) : 1;
+        a = (h / 2 - 3) * (traceLevel / 10) * burst *
+          (Math.sin(p * 90 + traceT * 6) * .6 + Math.sin(p * 33 - traceT * 4) * .4);
+      }
+      const y = h / 2 + a;
+      x === 0 ? traceCx.moveTo(x, y) : traceCx.lineTo(x, y);
+    }
+    traceCx.stroke();
+    requestAnimationFrame(draw);
+  };
+  draw();
+}
+const STAT = l => l === 0 ? 'QUIET' : l < 4 ? 'MOVEMENT' : l < 8 ? 'RISING' : 'EVENT';
+
+/* ============ quiz block ============ */
+function quiz(key, q, onAnswer) {
+  const box = el('div', 'choices');
+  const fb = el('div');
+  const prev = S.answered[key];
+  q.options.forEach((o, i) => {
+    const b = el('button', 'choice', `<span class="k">${KEY[i]}</span><span>${rich(o)}</span>`);
+    b.onclick = () => {
+      if (S.answered[key]) return;
+      const right = i === q.answer;
+      S.answered[key] = { pick: i, right };
+      S.tries++; if (right) S.right++;
+      paint();
+      if (onAnswer) onAnswer(right);
+      save();
+    };
+    box.appendChild(b);
+  });
+  function paint() {
+    const a = S.answered[key];
+    [...box.children].forEach((b, i) => {
+      b.classList.toggle('locked', !!a);
+      if (!a) return;
+      if (i === q.answer) b.classList.add('right');
+      else if (i === a.pick) b.classList.add('wrong');
+    });
+    fb.innerHTML = '';
+    if (a) {
+      const f = el('div', 'feedback' + (a.right ? '' : ' miss'),
+        `<b>${a.right ? 'CORRECT' : 'NOT QUITE — AND THAT IS FINE'}</b>${rich(q.why || q.reveal || '')}`);
+      fb.appendChild(f);
+    }
+  }
+  if (prev) paint();
+  const frag = document.createDocumentFragment();
+  frag.appendChild(box); frag.appendChild(fb);
+  return { frag, isAnswered: () => !!S.answered[key] };
+}
+
+/* ============ page render ============ */
+function render() {
+  const scroll = $('#scroll');
+  scroll.innerHTML = '';
+  const wrap = el('div', 'wrap');
+  scroll.appendChild(wrap);
+  try { window.scrollTo(0, 0); } catch (e) {}
+
+  if (S.idx < 0) { renderSetup(wrap); traceLevel = 0; }
+  else {
+    const p = PAGES[S.idx];
+    S.visited[p.n] = true;
+    traceLevel = p.seismo || 0;
+    p.cover ? renderSetup(wrap) : p.capstone ? renderCapstone(wrap, p) : renderPage(wrap, p);
+  }
+  $('#tstat').textContent = STAT(traceLevel);
+  renderRail(); renderNav(); renderWho();
+  save();
+}
+
+function showError(msg) {
+  const bar = $('#errbar'); if (!bar) return;
+  bar.style.display = 'block';
+  bar.textContent = 'Something broke. Please send this text back:\n' + msg;
+}
+
+function renderWho() {
+  const w = $('#whoami');
+  w.innerHTML = S.name
+    ? `<span class="tierdot ${S.tier}">${S.tier}</span><span class="nm">${S.name}</span>`
+    : '';
+}
+
+function renderRail() {
+  const r = $('#rail'); r.innerHTML = '';
+  PAGES.forEach((p, i) => {
+    const b = el('b');
+    if (S.visited[p.n]) b.classList.add('done');
+    if (i === S.idx) b.classList.add('now');
+    b.title = 'Page ' + p.n;
+    b.onclick = () => { S.idx = i; render(); };
+    b.style.cursor = 'pointer';
+    r.appendChild(b);
+  });
+}
+
+function renderNav() {
+  const n = $('#nav'); n.innerHTML = '';
+  const back = el('button', 'btn ghost', '← Back');
+  back.onclick = () => { S.idx = Math.max(-1, S.idx - 1); render(); };
+  back.disabled = S.idx <= -1;
+  const mid = el('div', 'sp', S.idx < 0 ? 'Sign in to begin' : `Page ${PAGES[S.idx].n} of 20`);
+  const next = el('button', 'btn coral', S.idx < 0 ? 'Report for duty →' : S.idx >= PAGES.length - 1 ? 'Finish' : 'Next →');
+  next.onclick = () => {
+    if (S.idx < 0) { if (!S.name.trim()) S.name = 'Field Assistant'; S.idx = 1; }
+    else S.idx = Math.min(PAGES.length - 1, S.idx + 1);
+    render();
+  };
+  next.disabled = S.idx >= PAGES.length - 1;
+  n.appendChild(back); n.appendChild(mid); n.appendChild(next);
+}
+
+/* ---------- setup / cover ---------- */
+function renderSetup(wrap) {
+  const p = PAGES[0];
+  const s = el('div', 'setup');
+  s.innerHTML = `<h1>SHAKE STATION 7</h1>
+    <div class="sub">A FIELD COURSE IN EARTHQUAKES, WAVES AND TECTONIC PLATES</div>
+    <div class="ages">FOUR ASSISTANTS · AGES 6, 8, 11 AND 11</div>`;
+  const fig = el('figure'); fig.innerHTML = ART.cover(); s.appendChild(fig);
+  s.appendChild(el('div', 'story', paras(p.coverBody)));
+
+  s.appendChild(el('div', 'ctitle', 'WHAT IS YOUR NAME?'));
+  const inp = el('input', 'namein'); inp.placeholder = 'type your name'; inp.value = S.name;
+  inp.oninput = e => { S.name = e.target.value; save(); };
+  s.appendChild(inp);
+
+  s.appendChild(el('div', 'ctitle', 'WHICH DOOR ARE YOU TAKING?'));
+  const tp = el('div', 'tierpick');
+  Object.entries(TIERS).forEach(([k, v]) => {
+    const b = el('button', 'tierbtn' + (S.tier === k ? ' on' : ''),
+      `<div class="tl">${k}</div><div class="tn">${v[1]}</div><div class="ta">${v[2]}</div>`);
+    b.onclick = () => { S.tier = k; render(); };
+    tp.appendChild(b);
+  });
+  s.appendChild(tp);
+  s.appendChild(el('div', 'oath', `<b>THE OATH</b><br>${rich(p.oath).replace(/\n/g, '<br>')}`));
+  s.appendChild(el('div', 'ctitle', `THE LOCKED CASE · ${Object.keys(S.digits).length} of 6 digits earned`));
+  s.appendChild(earnedRow());
+  wrap.appendChild(s);
+}
+
+function earnedRow() {
+  const r = el('div', 'earned');
+  PAGES.filter(p => p.badge).forEach(p => {
+    const got = S.digits[p.n] !== undefined;
+    r.appendChild(el('span', got ? 'got' : '', got ? String(p.badge.digit) : '?'));
+  });
+  return r;
+}
+
+/* ---------- standard page ---------- */
+function renderPage(wrap, p) {
+  wrap.appendChild(el('div', 'phead',
+    `<div><div class="u">UNIT ${p.unit}</div><div class="un">${p.unitTitle}</div></div>
+     <h2>${p.title}</h2><div class="n">${p.n}</div>`));
+  wrap.appendChild(el('div', 'hook', rich(p.hook)));
+
+  // core, veiled until the prediction is made
+  const veil = el('div', 'veil');
+  const inner = el('div');
+  inner.appendChild(el('div', 'core', paras(p.core) +
+    (p.terms ? `<div class="terms">${p.terms.map(t => `<span class="term"><b>${t[0]}</b> ${t[1]}</span>`).join('')}</div>` : '')));
+  veil.appendChild(inner);
+  const msg = el('div', 'veilmsg', 'Make your guess above and this unlocks.');
+  const unveil = () => { veil.classList.remove('hidden'); if (msg.parentNode) msg.remove(); };
+
+  if (p.predict) {
+    const c = el('div', 'card coral');
+    c.appendChild(el('div', 'ctitle', 'PREDICT FIRST <span class="sub">guess before you read on. a wrong guess still helps.</span>'));
+    c.appendChild(el('div', 'q', rich(p.predict.text)));
+    const qz = quiz('pre' + p.n, { ...p.predict, why: p.predict.reveal }, unveil);
+    c.appendChild(qz.frag);
+    wrap.appendChild(c);
+    if (!qz.isAnswered()) { veil.classList.add('hidden'); veil.appendChild(msg); }
+  }
+  wrap.appendChild(veil);
+
+  if (p.okonkwo) wrap.appendChild(el('div', 'okon', `<div class="oh">DR. OKONKWO</div>${paras(p.okonkwo)}`));
+
+  if (ART[p.art]) {
+    const f = el('figure'); f.innerHTML = ART[p.art]();
+    if (p.artCaption) f.appendChild(el('figcaption', '', rich(p.artCaption)));
+    wrap.appendChild(f);
+  }
+
+  if (p.myths) {
+    const r = el('div', 'mythrow');
+    p.myths.forEach(m => r.appendChild(el('div', 'mythcard', `<b>${rich(m.myth)}</b>${rich(m.truth)}`)));
+    wrap.appendChild(r);
+  }
+
+  if (p.warning) {
+    const w = el('div', 'warnbox');
+    w.innerHTML = `<div class="ctitle">${p.warning.title}</div><ol>${p.warning.items.map(i => `<li>${rich(i)}</li>`).join('')}</ol><div class="rule">${rich(p.warning.rule)}</div>`;
+    wrap.appendChild(w);
+  }
+
+  if (p.trap) {
+    const c = el('div', 'card');
+    c.appendChild(el('div', 'ctitle', 'CATCH THE ERROR'));
+    c.appendChild(el('div', 'q', rich(p.trap.text.replace(/^MISCONCEPTION TRAP\.\s*/, ''))));
+    c.appendChild(quiz('trap' + p.n, p.trap).frag);
+    wrap.appendChild(c);
+  }
+
+  if (p.build) {
+    const b = el('div', 'card');
+    b.innerHTML = `<div class="ctitle">${p.build.title}</div>
+      <div><b>YOU NEED:</b> ${rich(p.build.materials)}</div>
+      <ol class="steps">${p.build.steps.map(s => `<li>${rich(s)}</li>`).join('')}</ol>
+      <div class="feedback"><b>PREDICT FIRST</b>${rich(p.build.predict)}</div>
+      <div class="feedback miss"><b>THEN CHECK</b>${rich(p.build.result)}</div>
+      <div style="margin-top:10px;font-size:14px"><b>${rich(p.build.wrong)}</b></div>`;
+    wrap.appendChild(b);
+  }
+
+  if (p.activity) wrap.appendChild(el('div', 'card', `<div class="ctitle">${p.activity.title}</div><div class="mono">${rich(p.activity.body)}</div>`));
+  if (p.drill) wrap.appendChild(el('div', 'card coral', `<div class="ctitle">${p.drill.title}</div><div class="mono">${rich(p.drill.body)}</div>`));
+
+  // interactive tools
+  if (TOOLS[p.n]) wrap.appendChild(TOOLS[p.n]());
+
+  wrap.appendChild(tierBlock(p));
+
+  if (p.cooperate) wrap.appendChild(el('div', 'team', `<span class="lab">TEAM TASK · ALL FOUR OF YOU</span>${rich(p.cooperate)}`));
+
+  if (p.badge) wrap.appendChild(badgeBlock(p));
+
+  if (p.check) {
+    const c = el('div', 'card dash');
+    c.appendChild(el('div', 'ctitle', 'MEMORY CHECK <span class="sub">from an earlier page. no peeking.</span>'));
+    c.appendChild(el('div', 'q', rich(p.check.q)));
+    c.appendChild(quiz('chk' + p.n, p.check).frag);
+    wrap.appendChild(c);
+  }
+}
+
+function tierBlock(p) {
+  const box = el('div');
+  const tabs = el('div', 'tiertabs');
+  const body = el('div', 'tierbody');
+  const paintBody = () => {
+    body.className = 'tierbody';
+    const [k, label] = [TIERS[S.tier][0], TIERS[S.tier][1]];
+    const d = p.doors[k];
+    body.innerHTML = '';
+    body.appendChild(el('div', 'tiertask', `<span class="lab">${label} · YOUR TASK ON PAPER</span>${rich(d.print)}`));
+    if (d.q) {
+      body.appendChild(el('div', 'q', rich(d.q.text)));
+      body.appendChild(quiz(`d${p.n}${S.tier}`, d.q).frag);
+    }
+  };
+  Object.entries(TIERS).forEach(([k, v]) => {
+    const t = el('button', 'tiertab ' + k + (S.tier === k ? ' on' : ''), `${k} · ${v[1].split(' ')[0]}`);
+    t.onclick = () => { S.tier = k; [...tabs.children].forEach(c => c.classList.remove('on')); t.classList.add('on'); paintBody(); renderWho(); save(); };
+    tabs.appendChild(t);
+  });
+  paintBody();
+  box.appendChild(tabs); box.appendChild(body);
+  return box;
+}
+
+function badgeBlock(p) {
+  const b = el('div', 'badge');
+  b.appendChild(el('div', 'badgehead', `<span class="t">${p.badge.title}</span><span class="d">EARNS DIGIT ${S.digits[p.n] !== undefined ? p.badge.digit : '?'}</span>`));
+  const win = el('div');
+  const check = () => {
+    const all = p.badge.questions.every((q, i) => S.answered[`b${p.n}_${i}`]);
+    const allRight = p.badge.questions.every((q, i) => (S.answered[`b${p.n}_${i}`] || {}).right);
+    win.innerHTML = '';
+    if (all) {
+      if (allRight) {
+        S.digits[p.n] = p.badge.digit;
+        win.appendChild(el('div', 'digitwin', `<div class="lb">BADGE EARNED · YOUR DIGIT IS</div><div class="big">${p.badge.digit}</div><div class="lb">WRITE IT DOWN</div>`));
+        win.appendChild(earnedRow());
+      } else {
+        const retry = el('button', 'btn ghost', 'Clear and try the missed ones again');
+        retry.onclick = () => { p.badge.questions.forEach((q, i) => { if (!(S.answered[`b${p.n}_${i}`] || {}).right) delete S.answered[`b${p.n}_${i}`]; }); render(); };
+        win.appendChild(el('div', 'result', 'Every answer has to be right before the digit is released. Fix the ones marked in red.'));
+        win.appendChild(retry);
+      }
+      save();
+    }
+  };
+  p.badge.questions.forEach((q, i) => {
+    const bq = el('div', 'bq');
+    bq.appendChild(el('div', 'n', `QUESTION ${i + 1} OF ${p.badge.questions.length}`));
+    bq.appendChild(el('div', 'q', rich(q.text)));
+    const z = quiz(`b${p.n}_${i}`, q, null);
+    bq.appendChild(z.frag);
+    b.appendChild(bq);
+  });
+  // re-check after any click inside
+  b.addEventListener('click', () => setTimeout(check, 0));
+  b.appendChild(win);
+  check();
+  return b;
+}
+
+/* ---------- capstone ---------- */
+function renderCapstone(wrap, p) {
+  wrap.appendChild(el('div', 'phead', `<div><div class="u">FINAL</div><div class="un">CERTIFICATION</div></div><h2>${p.title}</h2><div class="n">20</div>`));
+  wrap.appendChild(el('div', 'hook', rich(p.hook)));
+
+  const lock = el('div', 'card coral');
+  lock.appendChild(el('div', 'ctitle', 'THE LOCKED CASE · ENTER YOUR SIX DIGITS'));
+  const row = el('div', 'lockrow');
+  const inputs = [];
+  for (let i = 0; i < 6; i++) {
+    const inp = el('input');
+    inp.maxLength = 1; inp.inputMode = 'numeric';
+    inp.oninput = () => {
+      inp.value = inp.value.replace(/\D/g, '');
+      if (inp.value && inputs[i + 1]) inputs[i + 1].focus();
+      const code = inputs.map(x => x.value).join('');
+      if (code === CODE) {
+        inputs.forEach(x => x.classList.add('ok'));
+        S.unlocked = true; save(); render();
+      }
+    };
+    inputs.push(inp); row.appendChild(inp);
+  }
+  lock.appendChild(row);
+  lock.appendChild(earnedRow());
+  if (!S.unlocked) {
+    lock.appendChild(el('div', 'result', 'One digit per unit badge. If a slot is still a question mark, that unit is unfinished. Go back and find it.'));
+    const hint = el('button', 'btn ghost', 'I have the digits on paper, open it');
+    hint.onclick = () => { inputs.forEach((x, i) => { x.value = CODE[i]; x.classList.add('ok'); }); S.unlocked = true; save(); render(); };
+    lock.appendChild(el('div', 'btnrow')).appendChild(hint);
+  }
+  wrap.appendChild(lock);
+
+  if (!S.unlocked) return;
+
+  wrap.appendChild(el('div', 'okon', `<div class="oh">DR. OKONKWO</div>${paras(p.okonkwo)}`));
+  wrap.appendChild(el('div', 'core', paras(p.core)));
+  const f = el('figure'); f.innerHTML = ART.capstone();
+  f.appendChild(el('figcaption', '', rich(p.artCaption)));
+  wrap.appendChild(f);
+  wrap.appendChild(TOOLS.town());
+  wrap.appendChild(tierBlock(p));
+
+  const pct = S.tries ? Math.round(S.right / S.tries * 100) : 0;
+  const sc = el('div', 'scoreline');
+  sc.appendChild(el('div', 'pill g', `${S.right} correct`));
+  sc.appendChild(el('div', 'pill', `${S.tries} answered`));
+  sc.appendChild(el('div', 'pill', `${pct}% first time`));
+  sc.appendChild(el('div', 'pill g', `${Object.keys(S.digits).length} of 6 badges`));
+  wrap.appendChild(sc);
+
+  const c = el('div', 'cert');
+  c.innerHTML = `<h3>${p.certificate.title}</h3>
+    <div class="who">${S.name || 'FIELD ASSISTANT'}</div>
+    <div class="body">${rich(p.certificate.body)}</div>
+    <div class="sig">${p.certificate.signature}</div>
+    <div class="seal"><span>SHAKE<br>STATION<br>SEVEN</span></div>`;
+  wrap.appendChild(c);
+  wrap.appendChild(el('div', 'okon', `<div class="oh">THE LAST THING SHE SAYS</div>${paras(p.final)}`));
+
+  const pr = el('button', 'btn', 'Print this certificate');
+  pr.onclick = () => window.print();
+  const again = el('button', 'btn ghost', 'Start again as someone else');
+  again.onclick = () => { if (confirm('This clears all answers and badges. Sure?')) { Object.assign(S, { name: '', idx: -1, answered: {}, digits: {}, visited: {}, right: 0, tries: 0, unlocked: false }); render(); } };
+  const row2 = el('div', 'btnrow'); row2.appendChild(pr); row2.appendChild(again);
+  wrap.appendChild(row2);
+}
+
+/* ============ INTERACTIVE TOOLS ============ */
+const TOOLS = {};
+
+/* page 11 — wave racer */
+TOOLS[11] = () => {
+  const t = el('div', 'tool');
+  t.innerHTML = `<div class="toolhead">WAVE RACER</div>
+    <div class="toolsub">Send all three waves from the same earthquake and watch which reaches the station first. Distance: 300 km.</div>`;
+  const cv = el('canvas'); cv.width = 900; cv.height = 230; cv.style.width = '100%'; cv.style.height = 'auto';
+  t.appendChild(cv);
+  const out = el('div', 'result', 'Press GO. Watch the order of arrival, then read the clock times.');
+  const go = el('button', 'btn coral', 'GO');
+  const row = el('div', 'btnrow'); row.appendChild(go); t.appendChild(row); t.appendChild(out);
+  const cx = cv.getContext('2d');
+  const D = 300, speeds = [6, 3.5, 2.6], names = ['P WAVE', 'S WAVE', 'SURFACE'], cols = ['#8fb3bf', '#33414a', '#e8553e'];
+  let t0 = null, raf = null;
+  function frame(ts) {
+    if (!t0) t0 = ts;
+    const secs = (ts - t0) / 1000 * 22; // 22x speed
+    cx.clearRect(0, 0, 900, 230);
+    cx.font = 'bold 14px sans-serif';
+    const arrivals = [];
+    speeds.forEach((v, i) => {
+      const y = 50 + i * 60;
+      cx.strokeStyle = 'rgba(51,65,74,.2)'; cx.lineWidth = 2;
+      cx.beginPath(); cx.moveTo(120, y); cx.lineTo(840, y); cx.stroke();
+      cx.fillStyle = '#33414a'; cx.fillText(names[i], 10, y + 5);
+      const prog = Math.min(1, (secs * v) / D);
+      const x = 120 + prog * 720;
+      cx.strokeStyle = cols[i]; cx.lineWidth = 5;
+      cx.beginPath(); cx.moveTo(120, y); cx.lineTo(x, y); cx.stroke();
+      cx.fillStyle = cols[i]; cx.beginPath(); cx.arc(x, y, 8, 0, 7); cx.fill();
+      if (prog >= 1) arrivals.push(`${names[i]} arrived at ${(D / v).toFixed(1)} s`);
+    });
+    cx.fillStyle = '#33414a'; cx.fillRect(114, 20, 6, 190);
+    cx.fillRect(834, 20, 6, 190);
+    cx.font = '12px sans-serif';
+    cx.fillText('QUAKE', 96, 16); cx.fillText('STATION (300 km)', 780, 16);
+    cx.font = 'bold 18px Georgia,serif';
+    cx.fillText(secs.toFixed(1) + ' s', 420, 218);
+    if (arrivals.length === 3) {
+      out.innerHTML = arrivals.join('. ') + '. <b>The P to S gap is ' + (D / 3.5 - D / 6).toFixed(1) + ' seconds.</b> Multiply that gap by 8 and you get ' + Math.round((D / 3.5 - D / 6) * 8) + ' km, which is close to the real 300 km. That is the rule of 8, and now you know where it comes from.';
+      return;
+    }
+    raf = requestAnimationFrame(frame);
+  }
+  go.onclick = () => { cancelAnimationFrame(raf); t0 = null; out.textContent = 'Running...'; raf = requestAnimationFrame(frame); };
+  cx.fillStyle = '#33414a'; cx.font = '16px sans-serif'; cx.fillText('Press GO', 380, 120);
+  return t;
+};
+
+/* page 13 — magnitude comparator */
+TOOLS[13] = () => {
+  const t = el('div', 'tool');
+  t.innerHTML = `<div class="toolhead">ENERGY COMPARATOR</div>
+    <div class="toolsub">Pick two magnitudes and see the real energy ratio. The answer surprises most adults.</div>`;
+  const mk = (lab, val) => {
+    const s = el('div', 'slider');
+    s.innerHTML = `<label>${lab}</label><input type="range" min="2" max="9" step="0.1" value="${val}"><span class="val">M ${val}</span>`;
+    return s;
+  };
+  const a = mk('SMALLER', 5), b = mk('BIGGER', 7);
+  t.appendChild(a); t.appendChild(b);
+  const out = el('div', 'result');
+  t.appendChild(out);
+  const calc = () => {
+    let m1 = +a.querySelector('input').value, m2 = +b.querySelector('input').value;
+    a.querySelector('.val').textContent = 'M ' + m1.toFixed(1);
+    b.querySelector('.val').textContent = 'M ' + m2.toFixed(1);
+    if (m2 < m1) { const x = m1; m1 = m2; m2 = x; }
+    const ratio = Math.pow(10, 1.5 * (m2 - m1));
+    const fmt = r => r >= 1e6 ? (r / 1e6).toFixed(1) + ' million' : r >= 1000 ? (r / 1000).toFixed(1) + ' thousand' : r.toFixed(1);
+    const amp = Math.pow(10, m2 - m1);
+    out.innerHTML = `A magnitude ${m2.toFixed(1)} releases about <b>${fmt(ratio)} times</b> the energy of a magnitude ${m1.toFixed(1)}.<br>
+      The ground also moves about <b>${fmt(amp)} times</b> further.<br>
+      <span style="opacity:.75">Energy multiplies by about 32 for every whole step. Ground movement multiplies by 10.</span>`;
+  };
+  a.querySelector('input').oninput = calc; b.querySelector('input').oninput = calc; calc();
+  return t;
+};
+
+/* page 14 — triangulation */
+TOOLS[14] = () => {
+  const t = el('div', 'tool');
+  t.innerHTML = `<div class="toolhead">TRIANGULATION DESK</div>
+    <div class="toolsub">Turn each P to S gap into a distance with the rule of 8, then set each circle. When all three cross on one point, you have found it.</div>`;
+  const truth = [64, 120, 88], gaps = [8, 15, 11], names = ['ALPHA', 'BRAVO', 'CHARLIE'];
+  const st = [{ x: 299.9, y: 158.1 }, { x: 475.9, y: 148.9 }, { x: 352.3, y: 267.7 }];
+  const r = [30, 30, 30];
+  const cv = el('canvas'); cv.width = 800; cv.height = 400; cv.style.width = '100%'; cv.style.height = 'auto';
+  const sliders = names.map((n, i) => {
+    const s = el('div', 'slider');
+    s.innerHTML = `<label>${n} · ${gaps[i]}s</label><input type="range" min="20" max="200" value="30"><span class="val">30 km</span>`;
+    s.querySelector('input').oninput = e => { r[i] = +e.target.value; s.querySelector('.val').textContent = r[i] + ' km'; draw(); };
+    return s;
+  });
+  sliders.forEach(s => t.appendChild(s));
+  t.appendChild(cv);
+  const out = el('div', 'result', 'Set all three. The scale is 1 km per unit, so a 10 second gap means a circle of 80.');
+  t.appendChild(out);
+  const cx = cv.getContext('2d');
+  function draw() {
+    cx.fillStyle = '#faf5e9'; cx.fillRect(0, 0, 800, 400);
+    cx.strokeStyle = 'rgba(51,65,74,.14)'; cx.lineWidth = 1;
+    for (let x = 0; x <= 800; x += 50) { cx.beginPath(); cx.moveTo(x, 0); cx.lineTo(x, 400); cx.stroke(); }
+    for (let y = 0; y <= 400; y += 50) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(800, y); cx.stroke(); }
+    let ok = 0;
+    st.forEach((s, i) => {
+      const good = Math.abs(r[i] - truth[i]) <= 4;
+      if (good) ok++;
+      cx.strokeStyle = good ? '#7d9471' : '#e8553e';
+      cx.lineWidth = good ? 3 : 2;
+      cx.beginPath(); cx.arc(s.x, s.y, r[i], 0, 7); cx.stroke();
+      cx.fillStyle = '#33414a';
+      cx.beginPath(); cx.moveTo(s.x, s.y - 10); cx.lineTo(s.x + 9, s.y + 7); cx.lineTo(s.x - 9, s.y + 7); cx.fill();
+      cx.font = 'bold 13px sans-serif'; cx.fillText(names[i], s.x + 13, s.y - 2);
+      cx.font = '11px sans-serif'; cx.fillText(gaps[i] + ' s gap', s.x + 13, s.y + 12);
+    });
+    if (ok === 3) {
+      cx.strokeStyle = '#e8553e'; cx.lineWidth = 6;
+      cx.beginPath(); cx.moveTo(347, 167); cx.lineTo(373, 193); cx.moveTo(373, 167); cx.lineTo(347, 193); cx.stroke();
+      cx.fillStyle = '#e8553e'; cx.font = 'bold 15px sans-serif'; cx.fillText('EPICENTRE', 386, 188);
+      out.innerHTML = '<b>Found it.</b> 8 x 8 = 64. 15 x 8 = 120. 11 x 8 = 88. Three circles, one crossing point. This is the idea behind every earthquake location you have ever seen on the news. In real life the circles form a small triangle instead of a point, because wave speed changes with the rock it travels through.';
+    } else {
+      out.innerHTML = `${ok} of 3 circles correct. Use the rule: distance in km = gap in seconds x 8.`;
+    }
+  }
+  draw();
+  return t;
+};
+
+/* page 18 — shake table */
+TOOLS[18] = () => {
+  const t = el('div', 'tool');
+  t.innerHTML = `<div class="toolhead">SHAKE TABLE SIMULATOR</div>
+    <div class="toolsub">Build a tower, then shake it. Test your ideas here before you waste any spaghetti.</div>`;
+  const choices = {
+    base: [['Narrow base', 0], ['Wide base', 2]],
+    brace: [['Squares only', 0], ['Triangles (cross braced)', 3]],
+    height: [['Short, 4 floors', 2], ['Tall, 10 floors', 0]],
+    found: [['Bolted straight to the ground', 0], ['On rubber pads (base isolation)', 3]]
+  };
+  const pick = { base: 0, brace: 0, height: 0, found: 0 };
+  Object.entries(choices).forEach(([k, opts]) => {
+    const g = el('div', 'towergrid');
+    opts.forEach((o, i) => {
+      const b = el('button', 'topt' + (pick[k] === i ? ' on' : ''), o[0]);
+      b.onclick = () => { pick[k] = i; [...g.children].forEach(c => c.classList.remove('on')); b.classList.add('on'); };
+      g.appendChild(b);
+    });
+    t.appendChild(g);
+  });
+  const cv = el('canvas'); cv.width = 800; cv.height = 260; cv.style.width = '100%'; cv.style.height = 'auto';
+  t.appendChild(cv);
+  const out = el('div', 'result', 'Choose one option from each row, then SHAKE.');
+  const go = el('button', 'btn coral', 'SHAKE IT');
+  const row = el('div', 'btnrow'); row.appendChild(go);
+  t.appendChild(row); t.appendChild(out);
+  const cx = cv.getContext('2d');
+  let raf, t0;
+  function score() { return Object.entries(choices).reduce((s, [k, o]) => s + o[pick[k]][1], 0); }
+  function drawTower(off, fallen) {
+    cx.clearRect(0, 0, 800, 260);
+    cx.fillStyle = '#e6d7ba'; cx.fillRect(0, 220, 800, 40);
+    cx.strokeStyle = '#33414a'; cx.lineWidth = 2;
+    cx.beginPath(); cx.moveTo(0, 220); cx.lineTo(800, 220); cx.stroke();
+    const floors = pick.height === 0 ? 4 : 10;
+    const w = pick.base === 1 ? 110 : 56;
+    const fh = 190 / floors;
+    const cxx = 400;
+    cx.save();
+    if (fallen) { cx.translate(cxx, 220); cx.rotate(0.9); cx.translate(-cxx, -220); }
+    for (let i = 0; i < floors; i++) {
+      const y = 220 - (i + 1) * fh;
+      const lean = fallen ? 0 : off * (i / floors) * (pick.found === 1 ? 0.25 : 1);
+      cx.strokeStyle = '#33414a'; cx.lineWidth = 2.5;
+      cx.strokeRect(cxx - w / 2 + lean, y, w, fh);
+      if (pick.brace === 1) {
+        cx.strokeStyle = '#e8553e'; cx.lineWidth = 2;
+        cx.beginPath(); cx.moveTo(cxx - w / 2 + lean, y + fh); cx.lineTo(cxx + w / 2 + lean, y); cx.stroke();
+      }
+    }
+    if (pick.found === 1) {
+      cx.fillStyle = '#e8553e';
+      for (let i = 0; i < 4; i++) cx.fillRect(cxx - w / 2 + 4 + i * (w - 16) / 3, 212, 10, 8);
+    }
+    cx.restore();
+    cx.fillStyle = '#33414a'; cx.font = 'bold 13px sans-serif';
+    cx.fillText(floors + ' floors', 20, 30);
+  }
+  drawTower(0, false);
+  go.onclick = () => {
+    cancelAnimationFrame(raf); t0 = null;
+    const sc = score(), survives = sc >= 6;
+    const dur = 3200;
+    function f(ts) {
+      if (!t0) t0 = ts;
+      const e = ts - t0;
+      const amp = 22 * Math.min(1, e / 600);
+      const off = Math.sin(e / 55) * amp;
+      const fallen = !survives && e > 1400;
+      drawTower(off, fallen);
+      if (e < dur) raf = requestAnimationFrame(f);
+      else {
+        drawTower(0, !survives);
+        const notes = [];
+        if (pick.base === 0) notes.push('A narrow base tips easily. Widen it.');
+        if (pick.brace === 0) notes.push('Squares fold into parallelograms. One diagonal per floor fixes that, and it is the cheapest upgrade in engineering.');
+        if (pick.height === 1) notes.push('Tall and flexible is not automatically bad, but a tall tower on a narrow base is.');
+        if (pick.found === 0) notes.push('Bolted straight down means the building has to absorb every bit of the shaking itself.');
+        out.innerHTML = (survives
+          ? `<b>IT HELD.</b> Score ${sc} out of 10. `
+          : `<b>IT CAME DOWN.</b> Score ${sc} out of 10. `) +
+          (notes.length ? notes.join(' ') : 'That is close to the best build available here. Wide base, triangles, low centre of mass, isolated foundation.');
+      }
+    }
+    raf = requestAnimationFrame(f);
+  };
+  return t;
+};
+
+/* page 20 — town planner */
+TOOLS.town = () => {
+  const t = el('div', 'tool');
+  t.innerHTML = `<div class="toolhead">TOWN PLANNER</div>
+    <div class="toolsub">Tap a building, then tap the map to place it. The report at the bottom argues with your choices. It is not always right, but it will always tell you what you traded away.</div>`;
+  const ITEMS = [
+    { k: 'HOSPITAL', c: '#e8553e' }, { k: 'SCHOOL', c: '#c98b3a' }, { k: 'FIRE STN', c: '#e8553e' },
+    { k: 'HOUSING', c: '#33414a' }, { k: 'POWER', c: '#7d9471' }, { k: 'MEET PT', c: '#8fb3bf' }
+  ];
+  let sel = 0;
+  const placed = {};
+  const bar = el('div', 'towergrid');
+  ITEMS.forEach((it, i) => {
+    const b = el('button', 'topt' + (i === 0 ? ' on' : ''), it.k);
+    b.onclick = () => { sel = i; [...bar.children].forEach(c => c.classList.remove('on')); b.classList.add('on'); };
+    bar.appendChild(b);
+  });
+  t.appendChild(bar);
+  const cv = el('canvas'); cv.width = 800; cv.height = 400; cv.style.width = '100%'; cv.style.height = 'auto'; cv.style.cursor = 'crosshair';
+  t.appendChild(cv);
+  const out = el('div', 'result', 'Place all six. Then read the report.');
+  const clear = el('button', 'btn ghost', 'Clear the map');
+  clear.onclick = () => { Object.keys(placed).forEach(k => delete placed[k]); draw(); };
+  t.appendChild(el('div', 'btnrow')).appendChild(clear);
+  t.appendChild(out);
+  const cx = cv.getContext('2d');
+
+  // zones: fault line from (120,380) to (600,40). rock = x>600 region. sand = river band. coast = x<150
+  const distToFault = (x, y) => {
+    const x1 = 120, y1 = 380, x2 = 600, y2 = 40;
+    const A = x - x1, B = y - y1, Cc = x2 - x1, D = y2 - y1;
+    const dot = A * Cc + B * D, len = Cc * Cc + D * D;
+    let p = len ? dot / len : -1; p = Math.max(0, Math.min(1, p));
+    return Math.hypot(x - (x1 + p * Cc), y - (y1 + p * D));
+  };
+  const riverDist = (x, y) => {
+    // river band approximated by line (170,60) -> (620,380)
+    const x1 = 170, y1 = 60, x2 = 620, y2 = 380;
+    const A = x - x1, B = y - y1, Cc = x2 - x1, D = y2 - y1;
+    let p = (A * Cc + B * D) / (Cc * Cc + D * D); p = Math.max(0, Math.min(1, p));
+    return Math.hypot(x - (x1 + p * Cc), y - (y1 + p * D));
+  };
+  const zone = (x, y) => {
+    if (x < 140) return 'SEA';
+    if (x > 610) return 'ROCK';
+    if (riverDist(x, y) < 55) return 'SAND';
+    if (y > 300 && x < 320) return 'COAST';
+    return 'MIXED';
+  };
+
+  let bgReady = false;
+  function draw() {
+    if (bgReady) cx.drawImage(bg, 0, 0);
+    else { cx.fillStyle = '#faf5e9'; cx.fillRect(0, 0, 800, 400);
+      cx.fillStyle = '#33414a'; cx.font = '16px sans-serif'; cx.fillText('loading the valley...', 300, 200); }
+    Object.entries(placed).forEach(([i, p]) => {
+      const it = ITEMS[i];
+      cx.fillStyle = it.c; cx.strokeStyle = '#faf5e9'; cx.lineWidth = 2;
+      cx.beginPath(); cx.arc(p.x, p.y, 11, 0, 7); cx.fill(); cx.stroke();
+      cx.fillStyle = '#33414a'; cx.font = 'bold 11px sans-serif';
+      cx.fillText(it.k, p.x + 15, p.y + 4);
+    });
+    report();
+  }
+  function report() {
+    const n = Object.keys(placed).length;
+    if (n < 6) { out.innerHTML = `${n} of 6 placed. Keep going.`; return; }
+    const notes = [];
+    const z = i => zone(placed[i].x, placed[i].y);
+    const df = i => distToFault(placed[i].x, placed[i].y);
+    ITEMS.forEach((it, i) => {
+      if (df(i) < 35) notes.push(`<b>${it.k}</b> is sitting almost on the fault. Nothing goes there.`);
+    });
+    if (z(0) !== 'ROCK') notes.push('<b>HOSPITAL</b> is not on the hard rock. It has to still be working the morning after. That is the one building you cannot afford to lose.');
+    if (z(2) !== 'ROCK') notes.push('<b>FIRE STN</b> is off the rock. A fire station that fails in the event is worse than no fire station, because everyone was counting on it.');
+    if (z(1) === 'SAND') notes.push('<b>SCHOOL</b> is on the old river sand. That ground liquefies. Move it.');
+    if (z(1) === 'COAST') notes.push('<b>SCHOOL</b> is on the low coastal ground. Think about what arrives after the shaking stops.');
+    if (z(5) === 'SAND' || z(5) === 'COAST') notes.push('<b>MEET PT</b> is somewhere people cannot safely reach or stay. High and open is the rule.');
+    if (z(4) === 'SAND') notes.push('<b>POWER</b> on liquefiable ground means broken lines, and broken lines start fires.');
+    if (z(3) === 'ROCK') notes.push('<b>HOUSING</b> is all on the safest ground, which sounds ideal. Ask yourself who then lives on the sand, and whether 8000 people actually fit up there.');
+    out.innerHTML = notes.length
+      ? '<b>THE REPORT</b><br>' + notes.join('<br>') + '<br><span style="opacity:.75">A plan with no admitted weak point is a plan nobody has thought about properly. Which of these are you willing to live with, and why?</span>'
+      : '<b>THE REPORT</b><br>Nothing on the fault. Critical services on rock. School off the sand. Meeting point high. That is a defensible plan. Now write down the one decision you are least sure about, because there is always one.';
+  }
+  const bg = new Image();
+  const svg = ART.capstone().replace('<svg ', '<svg width="800" height="400" ');
+  bg.onload = () => { bgReady = true; draw(); };
+  bg.onerror = () => { bgReady = false; draw(); };
+  bg.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  draw();
+  cv.onclick = e => {
+    const r = cv.getBoundingClientRect();
+    placed[sel] = { x: (e.clientX - r.left) * 800 / r.width, y: (e.clientY - r.top) * 400 / r.height };
+    if (sel < ITEMS.length - 1) { sel++; [...bar.children].forEach((c, i) => c.classList.toggle('on', i === sel)); }
+    draw();
+  };
+  return t;
+};
+
+/* ============ session memory (in-page only) ============ */
+function save() { /* state is held in memory for this session */ }
+
+function boot() {
+  try { initTrace(); } catch (e) { /* the animated trace is decorative, never fatal */ }
+  try { render(); }
+  catch (e) { showError((e && e.message) + '\n' + (e && e.stack || '')); }
+}
+window.addEventListener('error', ev => showError(ev.message + ' @' + (ev.lineno || '?')));
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+
+</script>
+</body></html>
