@@ -7,7 +7,7 @@ HTML files — no build step, no dependencies, no network calls.
 
 | | |
 |---|---|
-| [Interactive course](https://wippimum.github.io/shake-station-7/) | `index.html` — 32 screens: lessons, five badge challenges, the Box Seismograph build, and the epicentre-plotting exercise |
+| [Interactive course](https://wippimum.github.io/shake-station-7/) | `index.html` — 20 pages: lessons, six badge challenges that each yield a digit of the case code, the Box Seismograph build, and the epicentre-plotting exercise |
 | [Reader](https://wippimum.github.io/shake-station-7/reader.html) | `reader.html` — the same 20-topic arc as one read-through page, with collapsible answer reveals. Prints cleanly. |
 
 ## The arc
