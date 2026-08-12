@@ -4,6 +4,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1f2a30">
 <title>Shake Station 7</title>
+<meta name="description" content="A field course in earthquakes, waves and tectonic plates. Twenty pages, six badges and a locked case, for assistants aged 6 to 11.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Shake Station 7">
+<meta property="og:description" content="A field course in earthquakes, waves and tectonic plates. Twenty pages, six badges and a locked case, for assistants aged 6 to 11.">
+<meta property="og:url" content="https://wippimum.github.io/shake-station-7/">
+<meta property="og:image" content="https://wippimum.github.io/shake-station-7/social.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Shake Station 7">
+<meta name="twitter:description" content="A field course in earthquakes, waves and tectonic plates, for assistants aged 6 to 11.">
+<meta name="twitter:image" content="https://wippimum.github.io/shake-station-7/social.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231f2a30'/%3E%3Cpath d='M4 34h9l5-15 7 30 7-24 5 12 5-6 5 3h8' fill='none' stroke='%23e8553e' stroke-width='4' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>:root{
   --ink:#33414a; --ochre:#c98b3a; --coral:#e8553e; --cream:#faf5e9;
   --sand:#e6d7ba; --sea:#8fb3bf; --green:#7d9471; --deep:#1f2a30;
@@ -37,6 +50,7 @@ h1,h2,h3{ font-family:Georgia,"Bitstream Charter",serif; line-height:1.1; }
 .rail b{ flex:1 0 auto; min-width:12px; height:7px; border-radius:4px; background:rgba(51,65,74,.16); transition:.25s; }
 .rail b.done{ background:var(--green); }
 .rail b.now{ background:var(--coral); transform:scaleY(1.9); }
+.rail b:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
 
 /* ---------- scroll body ---------- */
 .scroll{ flex:1 1 auto; }
@@ -143,6 +157,7 @@ figcaption{ font-size:12px; padding:7px 11px; background:rgba(51,65,74,.06); bor
 .btn{ display:inline-block; border:2px solid var(--ink); background:var(--ink); color:var(--cream); padding:10px 18px; border-radius:3px; font-size:14px; font-weight:700; letter-spacing:.05em; }
 .btn.ghost{ background:transparent; color:var(--ink); }
 .btn.coral{ background:var(--coral); border-color:var(--coral); }
+.btn.small{ padding:5px 11px; font-size:12px; margin-top:9px; border-width:1px; }
 .btn:disabled{ opacity:.35; pointer-events:none; }
 .btnrow{ display:flex; gap:9px; flex-wrap:wrap; margin-top:11px; }
 .result{ margin-top:11px; font-size:14px; padding:10px 12px; border-radius:3px; background:rgba(51,65,74,.07); }
@@ -156,6 +171,9 @@ figcaption{ font-size:12px; padding:7px 11px; background:rgba(51,65,74,.06); bor
   box-shadow:0 -6px 18px rgba(31,42,48,.10); }
 .nav .sp{ flex:1; font-size:12px; opacity:.65; text-align:center; }
 #errbar{ display:none; background:#e8553e; color:#fff; padding:12px 16px; font:13px/1.4 monospace; white-space:pre-wrap; }
+#resumed{ display:none; background:var(--green); color:#fff; padding:9px 16px; font-size:13.5px; font-weight:600; }
+#resumed button{ background:rgba(255,255,255,.22); color:#fff; border:1px solid rgba(255,255,255,.55); border-radius:3px; padding:3px 9px; margin-left:6px; font:inherit; font-size:12.5px; cursor:pointer; }
+#resumed button:hover{ background:rgba(255,255,255,.34); }
 
 /* ---------- cover / setup ---------- */
 .setup{ text-align:center; padding:26px 20px 40px; }
@@ -205,6 +223,7 @@ This page needs JavaScript. Open the file in Safari, Chrome, or any normal brows
 </div></noscript>
 <div id="app">
   <div id="errbar"></div>
+  <div id="resumed" role="status"></div>
   <div class="topbar">
     <div class="brand">SHAKE&nbsp;STATION&nbsp;7</div>
     <div class="trace"><canvas id="trace"></canvas></div>
@@ -2082,6 +2101,8 @@ const S = {
 const $ = s => document.querySelector(s);
 const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h !== undefined) e.innerHTML = h; return e; };
 const rich = s => String(s).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>');
+// plain escape, for anything the assistant typed themselves (no <b> pass-through)
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const paras = s => rich(s).split('\n\n').map(x => `<p>${x.replace(/\n/g, '<br>')}</p>`).join('');
 const KEY = 'ABCD';
 
@@ -2090,9 +2111,19 @@ let traceLevel = 0, traceT = 0, traceCv, traceCx;
 function initTrace() {
   traceCv = $('#trace'); if (!traceCv) return;
   traceCx = traceCv.getContext('2d');
+  // size the backing store only when the box actually changes. reassigning
+  // canvas.width every frame reallocates the buffer 60x a second for nothing.
+  const fit = () => {
+    const w = Math.max(1, traceCv.clientWidth * 2), h = Math.max(1, traceCv.clientHeight * 2);
+    if (traceCv.width !== w) traceCv.width = w;
+    if (traceCv.height !== h) traceCv.height = h;
+  };
+  fit();
+  addEventListener('resize', fit, { passive: true });
   const draw = () => {
-    const w = traceCv.width = traceCv.clientWidth * 2;
-    const h = traceCv.height = traceCv.clientHeight * 2;
+    // nothing to animate while the tab is in the background
+    if (document.hidden) { requestAnimationFrame(draw); return; }
+    const w = traceCv.width, h = traceCv.height;
     traceT += 0.055;
     traceCx.clearRect(0, 0, w, h);
     traceCx.lineWidth = traceLevel >= 8 ? 3 : 2;
@@ -2119,7 +2150,10 @@ function initTrace() {
 const STAT = l => l === 0 ? 'QUIET' : l < 4 ? 'MOVEMENT' : l < 8 ? 'RISING' : 'EVENT';
 
 /* ============ quiz block ============ */
-function quiz(key, q, onAnswer) {
+function quiz(key, q, onAnswer, allowRetry) {
+  // allowRetry defaults on: a six-year-old's stray tap should not lock an
+  // answer forever. Badge questions pass false, they have their own bulk retry.
+  if (allowRetry === undefined) allowRetry = true;
   const box = el('div', 'choices');
   const fb = el('div');
   const prev = S.answered[key];
@@ -2140,6 +2174,7 @@ function quiz(key, q, onAnswer) {
     const a = S.answered[key];
     [...box.children].forEach((b, i) => {
       b.classList.toggle('locked', !!a);
+      b.classList.remove('right', 'wrong');   // cleared so a retry repaints from scratch
       if (!a) return;
       if (i === q.answer) b.classList.add('right');
       else if (i === a.pick) b.classList.add('wrong');
@@ -2149,6 +2184,12 @@ function quiz(key, q, onAnswer) {
       const f = el('div', 'feedback' + (a.right ? '' : ' miss'),
         `<b>${a.right ? 'CORRECT' : 'NOT QUITE — AND THAT IS FINE'}</b>${rich(q.why || q.reveal || '')}`);
       fb.appendChild(f);
+      if (!a.right && allowRetry) {
+        const again = el('button', 'btn ghost small', 'Try this one again');
+        // the tally is deliberately not rewound: "first time" should keep meaning first time
+        again.onclick = () => { delete S.answered[key]; paint(); save(); };
+        fb.appendChild(again);
+      }
     }
   }
   if (prev) paint();
@@ -2186,7 +2227,7 @@ function showError(msg) {
 function renderWho() {
   const w = $('#whoami');
   w.innerHTML = S.name
-    ? `<span class="tierdot ${S.tier}">${S.tier}</span><span class="nm">${S.name}</span>`
+    ? `<span class="tierdot ${S.tier}">${S.tier}</span><span class="nm">${esc(S.name)}</span>`
     : '';
 }
 
@@ -2196,8 +2237,16 @@ function renderRail() {
     const b = el('b');
     if (S.visited[p.n]) b.classList.add('done');
     if (i === S.idx) b.classList.add('now');
-    b.title = 'Page ' + p.n;
-    b.onclick = () => { S.idx = i; render(); };
+    const go = () => { S.idx = i; render(); };
+    // reachable by keyboard as well as by tapping: twenty of these are the
+    // only way to jump around the course
+    b.title = 'Page ' + p.n + ' — ' + p.title;
+    b.setAttribute('role', 'button');
+    b.setAttribute('tabindex', '0');
+    b.setAttribute('aria-label', `Page ${p.n}, ${p.title}${S.visited[p.n] ? ', visited' : ''}`);
+    if (i === S.idx) b.setAttribute('aria-current', 'true');
+    b.onclick = go;
+    b.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
     b.style.cursor = 'pointer';
     r.appendChild(b);
   });
@@ -2208,14 +2257,23 @@ function renderNav() {
   const back = el('button', 'btn ghost', '← Back');
   back.onclick = () => { S.idx = Math.max(-1, S.idx - 1); render(); };
   back.disabled = S.idx <= -1;
-  const mid = el('div', 'sp', S.idx < 0 ? 'Sign in to begin' : `Page ${PAGES[S.idx].n} of 20`);
-  const next = el('button', 'btn coral', S.idx < 0 ? 'Report for duty →' : S.idx >= PAGES.length - 1 ? 'Finish' : 'Next →');
+  const last = S.idx >= PAGES.length - 1;
+  const mid = el('div', 'sp', S.idx < 0 ? 'Sign in to begin' : `Page ${PAGES[S.idx].n} of ${PAGES.length}`);
+  const next = el('button', 'btn coral', S.idx < 0 ? 'Report for duty →' : last ? 'Finish' : 'Next →');
   next.onclick = () => {
-    if (S.idx < 0) { if (!S.name.trim()) S.name = 'Field Assistant'; S.idx = 1; }
-    else S.idx = Math.min(PAGES.length - 1, S.idx + 1);
+    if (S.idx < 0) { if (!S.name.trim()) S.name = 'Field Assistant'; S.idx = 1; render(); return; }
+    if (last) {
+      // the button says Finish, so it has to finish something. the case is
+      // either still locked (send them to the digits) or the certificate is
+      // sitting further down the page and they should be looking at it.
+      const target = $(S.unlocked ? '#cert' : '#lockcard');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (!S.unlocked) { const f = $('.lockrow input'); if (f) f.focus(); }
+      return;
+    }
+    S.idx = Math.min(PAGES.length - 1, S.idx + 1);
     render();
   };
-  next.disabled = S.idx >= PAGES.length - 1;
   n.appendChild(back); n.appendChild(mid); n.appendChild(next);
 }
 
@@ -2246,6 +2304,8 @@ function renderSetup(wrap) {
   s.appendChild(el('div', 'oath', `<b>THE OATH</b><br>${rich(p.oath).replace(/\n/g, '<br>')}`));
   s.appendChild(el('div', 'ctitle', `THE LOCKED CASE · ${Object.keys(S.digits).length} of 6 digits earned`));
   s.appendChild(earnedRow());
+  s.appendChild(el('div', 'swap',
+    `<a href="reader.html">↔ Prefer to just read it?</a><span>the same twenty topics as one page, good for printing or reading aloud</span>`));
   wrap.appendChild(s);
 }
 
@@ -2396,7 +2456,7 @@ function badgeBlock(p) {
     const bq = el('div', 'bq');
     bq.appendChild(el('div', 'n', `QUESTION ${i + 1} OF ${p.badge.questions.length}`));
     bq.appendChild(el('div', 'q', rich(q.text)));
-    const z = quiz(`b${p.n}_${i}`, q, null);
+    const z = quiz(`b${p.n}_${i}`, q, null, false);
     bq.appendChild(z.frag);
     b.appendChild(bq);
   });
@@ -2413,6 +2473,7 @@ function renderCapstone(wrap, p) {
   wrap.appendChild(el('div', 'hook', rich(p.hook)));
 
   const lock = el('div', 'card coral');
+  lock.id = 'lockcard';
   lock.appendChild(el('div', 'ctitle', 'THE LOCKED CASE · ENTER YOUR SIX DIGITS'));
   const row = el('div', 'lockrow');
   const inputs = [];
@@ -2434,9 +2495,23 @@ function renderCapstone(wrap, p) {
   lock.appendChild(earnedRow());
   if (!S.unlocked) {
     lock.appendChild(el('div', 'result', 'One digit per unit badge. If a slot is still a question mark, that unit is unfinished. Go back and find it.'));
-    const hint = el('button', 'btn ghost', 'I have the digits on paper, open it');
-    hint.onclick = () => { inputs.forEach((x, i) => { x.value = CODE[i]; x.classList.add('ok'); }); S.unlocked = true; save(); render(); };
+    // one digit at a time. handing over all six in a single click throws away
+    // the six badges the whole course was building toward.
+    const hint = el('button', 'btn ghost', 'Give me one digit');
+    const note = el('div', 'result');
+    hint.onclick = () => {
+      const next = inputs.findIndex((x, i) => x.value !== CODE[i]);
+      if (next === -1) return;
+      inputs[next].value = CODE[next];
+      inputs[next].classList.add('ok');
+      const left = inputs.filter((x, i) => x.value !== CODE[i]).length;
+      note.textContent = left
+        ? `Slot ${next + 1} filled in. ${left} still to go — those badges are worth going back for.`
+        : 'That is all six. Opening the case.';
+      if (!left) { S.unlocked = true; save(); render(); }
+    };
     lock.appendChild(el('div', 'btnrow')).appendChild(hint);
+    lock.appendChild(note);
   }
   wrap.appendChild(lock);
 
@@ -2459,8 +2534,9 @@ function renderCapstone(wrap, p) {
   wrap.appendChild(sc);
 
   const c = el('div', 'cert');
+  c.id = 'cert';
   c.innerHTML = `<h3>${p.certificate.title}</h3>
-    <div class="who">${S.name || 'FIELD ASSISTANT'}</div>
+    <div class="who">${esc(S.name).trim() || 'FIELD ASSISTANT'}</div>
     <div class="body">${rich(p.certificate.body)}</div>
     <div class="sig">${p.certificate.signature}</div>
     <div class="seal"><span>SHAKE<br>STATION<br>SEVEN</span></div>`;
@@ -2470,7 +2546,7 @@ function renderCapstone(wrap, p) {
   const pr = el('button', 'btn', 'Print this certificate');
   pr.onclick = () => window.print();
   const again = el('button', 'btn ghost', 'Start again as someone else');
-  again.onclick = () => { if (confirm('This clears all answers and badges. Sure?')) { Object.assign(S, { name: '', idx: -1, answered: {}, digits: {}, visited: {}, right: 0, tries: 0, unlocked: false }); render(); } };
+  again.onclick = () => { if (confirm('This clears all answers and badges. Sure?')) { wipe(); Object.assign(S, { name: '', idx: -1, answered: {}, digits: {}, visited: {}, right: 0, tries: 0, unlocked: false }); render(); } };
   const row2 = el('div', 'btnrow'); row2.appendChild(pr); row2.appendChild(again);
   wrap.appendChild(row2);
 }
@@ -2795,14 +2871,89 @@ TOOLS.town = () => {
   return t;
 };
 
-/* ============ session memory (in-page only) ============ */
-function save() { /* state is held in memory for this session */ }
+/* ============ saved progress ============ */
+/* The course is twenty pages long and nobody finishes it in one sitting, so the
+   station log has to survive a closed tab. Everything lives under one key; if
+   storage is unavailable (private browsing, wiped profile) the course simply
+   runs in memory the way it used to, rather than falling over. */
+const STORE = 'shake-station-7/v1';
+let storageOK = true;
+
+function save() {
+  if (!storageOK) return;
+  try {
+    localStorage.setItem(STORE, JSON.stringify({
+      v: 1, name: S.name, tier: S.tier, idx: S.idx,
+      answered: S.answered, digits: S.digits, visited: S.visited,
+      right: S.right, tries: S.tries, unlocked: S.unlocked
+    }));
+  } catch (e) { storageOK = false; }   // quota or a blocked profile: carry on in memory
+}
+
+function load() {
+  let raw = null;
+  try { raw = localStorage.getItem(STORE); } catch (e) { storageOK = false; return false; }
+  if (!raw) return false;
+  try {
+    const d = JSON.parse(raw);
+    if (!d || d.v !== 1) return false;
+    if (typeof d.name === 'string') S.name = d.name;
+    if (TIERS[d.tier]) S.tier = d.tier;
+    if (Number.isInteger(d.idx) && d.idx >= -1 && d.idx < PAGES.length) S.idx = d.idx;
+    if (d.answered && typeof d.answered === 'object') S.answered = d.answered;
+    if (d.digits && typeof d.digits === 'object') S.digits = d.digits;
+    if (d.visited && typeof d.visited === 'object') S.visited = d.visited;
+    if (Number.isFinite(d.right)) S.right = d.right;
+    if (Number.isFinite(d.tries)) S.tries = d.tries;
+    S.unlocked = !!d.unlocked;
+    return S.idx > -1 || !!S.name;
+  } catch (e) { return false; }        // corrupt log, start clean
+}
+
+function wipe() {
+  try { localStorage.removeItem(STORE); } catch (e) {}
+}
 
 function boot() {
+  const resumed = load();
   try { initTrace(); } catch (e) { /* the animated trace is decorative, never fatal */ }
   try { render(); }
   catch (e) { showError((e && e.message) + '\n' + (e && e.stack || '')); }
+  if (resumed) showResumed();
+  bindKeys();
 }
+
+/* a quiet note that the log was found, rather than silently teleporting them */
+function showResumed() {
+  const t = $('#resumed'); if (!t) return;
+  const where = S.idx > 0 ? `page ${PAGES[S.idx].n}` : 'the front desk';
+  t.innerHTML = `Welcome back${S.name ? ', ' + esc(S.name) : ''} — your log was still here. You are on ${where}.` +
+    ` <button type="button" id="freshstart">Start over</button>`;
+  t.style.display = 'block';
+  $('#freshstart').onclick = () => {
+    if (!confirm('This clears the name, every answer and all six digits. Sure?')) return;
+    wipe();
+    Object.assign(S, { name: '', tier: 'F', idx: -1, answered: {}, digits: {}, visited: {}, right: 0, tries: 0, unlocked: false });
+    t.style.display = 'none';
+    render();
+  };
+  setTimeout(() => { t.style.display = 'none'; }, 9000);
+}
+
+/* ============ keyboard ============ */
+function bindKeys() {
+  addEventListener('keydown', e => {
+    const tag = (e.target && e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'ArrowRight' && S.idx > -1 && S.idx < PAGES.length - 1) { S.idx++; render(); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft' && S.idx > -1) { S.idx = Math.max(-1, S.idx - 1); render(); e.preventDefault(); }
+  });
+}
+/* offline: only meaningful when served over http(s), skipped on file:// */
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+
 window.addEventListener('error', ev => showError(ev.message + ' @' + (ev.lineno || '?')));
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
 else boot();

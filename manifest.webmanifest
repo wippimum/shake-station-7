@@ -1,0 +1,17 @@
+{
+  "name": "Shake Station 7",
+  "short_name": "Shake St 7",
+  "description": "A field course in earthquakes, waves and tectonic plates. Twenty pages, six badges and a locked case, for assistants aged 6 to 11.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf5e9",
+  "theme_color": "#1f2a30",
+  "categories": ["education", "kids"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
