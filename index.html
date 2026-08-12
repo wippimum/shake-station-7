@@ -191,6 +191,33 @@ figcaption{ font-size:12px; padding:7px 11px; background:rgba(51,65,74,.06); bor
 
 .revtally{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px; }
 .lessonend{ border-top:2px solid var(--line); margin-top:18px; padding-top:11px; font-size:13.5px; opacity:.7; font-style:italic; }
+
+/* ---------- chapter menu on the front page ---------- */
+.chmenu{ display:grid; gap:8px; margin-bottom:22px; }
+.chcard{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; font:inherit; cursor:pointer;
+  border:2px solid var(--line); border-left:6px solid var(--accent); border-radius:3px; padding:10px 12px; background:#fff; color:var(--ink); }
+.chcard:hover{ border-color:var(--accent); }
+.chcard:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+.chcard.got{ background:color-mix(in srgb, var(--accent) 9%, #fff); }
+.chcard .cn{ font-family:Georgia,serif; font-size:27px; font-weight:700; line-height:1; color:var(--accent); width:28px; flex:0 0 28px; text-align:center; }
+.chcard .cbody{ flex:1; min-width:0; display:block; }
+.chcard .cname{ display:block; font-weight:700; font-size:15.5px; }
+.chcard .ctag{ display:block; font-size:11.5px; opacity:.55; letter-spacing:.03em; }
+.chcard .cmeta{ display:block; font-size:11px; opacity:.45; margin-top:2px; letter-spacing:.04em; }
+.chcard .cpips{ display:flex; gap:3px; margin-top:6px; }
+.chcard .cpips i{ width:16px; height:4px; border-radius:2px; background:rgba(51,65,74,.16); }
+.chcard .cpips i.on{ background:var(--accent); }
+.chcard .cright{ flex:0 0 auto; text-align:center; }
+.chcard .cdig{ display:block; font-family:Georgia,serif; font-size:22px; font-weight:700; line-height:1;
+  color:var(--accent); opacity:.28; }
+.chcard.got .cdig{ opacity:1; }
+.chcard .cprog{ display:block; font-size:10px; letter-spacing:.08em; opacity:.5; margin-top:3px; }
+@media (min-width:620px){ .chmenu{ grid-template-columns:1fr 1fr; } }
+
+/* the link across to the reader (the reader has its own copy of this) */
+.swap{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:center; gap:4px 10px; margin-top:18px; font-size:13.5px; }
+.swap a{ font-weight:700; text-decoration:none; color:var(--coral); border-bottom:2px solid var(--coral); }
+.swap span{ opacity:.6; font-size:12.5px; }
 .btn:disabled{ opacity:.35; pointer-events:none; }
 .btnrow{ display:flex; gap:9px; flex-wrap:wrap; margin-top:11px; }
 .result{ margin-top:11px; font-size:14px; padding:10px 12px; border-radius:3px; background:rgba(51,65,74,.07); }
@@ -1041,7 +1068,7 @@ ART_CH[2] = a => wrap(`
     <path d="M600 84 L600 40"/><path d="M590 54 L600 38 L610 54"/>
   </g>
   <g font-size="11" fill="${C.cream}" opacity="0.75" letter-spacing="1.6" text-anchor="middle">
-    <text x="280" y="72">PUSHING</text><text x="600" y="24">RISING</text><text x="120" y="110">SLIDING</text>
+    <text x="280" y="72">PUSHING</text><text x="600" y="24">RISING</text><text x="95" y="90">SLIDING</text>
   </g>
   <path d="M40 118 L150 108" stroke="${C.cream}" stroke-width="2.5" stroke-dasharray="9 6" fill="none"/>`, CHVB);
 
@@ -2651,11 +2678,57 @@ function renderSetup(wrap) {
   });
   s.appendChild(tp);
   s.appendChild(el('div', 'oath', `<b>THE OATH</b><br>${rich(p.oath).replace(/\n/g, '<br>')}`));
+
+  s.appendChild(el('div', 'ctitle', 'THE SIX CHAPTERS <span class="sub">· tap one to go straight there</span>'));
+  s.appendChild(chapterMenu());
+
   s.appendChild(el('div', 'ctitle', `THE LOCKED CASE · ${Object.keys(S.digits).length} of 6 digits earned`));
   s.appendChild(earnedRow());
   s.appendChild(el('div', 'swap',
-    `<a href="reader.html">↔ Prefer to just read it?</a><span>the same twenty topics as one page, good for printing or reading aloud</span>`));
+    `<a href="reader.html">↔ Prefer to just read it?</a><span>the same course as one long page, good for printing or reading aloud</span>`));
   wrap.appendChild(s);
+}
+
+/* ---------- chapter menu ----------
+   Doubles as the map of the course on a first visit and as the way back in on
+   every visit after that: what is in it, how far they got, which digits landed. */
+function chapterMenu() {
+  const g = el('div', 'chmenu');
+  CHAPTERS.forEach(ch => {
+    const seen = ch.pages.filter(p => S.visited[`lesson:${ch.u}:${p.n}`]).length;
+    const digit = ch.badgePage ? S.digits[ch.badgePage.n] : undefined;
+    const got = digit !== undefined;
+    const complete = seen === ch.pages.length;
+
+    const card = el('button', 'chcard' + (got ? ' got' : '') + (complete && !got ? ' read' : ''));
+    card.style.setProperty('--accent', ch.colour);
+    card.innerHTML =
+      `<span class="cn">${ch.no}</span>
+       <span class="cbody">
+         <span class="cname">${esc(ch.name)}</span>
+         <span class="ctag">${esc(ch.tag.toLowerCase())}</span>
+         <span class="cmeta">${ch.pages.length} lessons · ${ch.review.length} questions</span>
+       </span>
+       <span class="cright">
+         <span class="cdig">${got ? digit : '?'}</span>
+         <span class="cprog">${seen}/${ch.pages.length}</span>
+       </span>`;
+    card.title = got
+      ? `Chapter ${ch.no}: badge earned, digit ${digit}`
+      : `Chapter ${ch.no}: ${seen} of ${ch.pages.length} lessons read`;
+    card.setAttribute('aria-label', card.title);
+    card.onclick = () => { S.idx = STEPS.findIndex(st => st.kind === 'cover' && st.ch === ch); render(); };
+
+    // a row of pips, one per lesson, so progress is legible without reading
+    const pips = el('span', 'cpips');
+    ch.pages.forEach(p => {
+      const d = el('i', S.visited[`lesson:${ch.u}:${p.n}`] ? 'on' : '');
+      pips.appendChild(d);
+    });
+    card.querySelector('.cbody').appendChild(pips);
+    g.appendChild(card);
+  });
+  return g;
 }
 
 function earnedRow() {

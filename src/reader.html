@@ -1,0 +1,181 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shake Station 7 — Reader</title>
+<meta name="theme-color" content="#1f2a30">
+<meta name="description" content="The read-through of Shake Station 7: earthquakes, waves and tectonic plates in twenty topics, with the answers folded away until you want them.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Shake Station 7 — Reader">
+<meta property="og:description" content="The read-through of Shake Station 7: earthquakes, waves and tectonic plates in twenty topics.">
+<meta property="og:url" content="https://wippimum.github.io/shake-station-7/reader.html">
+<meta property="og:image" content="https://wippimum.github.io/shake-station-7/social.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wippimum.github.io/shake-station-7/social.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231f2a30'/%3E%3Cpath d='M4 34h9l5-15 7 30 7-24 5 12 5-6 5 3h8' fill='none' stroke='%23e8553e' stroke-width='4' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{--ink:#33414a;--ochre:#c98b3a;--coral:#e8553e;--cream:#faf5e9;--sand:#e6d7ba;--sea:#8fb3bf;--green:#7d9471;--deep:#1f2a30;--line:rgba(51,65,74,.24)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--cream);-webkit-text-size-adjust:100%}
+.sheet{max-width:760px;margin:0 auto;padding:0 16px 60px}
+h1,h2,h3{font-family:Georgia,serif;line-height:1.1}
+a{color:var(--coral)}
+.masthead{background:var(--deep);color:var(--cream);margin:0 -16px 20px;padding:26px 20px;text-align:center}
+.masthead h1{font-size:34px;letter-spacing:-.01em}
+.masthead .s{font-size:11px;letter-spacing:.18em;font-weight:700;margin-top:10px}
+.masthead .a{font-size:11px;letter-spacing:.14em;font-weight:700;color:var(--coral);margin-top:6px}
+.note{border:2px solid var(--ochre);background:rgba(201,139,58,.12);padding:12px 14px;border-radius:3px;font-size:14px;margin-bottom:20px}
+.swap{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin-bottom:16px;font-size:13.5px}
+.swap a{font-weight:700;text-decoration:none;border-bottom:2px solid var(--coral)}
+.swap span{opacity:.6;font-size:12.5px}
+@media print{.swap{display:none}}
+.note b{display:block;margin-bottom:4px;letter-spacing:.1em;font-size:11px;color:var(--ochre)}
+.story{font-size:16.5px;margin-bottom:20px}
+.story p{margin-bottom:11px}
+.oath{border:2px solid var(--ink);border-radius:3px;padding:13px;font-style:italic;margin-bottom:20px}
+.toc{display:grid;grid-template-columns:1fr;gap:5px;margin-bottom:26px}
+.tocitem{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line);padding:8px 2px}
+.tocitem .tn{font-family:Georgia,serif;font-weight:700;color:var(--coral);width:26px;flex:0 0 26px}
+.tocitem .tt{flex:1;font-weight:600}
+.tocitem .tu{font-size:11px;opacity:.55;letter-spacing:.08em}
+.page{border-top:4px solid var(--ink);padding-top:16px;margin-top:34px}
+.ph{display:flex;align-items:flex-end;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:14px}
+.ph .u{font-size:10px;letter-spacing:.16em;font-weight:700;color:var(--coral)}
+.ph .un{font-size:10px;letter-spacing:.12em;font-weight:700;opacity:.6}
+.ph h2{font-size:25px;flex:1}
+.ph .n{font-family:Georgia,serif;font-size:30px;font-weight:700;color:var(--coral)}
+.hook{background:var(--ink);color:var(--cream);padding:12px 14px;font-weight:700;font-size:17px;border-radius:3px;margin-bottom:14px}
+.card{border:2px solid var(--ink);border-radius:3px;padding:13px 15px;margin-bottom:14px;background:#fff}
+.card.coral{border-color:var(--coral)}
+.card.dash{border-style:dashed;border-color:var(--coral);background:transparent}
+.card.warn{background:rgba(232,85,62,.09);border-color:var(--coral)}
+.ct{font-size:11px;letter-spacing:.14em;font-weight:700;color:var(--coral);margin-bottom:8px}
+.ct .sub{font-weight:400;letter-spacing:0;opacity:.65;text-transform:none}
+.q{font-size:16.5px;margin-bottom:9px}
+.q.sm{font-size:15px;margin-top:10px}
+ol.opts{list-style:upper-alpha;margin:0 0 10px 22px}
+ol.opts li{margin-bottom:5px}
+ol.num{margin:8px 0 8px 20px}
+ol.num li{margin-bottom:5px}
+p{margin-bottom:10px}
+.rev{border:2px solid var(--line);border-radius:3px;margin-bottom:12px;background:rgba(51,65,74,.03)}
+.rev>summary{cursor:pointer;padding:11px 14px;font-weight:700;font-size:14px;letter-spacing:.04em;color:var(--coral);list-style:none}
+.rev>summary::-webkit-details-marker{display:none}
+.rev>summary::before{content:"▸ ";font-size:13px}
+.rev[open]>summary::before{content:"▾ "}
+.rev[open]>summary{border-bottom:1px solid var(--line);color:var(--ink)}
+.revb{padding:12px 14px;font-size:15px}
+.revb b{color:var(--green)}
+.core-rev{border-color:var(--ink);border-width:3px;background:#fff}
+.core-rev>summary{font-size:15px;letter-spacing:.1em}
+.core-rev .revb{font-size:16.5px}
+.core-rev .revb b{color:var(--coral)}
+.terms{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.term{font-size:12px;border:1px dashed var(--line);padding:4px 8px;border-radius:3px}
+.term b{color:var(--ink)!important}
+.okon{background:rgba(201,139,58,.15);border-left:5px solid var(--ochre);padding:11px 13px;font-style:italic;margin-bottom:14px;border-radius:0 3px 3px 0}
+.okon .oh{font-style:normal;font-size:10px;letter-spacing:.14em;font-weight:700;color:var(--ochre);margin-bottom:4px}
+.okon p:last-child{margin-bottom:0}
+figure{margin:0 0 14px;border:2px solid var(--ink);border-radius:3px;background:#fff;overflow:hidden}
+figure svg{display:block;width:100%;height:auto}
+figcaption{font-size:12px;padding:7px 11px;background:rgba(51,65,74,.06);border-top:1px solid var(--line);font-style:italic}
+.doors{display:grid;gap:10px;margin-bottom:14px}
+.door{border:2px solid var(--ink);border-radius:3px;padding:12px 14px}
+.door.L{background:rgba(125,148,113,.13)}
+.door.F{background:rgba(143,179,191,.15)}
+.door.C{background:rgba(232,85,62,.09)}
+.dh{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.dt{width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--cream);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;flex:0 0 24px}
+.dn{font-size:11px;font-weight:700;letter-spacing:.08em}
+.da{font-size:10px;opacity:.6;margin-left:auto}
+.team{border:2px dashed var(--coral);border-radius:3px;padding:11px 13px;margin-bottom:14px;font-size:15px}
+.team .lab{display:block;font-size:10px;letter-spacing:.14em;font-weight:700;color:var(--coral);margin-bottom:4px}
+.badge{border-width:3px}
+.badge .rule{font-size:13px;opacity:.75;margin-bottom:12px}
+.bq{border-top:1px solid var(--line);padding-top:10px}
+.digit{font-family:Georgia,serif;font-size:56px;font-weight:700;color:var(--green);text-align:center;line-height:1}
+.dlab{text-align:center;font-size:11px;letter-spacing:.12em;font-weight:700;margin-top:6px}
+.myths{display:grid;gap:10px;margin-bottom:14px}
+.myth{border:2px solid var(--line);border-radius:3px;padding:11px 13px;font-size:14px}
+.myth b{display:block;color:var(--coral);margin-bottom:5px}
+.pred{border-top:1px dashed var(--line);padding-top:9px;margin-top:9px;font-size:15px}
+.pred.coralbg{color:var(--coral)}
+.pre{white-space:pre-wrap;font-size:15px}
+.lock{display:flex;gap:6px;margin:12px 0}
+.lock span{flex:1;height:46px;border:2px solid var(--ink);border-radius:3px;background:#fff}
+.cert{border:5px double var(--ink);border-radius:3px;padding:20px;text-align:center;background:#fff;margin-bottom:14px}
+.cth{font-family:Georgia,serif;font-size:19px;font-weight:700;letter-spacing:.05em}
+.cline{border-bottom:2px solid var(--ink);height:34px;margin:14px 0 2px}
+.clab{font-size:10px;letter-spacing:.14em;opacity:.6;text-align:left}
+.csig{font-size:12px;opacity:.7;margin-top:12px}
+.seal{width:92px;height:92px;margin:14px auto 0;border-radius:50%;border:3px dashed var(--coral);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--coral);line-height:1.5}
+.foot{border-top:1px solid var(--line);padding-top:10px;margin-top:8px;font-size:13px;letter-spacing:.04em}
+@media(min-width:720px){.doors{grid-template-columns:repeat(3,1fr)}.myths{grid-template-columns:repeat(3,1fr)}}
+
+/* ---------- chapters (generated reader) ---------- */
+.chopen{border:3px solid var(--accent);border-radius:4px;margin:34px 0 22px;background:#fff;overflow:hidden}
+.chopen .chno{font-family:Georgia,serif;font-size:58px;font-weight:700;line-height:1;color:var(--cream);background:var(--accent);padding:14px 18px 8px}
+.chopen .chtag{font-size:10px;letter-spacing:.18em;font-weight:700;color:var(--cream);background:var(--accent);padding:0 18px 13px}
+.chopen h2{font-size:29px;padding:15px 18px 0}
+.chopen .chpromise{padding:7px 18px 0;font-size:15.5px;opacity:.85}
+.chfig{margin:14px 0 0}
+.chfig svg{display:block;width:100%;height:auto}
+.chlist{list-style:none;margin:6px 18px 16px;padding:0;counter-reset:l}
+.chlist li{counter-increment:l;position:relative;padding:8px 0 8px 32px;border-bottom:1px solid var(--line);font-weight:600}
+.chlist li::before{content:counter(l);position:absolute;left:0;top:7px;width:21px;height:21px;border-radius:50%;border:2px solid var(--accent);color:var(--accent);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.chlist a{color:inherit;text-decoration:none}
+.chlist a:hover{color:var(--accent)}
+.tocch{display:flex;align-items:baseline;gap:11px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line);padding:10px 2px}
+.tocch .tn{font-family:Georgia,serif;font-weight:700;font-size:20px;color:var(--accent);width:28px;flex:0 0 28px}
+.tocch .tt{flex:1;font-weight:700}
+.tocch .ts{display:block;font-weight:400;font-size:11.5px;opacity:.6;letter-spacing:.04em}
+.tocch .tu{font-size:11px;opacity:.45;letter-spacing:.06em}
+.badgepage{border-top-color:var(--accent)}
+.badgepage .ph .u,.badgepage .ph .n{color:var(--accent)}
+.bn{font-size:10px;letter-spacing:.14em;font-weight:700;opacity:.55;margin-bottom:5px}
+.mythrow{display:grid;gap:9px;margin-bottom:14px}
+.mythcard{border:1px solid var(--line);border-radius:3px;padding:10px 12px;font-size:14.5px}
+.mythcard b{display:block;color:var(--coral);margin-bottom:3px}
+.warnbox{border:2px solid var(--coral);background:rgba(232,85,62,.08);border-radius:3px;padding:12px 14px;margin-bottom:14px}
+.warnbox .rule{margin-top:8px;font-weight:700}
+ol.steps{margin:8px 0 8px 20px}
+ol.steps li{margin-bottom:5px}
+@media print{.chopen{break-inside:avoid}.swap{display:none}}
+</style></head><body>
+<a id="top"></a>
+<div class="sheet">
+  <div class="masthead">
+    <h1>SHAKE STATION 7</h1>
+    <div class="s">A FIELD COURSE IN EARTHQUAKES, WAVES AND TECTONIC PLATES</div>
+    <div class="a">FOUR ASSISTANTS · AGES 6, 8, 11 AND 11</div>
+  </div>
+  <div class="swap"><a href="./">↔ Open the interactive course instead</a><span>badges, tools and the locked case</span></div>
+  <div class="note"><b>HOW THIS ONE WORKS</b>Nothing here is hidden by a computer. Every answer sits behind a grey bar that says tap to open. The rule is simple and it is the whole point: say your guess out loud first, then open the bar. A wrong guess out loud beats a right guess in your head.</div>
+  {{COVERFIG}}
+  <div class="story">{{STORY}}</div>
+  <div class="oath"><b>THE OATH</b><br>{{OATH}}</div>
+
+  <div class="ctitle" style="font-size:11px;letter-spacing:.14em;font-weight:700;color:var(--coral);margin:22px 0 8px">THE SIX CHAPTERS</div>
+  <div class="toc">{{TOC}}</div>
+
+{{BODY}}
+
+{{CAPSTONE}}
+
+  <section class="page">
+    <header class="ph"><div><div class="u">FOR THE GROWN UP</div><div class="un">ONLY</div></div><h2>The Code</h2><div class="n">·</div></header>
+    <details class="rev"><summary>Padlock combination. Do not open this in front of them.</summary>
+    <div class="revb"><b style="font-size:26px;letter-spacing:.3em">{{CODE}}</b><br><br>
+    Earned in chapter order from the six badge challenges, which close chapters 1 to 6.
+    Each badge releases one digit and only releases it when every answer in that badge is right.</div>
+    </details>
+    <div class="foot"><a href="#top">back to the top</a></div>
+  </section>
+</div>
+<script>
+/* offline: only meaningful when served over http(s), skipped on file:// */
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+}
+</script>
+</body></html>

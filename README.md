@@ -1,14 +1,39 @@
 # Shake Station 7
 
-An earthquake-science course for kids, in two forms. Both are single self-contained
-HTML files — no build step, no dependencies, no network calls.
+An earthquake-science course for kids, in two forms. Both ship as single
+self-contained HTML files — no dependencies, no network calls, openable from a
+memory stick on a plane.
 
 **Live:** https://wippimum.github.io/shake-station-7/
 
 | | |
 |---|---|
 | [Interactive course](https://wippimum.github.io/shake-station-7/) | `index.html` — six chapters, each with its own colour, cover and banner. 18 lessons, six chapter reviews, six badge challenges, the Box Seismograph build and the epicentre-plotting exercise. |
-| [Reader](https://wippimum.github.io/shake-station-7/reader.html) | `reader.html` — the same 20-topic arc as one read-through page, with collapsible answer reveals. Prints cleanly. |
+| [Reader](https://wippimum.github.io/shake-station-7/reader.html) | `reader.html` — the same course as one long page, every answer behind a tap-to-open bar. Prints cleanly. |
+
+## ⚠️ Edit `src/`, not the HTML
+
+`index.html` and `reader.html` are **generated**. Editing them directly works
+until the next build, which overwrites your change.
+
+```
+src/pages.js       ← the course text: every lesson, question, answer and task
+src/chapters.js    ← chapter colours, tags and promises
+src/art.js         ← the SVG diagram library, shared by both outputs
+src/app.html       ← app shell: styles + interactive runtime, with {{…}} slots
+src/reader.html    ← reader shell: styles + masthead, with {{…}} slots
+build.mjs          ← assembles index.html and reader.html
+```
+
+```sh
+node build.mjs      # regenerates index.html and reader.html
+```
+
+The course text used to live twice — once as data in the app, once as
+hand-written prose in the reader — so a wording fix had to be made in both, and
+the illustrations were duplicated too. It now lives once in `src/` and both
+pages are generated from it. The reader is rendered from the same page objects
+the app uses, so a change to a question appears in both.
 
 ## How a chapter runs
 
@@ -67,5 +92,8 @@ Then visit http://localhost:8000/
   `sw.js` whenever the course content changes, or tablets keep serving the old copy.
 - The prose was written when this ran as twenty numbered pages, so it says things
   like "you met this on page 4". `depage()` swaps those for the lesson's real name
-  at render time rather than editing eighteen strings by hand.
+  rather than editing eighteen strings by hand — in the app at render time, in the
+  reader at build time. Both share the same implementation shape.
+- `index.html` and `reader.html` are build output and are committed so GitHub Pages
+  can serve them. Run `node build.mjs` after any change to `src/`.
 - `.nojekyll` is present so GitHub Pages serves the files as-is.

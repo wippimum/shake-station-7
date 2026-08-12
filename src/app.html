@@ -1,0 +1,1399 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f2a30">
+<title>Shake Station 7</title>
+<meta name="description" content="A field course in earthquakes, waves and tectonic plates. Twenty pages, six badges and a locked case, for assistants aged 6 to 11.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Shake Station 7">
+<meta property="og:description" content="A field course in earthquakes, waves and tectonic plates. Twenty pages, six badges and a locked case, for assistants aged 6 to 11.">
+<meta property="og:url" content="https://wippimum.github.io/shake-station-7/">
+<meta property="og:image" content="https://wippimum.github.io/shake-station-7/social.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Shake Station 7">
+<meta name="twitter:description" content="A field course in earthquakes, waves and tectonic plates, for assistants aged 6 to 11.">
+<meta name="twitter:image" content="https://wippimum.github.io/shake-station-7/social.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231f2a30'/%3E%3Cpath d='M4 34h9l5-15 7 30 7-24 5 12 5-6 5 3h8' fill='none' stroke='%23e8553e' stroke-width='4' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>:root{
+  --ink:#33414a; --ochre:#c98b3a; --coral:#e8553e; --cream:#faf5e9;
+  --sand:#e6d7ba; --sea:#8fb3bf; --green:#7d9471; --deep:#1f2a30;
+  --line:rgba(51,65,74,.24);
+}
+*{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Carlito",Roboto,sans-serif;
+  background:var(--deep); color:var(--ink);
+  font-size:16px; line-height:1.45;
+  -webkit-text-size-adjust:100%;
+}
+html,body{ height:auto; min-height:100%; }
+button{ font:inherit; color:inherit; cursor:pointer; border:none; background:none; }
+h1,h2,h3{ font-family:Georgia,"Bitstream Charter",serif; line-height:1.1; }
+
+#app{ display:flex; flex-direction:column; min-height:100vh; background:var(--cream); max-width:1100px; margin:0 auto; box-shadow:0 0 60px rgba(0,0,0,.5); }
+
+/* ---------- top bar ---------- */
+.topbar{ position:sticky; top:0; z-index:20; flex:0 0 auto; background:var(--deep); color:var(--cream); padding:8px 14px; display:flex; align-items:center; gap:12px; }
+.brand{ font-family:Georgia,serif; font-weight:700; font-size:15px; letter-spacing:.02em; white-space:nowrap; }
+.trace{ flex:1 1 auto; height:34px; min-width:60px; }
+.trace canvas{ width:100%; height:100%; display:block; }
+.tstat{ font-size:9px; letter-spacing:.14em; font-weight:700; color:var(--coral); white-space:nowrap; }
+.whoami{ display:flex; align-items:center; gap:7px; font-size:11px; letter-spacing:.08em; }
+.tierdot{ width:24px; height:24px; border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:12px; background:var(--coral); color:var(--cream); }
+.tierdot.L{ background:var(--green); } .tierdot.F{ background:var(--sea); color:var(--deep); }
+
+/* ---------- progress rail ---------- */
+.rail{ position:sticky; top:50px; z-index:19; flex:0 0 auto; display:flex; gap:2px; padding:6px 10px; background:#efe8d6; border-bottom:1px solid var(--line); overflow-x:auto; }
+.rail b{ flex:1 0 auto; min-width:12px; height:7px; border-radius:4px; background:rgba(51,65,74,.16); transition:.25s; }
+.rail b.done{ background:var(--green); }
+.rail b.now{ background:var(--coral); transform:scaleY(1.9); }
+.rail b:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+
+/* ---------- scroll body ---------- */
+.scroll{ flex:1 1 auto; }
+.wrap{ padding:16px 18px 28px; max-width:820px; margin:0 auto; }
+
+/* ---------- page header ---------- */
+.phead{ border-bottom:2px solid var(--ink); padding-bottom:8px; margin-bottom:14px; display:flex; align-items:flex-end; gap:12px; }
+.phead .u{ font-size:10px; letter-spacing:.16em; font-weight:700; color:var(--coral); }
+.phead .un{ font-size:10px; letter-spacing:.12em; font-weight:700; opacity:.6; }
+.phead h2{ font-size:27px; flex:1; }
+.phead .n{ font-family:Georgia,serif; font-size:32px; font-weight:700; color:var(--coral); }
+
+.hook{ background:var(--ink); color:var(--cream); padding:12px 14px; font-weight:700; font-size:17px; border-radius:3px; margin-bottom:14px; }
+
+/* ---------- cards ---------- */
+.card{ border:2px solid var(--ink); border-radius:3px; padding:13px 15px; margin-bottom:14px; background:#fff; }
+.card.coral{ border-color:var(--coral); }
+.card.dash{ border-style:dashed; border-width:2px; border-color:var(--coral); background:transparent; }
+.ctitle{ font-size:11px; letter-spacing:.14em; font-weight:700; color:var(--coral); margin-bottom:8px; }
+.ctitle .sub{ font-weight:400; letter-spacing:0; opacity:.65; font-size:11px; text-transform:none; }
+
+.q{ font-size:17px; margin-bottom:11px; }
+.choices{ display:flex; flex-direction:column; gap:8px; }
+.choice{ display:flex; gap:10px; align-items:flex-start; text-align:left; border:2px solid var(--line); border-radius:3px; padding:10px 12px; background:#fff; transition:.15s; font-size:15px; width:100%; }
+.choice:hover{ border-color:var(--ink); }
+.choice .k{ flex:0 0 22px; height:22px; border:2px solid currentColor; border-radius:3px; display:grid; place-items:center; font-size:12px; font-weight:700; }
+.choice.right{ border-color:var(--green); background:rgba(125,148,113,.16); }
+.choice.wrong{ border-color:var(--coral); background:rgba(232,85,62,.12); opacity:.75; }
+.choice.locked{ pointer-events:none; }
+.feedback{ margin-top:10px; padding:10px 12px; border-left:4px solid var(--green); background:rgba(125,148,113,.12); font-size:14px; border-radius:2px; }
+.feedback.miss{ border-left-color:var(--coral); background:rgba(232,85,62,.10); }
+.feedback b{ display:block; font-size:11px; letter-spacing:.12em; margin-bottom:3px; }
+
+.veil{ position:relative; }
+.veil.hidden > *{ filter:blur(7px); opacity:.35; pointer-events:none; user-select:none; }
+.veilmsg{ position:absolute; inset:0; display:grid; place-items:center; text-align:center; font-size:14px; font-weight:700; color:var(--coral); background:rgba(250,245,233,.55); border:2px dashed var(--coral); border-radius:3px; padding:14px; }
+
+.core{ font-size:16.5px; }
+.core p{ margin-bottom:11px; }
+.core b{ color:var(--coral); }
+.terms{ display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
+.term{ font-size:12px; border:1px dashed var(--line); padding:4px 8px; border-radius:3px; }
+.term b{ color:var(--ink); }
+
+.okon{ background:rgba(201,139,58,.15); border-left:5px solid var(--ochre); padding:11px 13px; font-style:italic; font-size:15px; margin-bottom:14px; border-radius:0 3px 3px 0; }
+.okon .oh{ font-style:normal; font-size:10px; letter-spacing:.14em; font-weight:700; color:var(--ochre); margin-bottom:4px; }
+.okon p{ margin-bottom:7px; } .okon p:last-child{ margin-bottom:0; }
+
+figure{ margin:0 0 14px; border:2px solid var(--ink); background:#fff; border-radius:3px; overflow:hidden; }
+figure svg{ display:block; width:100%; height:auto; }
+figcaption{ font-size:12px; padding:7px 11px; background:rgba(51,65,74,.06); border-top:1px solid var(--line); font-style:italic; }
+
+/* ---------- tier tabs ---------- */
+.tiertabs{ display:flex; gap:6px; margin-bottom:0; }
+.tiertab{ flex:1; padding:9px 6px; border:2px solid var(--line); border-bottom:none; border-radius:3px 3px 0 0; font-size:11px; font-weight:700; letter-spacing:.06em; opacity:.55; background:rgba(51,65,74,.05); }
+.tiertab.on{ opacity:1; border-color:var(--ink); background:#fff; }
+.tiertab.on.L{ background:rgba(125,148,113,.18); }
+.tiertab.on.F{ background:rgba(143,179,191,.2); }
+.tiertab.on.C{ background:rgba(232,85,62,.13); }
+.tierbody{ border:2px solid var(--ink); border-radius:0 3px 3px 3px; padding:13px 15px; background:#fff; margin-bottom:14px; }
+.tiertask{ font-size:15px; margin-bottom:12px; padding-bottom:11px; border-bottom:1px dashed var(--line); }
+.tiertask .lab{ font-size:10px; letter-spacing:.14em; font-weight:700; color:var(--coral); display:block; margin-bottom:4px; }
+
+/* ---------- team / build / mission ---------- */
+.team{ border:2px dashed var(--coral); border-radius:3px; padding:11px 13px; margin-bottom:14px; font-size:15px; }
+.team .lab{ font-size:10px; letter-spacing:.14em; font-weight:700; color:var(--coral); display:block; margin-bottom:4px; }
+.steps{ margin:8px 0 0 20px; font-size:15px; } .steps li{ margin-bottom:5px; }
+.mono{ white-space:pre-wrap; font-size:15px; }
+.warnbox{ background:rgba(232,85,62,.1); border:2px solid var(--coral); border-radius:3px; padding:12px 14px; margin-bottom:14px; }
+.warnbox ol{ margin:8px 0 8px 20px; } .warnbox li{ margin-bottom:5px; }
+.warnbox .rule{ font-weight:700; }
+.mythrow{ display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:14px; }
+.mythcard{ border:2px solid var(--line); border-radius:3px; padding:11px 13px; font-size:14px; }
+.mythcard b{ display:block; color:var(--coral); margin-bottom:5px; }
+
+/* ---------- badge ---------- */
+.badge{ border:3px solid var(--ink); border-radius:3px; padding:14px 16px; margin-bottom:14px; background:rgba(51,65,74,.05); }
+.badgehead{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:12px; }
+.badgehead .t{ font-size:14px; font-weight:700; letter-spacing:.08em; }
+.badgehead .d{ font-size:11px; color:var(--coral); font-weight:700; }
+.bq{ margin-bottom:14px; }
+.bq .n{ font-size:11px; letter-spacing:.1em; font-weight:700; opacity:.55; }
+.digitwin{ margin-top:6px; text-align:center; padding:16px; border:3px solid var(--green); border-radius:3px; background:rgba(125,148,113,.14); }
+.digitwin .big{ font-family:Georgia,serif; font-size:52px; font-weight:700; color:var(--green); line-height:1; }
+.digitwin .lb{ font-size:11px; letter-spacing:.14em; font-weight:700; }
+
+/* ---------- lock ---------- */
+.lockrow{ display:flex; gap:7px; justify-content:center; margin:14px 0; }
+.lockrow input{ width:46px; height:58px; text-align:center; font-family:Georgia,serif; font-size:26px; font-weight:700; border:3px solid var(--ink); border-radius:3px; background:#fff; color:var(--ink); }
+.lockrow input:focus{ outline:none; border-color:var(--coral); }
+.lockrow input.ok{ border-color:var(--green); background:rgba(125,148,113,.16); }
+.earned{ display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+.earned span{ width:30px; height:34px; border:2px solid var(--line); border-radius:3px; display:grid; place-items:center; font-family:Georgia,serif; font-weight:700; font-size:17px; opacity:.35; }
+.earned span.got{ opacity:1; border-color:var(--green); background:rgba(125,148,113,.14); color:var(--green); }
+
+/* ---------- tools ---------- */
+.tool{ border:3px solid var(--coral); border-radius:3px; padding:14px 15px; margin-bottom:14px; background:#fff; }
+.toolhead{ font-size:11px; letter-spacing:.14em; font-weight:700; color:var(--coral); margin-bottom:4px; }
+.toolsub{ font-size:14px; margin-bottom:11px; }
+.slider{ display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:14px; }
+.slider label{ flex:0 0 78px; font-weight:700; font-size:12px; letter-spacing:.06em; }
+.slider input[type=range]{ flex:1; accent-color:var(--coral); }
+.slider .val{ flex:0 0 66px; text-align:right; font-family:Georgia,serif; font-weight:700; }
+.btn{ display:inline-block; border:2px solid var(--ink); background:var(--ink); color:var(--cream); padding:10px 18px; border-radius:3px; font-size:14px; font-weight:700; letter-spacing:.05em; }
+.btn.ghost{ background:transparent; color:var(--ink); }
+.btn.coral{ background:var(--coral); border-color:var(--coral); }
+.btn.small{ padding:5px 11px; font-size:12px; margin-top:9px; border-width:1px; }
+
+/* ---------- chapters ----------
+   Each chapter carries its own accent. Everything that used to be hard-coded
+   coral follows --accent instead, and falls back to coral off-chapter. */
+.phead .u, .phead .n, .ctitle, .team .lab, .badgehead .d{ color:var(--accent,var(--coral)); }
+.card.coral, .card.dash, .team{ border-color:var(--accent,var(--coral)); }
+.rail b.now{ background:var(--dot,var(--coral)); }
+.rail b.done{ background:var(--dot,var(--green)); opacity:.65; }
+.rail b.ischap{ min-width:20px; border-radius:2px; }
+.rail b.isbadge{ min-width:16px; }
+.railgap{ flex:0 0 auto; width:9px; }
+
+.chcover{ border:3px solid var(--accent,var(--coral)); border-radius:4px; padding:0 0 16px; margin-bottom:16px; background:#fff; overflow:hidden; }
+.chcover .chno{ font-family:Georgia,serif; font-size:62px; font-weight:700; line-height:1; color:var(--cream); background:var(--accent,var(--coral)); padding:14px 20px 10px; }
+.chcover .chtag{ font-size:10px; letter-spacing:.18em; font-weight:700; color:var(--cream); background:var(--accent,var(--coral)); padding:0 20px 14px; }
+.chcover h2{ font-size:31px; padding:16px 20px 0; }
+.chcover .chpromise{ padding:8px 20px 0; font-size:16px; opacity:.85; }
+.chcover .chfig{ margin:16px 0 0; }
+.chcover .chfig svg{ display:block; width:100%; height:auto; }
+.chcover .ctitle{ padding:16px 20px 0; }
+.chlist{ list-style:none; margin:8px 20px 0; padding:0; counter-reset:l; }
+.chlist li{ counter-increment:l; position:relative; padding:9px 0 9px 34px; border-bottom:1px solid var(--line); font-weight:600; cursor:pointer; }
+.chlist li::before{ content:counter(l); position:absolute; left:0; top:8px; width:22px; height:22px; border-radius:50%; border:2px solid var(--accent,var(--coral)); color:var(--accent,var(--coral)); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+.chlist li.seen::before{ background:var(--accent,var(--coral)); color:#fff; content:"✓"; }
+.chlist li:hover{ color:var(--accent,var(--coral)); }
+.chbadge{ margin:14px 20px 0; border:2px dashed var(--accent,var(--coral)); border-radius:3px; padding:11px 13px; font-weight:700; font-size:15px; }
+.chbadge.got{ border-style:solid; background:var(--accent-soft,rgba(232,85,62,.10)); }
+.chbadge .lab{ display:block; font-size:10px; letter-spacing:.14em; color:var(--accent,var(--coral)); margin-bottom:4px; }
+.chbadge .dg{ display:block; font-size:11px; letter-spacing:.1em; font-weight:400; opacity:.7; margin-top:4px; }
+.chcover .result{ margin:14px 20px 0; }
+
+.revtally{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px; }
+.lessonend{ border-top:2px solid var(--line); margin-top:18px; padding-top:11px; font-size:13.5px; opacity:.7; font-style:italic; }
+
+/* ---------- chapter menu on the front page ---------- */
+.chmenu{ display:grid; gap:8px; margin-bottom:22px; }
+.chcard{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; font:inherit; cursor:pointer;
+  border:2px solid var(--line); border-left:6px solid var(--accent); border-radius:3px; padding:10px 12px; background:#fff; color:var(--ink); }
+.chcard:hover{ border-color:var(--accent); }
+.chcard:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+.chcard.got{ background:color-mix(in srgb, var(--accent) 9%, #fff); }
+.chcard .cn{ font-family:Georgia,serif; font-size:27px; font-weight:700; line-height:1; color:var(--accent); width:28px; flex:0 0 28px; text-align:center; }
+.chcard .cbody{ flex:1; min-width:0; display:block; }
+.chcard .cname{ display:block; font-weight:700; font-size:15.5px; }
+.chcard .ctag{ display:block; font-size:11.5px; opacity:.55; letter-spacing:.03em; }
+.chcard .cmeta{ display:block; font-size:11px; opacity:.45; margin-top:2px; letter-spacing:.04em; }
+.chcard .cpips{ display:flex; gap:3px; margin-top:6px; }
+.chcard .cpips i{ width:16px; height:4px; border-radius:2px; background:rgba(51,65,74,.16); }
+.chcard .cpips i.on{ background:var(--accent); }
+.chcard .cright{ flex:0 0 auto; text-align:center; }
+.chcard .cdig{ display:block; font-family:Georgia,serif; font-size:22px; font-weight:700; line-height:1;
+  color:var(--accent); opacity:.28; }
+.chcard.got .cdig{ opacity:1; }
+.chcard .cprog{ display:block; font-size:10px; letter-spacing:.08em; opacity:.5; margin-top:3px; }
+@media (min-width:620px){ .chmenu{ grid-template-columns:1fr 1fr; } }
+
+/* the link across to the reader (the reader has its own copy of this) */
+.swap{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:center; gap:4px 10px; margin-top:18px; font-size:13.5px; }
+.swap a{ font-weight:700; text-decoration:none; color:var(--coral); border-bottom:2px solid var(--coral); }
+.swap span{ opacity:.6; font-size:12.5px; }
+.btn:disabled{ opacity:.35; pointer-events:none; }
+.btnrow{ display:flex; gap:9px; flex-wrap:wrap; margin-top:11px; }
+.result{ margin-top:11px; font-size:14px; padding:10px 12px; border-radius:3px; background:rgba(51,65,74,.07); }
+.towergrid{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:10px; }
+.topt{ border:2px solid var(--line); border-radius:3px; padding:9px 10px; font-size:13px; text-align:left; }
+.topt.on{ border-color:var(--coral); background:rgba(232,85,62,.1); font-weight:700; }
+
+/* ---------- nav ---------- */
+.nav{ position:sticky; bottom:0; z-index:20; background:var(--cream); border-top:2px solid var(--ink);
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom)); display:flex; gap:10px; align-items:center;
+  box-shadow:0 -6px 18px rgba(31,42,48,.10); }
+.nav .sp{ flex:1; font-size:12px; opacity:.65; text-align:center; }
+#errbar{ display:none; background:#e8553e; color:#fff; padding:12px 16px; font:13px/1.4 monospace; white-space:pre-wrap; }
+#resumed{ display:none; background:var(--green); color:#fff; padding:9px 16px; font-size:13.5px; font-weight:600; }
+#resumed button{ background:rgba(255,255,255,.22); color:#fff; border:1px solid rgba(255,255,255,.55); border-radius:3px; padding:3px 9px; margin-left:6px; font:inherit; font-size:12.5px; cursor:pointer; }
+#resumed button:hover{ background:rgba(255,255,255,.34); }
+
+/* ---------- cover / setup ---------- */
+.setup{ text-align:center; padding:26px 20px 40px; }
+.setup h1{ font-size:44px; letter-spacing:-.02em; }
+.setup .sub{ font-size:12px; letter-spacing:.2em; font-weight:700; margin:10px 0 3px; }
+.setup .ages{ font-size:11px; letter-spacing:.14em; font-weight:700; color:var(--coral); margin-bottom:18px; }
+.setup figure{ margin-bottom:20px; }
+.story{ text-align:left; font-size:16.5px; max-width:600px; margin:0 auto 22px; }
+.story p{ margin-bottom:12px; }
+.namein{ width:100%; max-width:340px; padding:12px 14px; border:3px solid var(--ink); border-radius:3px; font-size:17px; text-align:center; background:#fff; color:var(--ink); }
+.namein:focus{ outline:none; border-color:var(--coral); }
+.tierpick{ display:flex; gap:9px; justify-content:center; margin:14px 0 20px; flex-wrap:wrap; }
+.tierbtn{ border:3px solid var(--line); border-radius:3px; padding:12px 14px; text-align:center; min-width:130px; }
+.tierbtn.on{ border-color:var(--ink); background:rgba(51,65,74,.07); }
+.tierbtn .tl{ font-family:Georgia,serif; font-size:24px; font-weight:700; }
+.tierbtn .tn{ font-size:11px; letter-spacing:.1em; font-weight:700; }
+.tierbtn .ta{ font-size:11px; opacity:.65; }
+.oath{ font-style:italic; font-size:15px; border:2px solid var(--ink); border-radius:3px; padding:13px; max-width:420px; margin:0 auto 18px; text-align:left; }
+
+/* ---------- certificate ---------- */
+.cert{ border:5px double var(--ink); border-radius:3px; padding:22px; text-align:center; background:#fff; margin-bottom:14px; }
+.cert h3{ font-size:22px; letter-spacing:.06em; }
+.cert .who{ font-family:Georgia,serif; font-size:30px; font-weight:700; color:var(--coral); margin:14px 0 10px; }
+.cert .body{ font-size:14px; max-width:460px; margin:0 auto 16px; }
+.cert .sig{ font-size:12px; opacity:.7; }
+.seal{ width:96px; height:96px; margin:14px auto 0; border-radius:50%; border:3px dashed var(--coral); display:grid; place-items:center; font-size:11px; font-weight:700; letter-spacing:.12em; color:var(--coral); line-height:1.4; }
+.scoreline{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:14px; }
+.pill{ border:2px solid var(--ink); border-radius:20px; padding:6px 14px; font-size:13px; font-weight:700; }
+.pill.g{ border-color:var(--green); color:var(--green); }
+
+@media (max-width:620px){
+  .wrap{ padding:12px 13px 24px; }
+  .phead h2{ font-size:21px; } .phead .n{ font-size:24px; }
+  .hook{ font-size:15px; }
+  .core,.q{ font-size:15.5px; }
+  .setup h1{ font-size:30px; }
+  .towergrid{ grid-template-columns:1fr; }
+  .brand{ font-size:12px; }
+  .whoami .nm{ display:none; }
+}
+@media (min-width:760px){ .mythrow{ grid-template-columns:repeat(3,1fr); } }
+</style>
+</head>
+<body>
+<noscript><div style="padding:24px;font:16px/1.5 sans-serif;background:#e8553e;color:#fff">
+This page needs JavaScript. Open the file in Safari, Chrome, or any normal browser rather than a preview window.
+</div></noscript>
+<div id="app">
+  <div id="errbar"></div>
+  <div id="resumed" role="status"></div>
+  <div class="topbar">
+    <div class="brand">SHAKE&nbsp;STATION&nbsp;7</div>
+    <div class="trace"><canvas id="trace"></canvas></div>
+    <div class="tstat" id="tstat">QUIET</div>
+    <div class="whoami" id="whoami"></div>
+  </div>
+  <div class="rail" id="rail"></div>
+  <div class="scroll" id="scroll"></div>
+  <div class="nav" id="nav"></div>
+</div>
+<script>
+{{ART}}
+
+{{PAGES}}
+
+/* SHAKE STATION 7 — interactive runtime */
+const PAGES = [...PAGES_A, ...PAGES_B, ...PAGES_C, ...PAGES_D];
+const CODE = PAGES.filter(p => p.badge).map(p => p.badge.digit).join('');
+const TIERS = { L: ['little', 'LITTLE SEISMOLOGIST', 'ages 6 to 7'], F: ['field', 'FIELD SEISMOLOGIST', 'ages 8 to 9'], C: ['chief', 'STATION CHIEF', 'ages 10 to 11'] };
+
+/* ============ chapters ============
+   The course used to be twenty pages in a row, with each page's questions
+   wrapped around its own lesson. It now runs as six chapters. A chapter opens
+   with a cover, teaches its lessons, and only then asks its questions — the
+   whole chapter's worth at once — before the badge that closes it.
+   PREDICT FIRST stays where it was, at the top of each lesson, because the
+   point of it is to make them commit before they read. */
+{{CHAPTERS}}
+
+const CHAPTERS = (() => {
+  const out = [];
+  PAGES.forEach(p => {
+    if (!p.unit || !CH_META[p.unit] || p.cover || p.capstone) return;
+    let ch = out.find(c => c.u === p.unit);
+    if (!ch) {
+      ch = { u: p.unit, name: p.unitTitle, ...CH_META[p.unit], pages: [], review: [], badgePage: null };
+      out.push(ch);
+    }
+    ch.pages.push(p);
+    // questions are lifted off the lesson and held for the chapter review
+    if (p.trap) ch.review.push({ type: 'trap', page: p });
+    if (p.check) ch.review.push({ type: 'check', page: p });
+    if (p.badge) ch.badgePage = p;
+  });
+  out.forEach((c, i) => { c.no = i + 1; });
+  return out;
+})();
+
+/* the flat list the Back/Next buttons actually walk */
+const STEPS = (() => {
+  const s = [{ kind: 'arrival', page: PAGES[0] }];
+  CHAPTERS.forEach(ch => {
+    s.push({ kind: 'cover', ch });
+    ch.pages.forEach(p => s.push({ kind: 'lesson', ch, page: p }));
+    if (ch.review.length) s.push({ kind: 'review', ch });
+    if (ch.badgePage) s.push({ kind: 'badge', ch, page: ch.badgePage });
+  });
+  s.push({ kind: 'capstone', page: PAGES[PAGES.length - 1] });
+  return s;
+})();
+
+/* stable across content edits, unlike the raw index */
+const stepKey = st => `${st.kind}:${st.ch ? st.ch.u : 0}:${st.page ? st.page.n : 0}`;
+
+function applyTheme(ch) {
+  const root = document.documentElement;
+  root.style.setProperty('--accent', ch ? ch.colour : 'var(--coral)');
+  root.style.setProperty('--accent-soft', ch ? ch.colour + '22' : 'rgba(232,85,62,.10)');
+}
+
+const S = {
+  name: '', tier: 'F', idx: -1,
+  answered: {},          // key -> {pick, right}
+  digits: {},            // pageNumber -> digit
+  visited: {},
+  right: 0, tries: 0,
+  unlocked: false
+};
+
+const $ = s => document.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h !== undefined) e.innerHTML = h; return e; };
+/* The course was written when it ran as twenty numbered pages, so a lot of the
+   prose says things like "you met this on page 4". Chapters have no page 4, so
+   those references are swapped for the lesson's actual name wherever they
+   appear. Numbers that match no lesson are left exactly as written. */
+const PAGE_BY_N = {};
+PAGES.forEach(p => { if (p.title && !p.cover) PAGE_BY_N[p.n] = p; });
+const depage = s => String(s).replace(/\b(on |in |from )?page (\d+)\b/gi, (m, prep, n) => {
+  const p = PAGE_BY_N[+n];
+  if (!p) return m;
+  // "on page 2" wants to become "in <title>", not "on <title>"
+  const lead = prep ? (/^on /i.test(prep) ? 'in ' : prep) : '';
+  return `${lead}“${p.title}”`;
+});
+
+const rich = s => depage(String(s)).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>');
+// plain escape, for anything the assistant typed themselves (no <b> pass-through)
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const paras = s => rich(s).split('\n\n').map(x => `<p>${x.replace(/\n/g, '<br>')}</p>`).join('');
+const KEY = 'ABCD';
+
+/* ============ live seismogram ============ */
+let traceLevel = 0, traceT = 0, traceCv, traceCx;
+function initTrace() {
+  traceCv = $('#trace'); if (!traceCv) return;
+  traceCx = traceCv.getContext('2d');
+  // size the backing store only when the box actually changes. reassigning
+  // canvas.width every frame reallocates the buffer 60x a second for nothing.
+  const fit = () => {
+    const w = Math.max(1, traceCv.clientWidth * 2), h = Math.max(1, traceCv.clientHeight * 2);
+    if (traceCv.width !== w) traceCv.width = w;
+    if (traceCv.height !== h) traceCv.height = h;
+  };
+  fit();
+  addEventListener('resize', fit, { passive: true });
+  const draw = () => {
+    // nothing to animate while the tab is in the background
+    if (document.hidden) { requestAnimationFrame(draw); return; }
+    const w = traceCv.width, h = traceCv.height;
+    traceT += 0.055;
+    traceCx.clearRect(0, 0, w, h);
+    traceCx.lineWidth = traceLevel >= 8 ? 3 : 2;
+    traceCx.strokeStyle = traceLevel >= 8 ? '#e8553e' : traceLevel >= 4 ? '#c98b3a' : '#faf5e9';
+    traceCx.globalAlpha = traceLevel === 0 ? .55 : 1;
+    traceCx.beginPath();
+    for (let x = 0; x <= w; x += 2) {
+      const p = x / w;
+      let a = 0;
+      if (traceLevel > 0) {
+        const burst = traceLevel < 4 ? (Math.sin(p * 22 + traceT) > .93 ? 1 : .05)
+          : traceLevel < 8 ? .35 + .65 * Math.abs(Math.sin(p * 3 + traceT * .4)) : 1;
+        a = (h / 2 - 3) * (traceLevel / 10) * burst *
+          (Math.sin(p * 90 + traceT * 6) * .6 + Math.sin(p * 33 - traceT * 4) * .4);
+      }
+      const y = h / 2 + a;
+      x === 0 ? traceCx.moveTo(x, y) : traceCx.lineTo(x, y);
+    }
+    traceCx.stroke();
+    requestAnimationFrame(draw);
+  };
+  draw();
+}
+const STAT = l => l === 0 ? 'QUIET' : l < 4 ? 'MOVEMENT' : l < 8 ? 'RISING' : 'EVENT';
+
+/* ============ quiz block ============ */
+function quiz(key, q, onAnswer, allowRetry) {
+  // allowRetry defaults on: a six-year-old's stray tap should not lock an
+  // answer forever. Badge questions pass false, they have their own bulk retry.
+  if (allowRetry === undefined) allowRetry = true;
+  const box = el('div', 'choices');
+  const fb = el('div');
+  const prev = S.answered[key];
+  q.options.forEach((o, i) => {
+    const b = el('button', 'choice', `<span class="k">${KEY[i]}</span><span>${rich(o)}</span>`);
+    b.onclick = () => {
+      if (S.answered[key]) return;
+      const right = i === q.answer;
+      S.answered[key] = { pick: i, right };
+      S.tries++; if (right) S.right++;
+      paint();
+      if (onAnswer) onAnswer(right);
+      save();
+    };
+    box.appendChild(b);
+  });
+  function paint() {
+    const a = S.answered[key];
+    [...box.children].forEach((b, i) => {
+      b.classList.toggle('locked', !!a);
+      b.classList.remove('right', 'wrong');   // cleared so a retry repaints from scratch
+      if (!a) return;
+      if (i === q.answer) b.classList.add('right');
+      else if (i === a.pick) b.classList.add('wrong');
+    });
+    fb.innerHTML = '';
+    if (a) {
+      const f = el('div', 'feedback' + (a.right ? '' : ' miss'),
+        `<b>${a.right ? 'CORRECT' : 'NOT QUITE — AND THAT IS FINE'}</b>${rich(q.why || q.reveal || '')}`);
+      fb.appendChild(f);
+      if (!a.right && allowRetry) {
+        const again = el('button', 'btn ghost small', 'Try this one again');
+        // the tally is deliberately not rewound: "first time" should keep meaning first time
+        again.onclick = () => { delete S.answered[key]; paint(); save(); };
+        fb.appendChild(again);
+      }
+    }
+  }
+  if (prev) paint();
+  const frag = document.createDocumentFragment();
+  frag.appendChild(box); frag.appendChild(fb);
+  return { frag, isAnswered: () => !!S.answered[key] };
+}
+
+/* ============ page render ============ */
+function render() {
+  const scroll = $('#scroll');
+  scroll.innerHTML = '';
+  const wrap = el('div', 'wrap');
+  scroll.appendChild(wrap);
+  try { window.scrollTo(0, 0); } catch (e) {}
+
+  if (S.idx < 0) { renderSetup(wrap); traceLevel = 0; applyTheme(null); }
+  else {
+    const st = STEPS[S.idx];
+    S.visited[stepKey(st)] = true;
+    applyTheme(st.ch);
+    traceLevel = st.page ? (st.page.seismo || 0) : (st.kind === 'badge' ? 6 : 2);
+    if (st.kind === 'arrival') { renderSetup(wrap); traceLevel = 0; }
+    else if (st.kind === 'cover') renderChapterCover(wrap, st.ch);
+    else if (st.kind === 'review') renderReview(wrap, st.ch);
+    else if (st.kind === 'badge') renderBadgePage(wrap, st.ch, st.page);
+    else if (st.kind === 'capstone') renderCapstone(wrap, st.page);
+    else renderPage(wrap, st.page, st.ch);
+  }
+  $('#tstat').textContent = STAT(traceLevel);
+  renderRail(); renderNav(); renderWho();
+  save();
+}
+
+function showError(msg) {
+  const bar = $('#errbar'); if (!bar) return;
+  bar.style.display = 'block';
+  bar.textContent = 'Something broke. Please send this text back:\n' + msg;
+}
+
+function renderWho() {
+  const w = $('#whoami');
+  w.innerHTML = S.name
+    ? `<span class="tierdot ${S.tier}">${S.tier}</span><span class="nm">${esc(S.name)}</span>`
+    : '';
+}
+
+function renderRail() {
+  const r = $('#rail'); r.innerHTML = '';
+  let lastCh = null;
+  STEPS.forEach((st, i) => {
+    // a visible gap wherever one chapter hands over to the next
+    if (st.ch !== lastCh && i > 0) r.appendChild(el('i', 'railgap'));
+    lastCh = st.ch;
+    const b = el('b');
+    const seen = !!S.visited[stepKey(st)];
+    if (seen) b.classList.add('done');
+    if (i === S.idx) b.classList.add('now');
+    if (st.kind === 'cover') b.classList.add('ischap');
+    if (st.kind === 'badge') b.classList.add('isbadge');
+    if (st.ch) b.style.setProperty('--dot', st.ch.colour);
+    const label = st.kind === 'cover' ? `Chapter ${st.ch.no}, ${st.ch.name}`
+      : st.kind === 'review' ? `Chapter ${st.ch.no} review`
+      : st.kind === 'badge' ? `Chapter ${st.ch.no} badge challenge`
+      : st.kind === 'capstone' ? 'The case opens'
+      : st.kind === 'arrival' ? 'Front desk'
+      : `${st.page.title}`;
+    const go = () => { S.idx = i; render(); };
+    // reachable by keyboard as well as by tapping: these are the only way to
+    // jump around the course
+    b.title = label;
+    b.setAttribute('role', 'button');
+    b.setAttribute('tabindex', '0');
+    b.setAttribute('aria-label', label + (seen ? ', visited' : ''));
+    if (i === S.idx) b.setAttribute('aria-current', 'true');
+    b.onclick = go;
+    b.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
+    b.style.cursor = 'pointer';
+    r.appendChild(b);
+  });
+}
+
+function renderNav() {
+  const n = $('#nav'); n.innerHTML = '';
+  const back = el('button', 'btn ghost', '← Back');
+  back.onclick = () => { S.idx = Math.max(-1, S.idx - 1); render(); };
+  back.disabled = S.idx <= -1;
+  const last = S.idx >= STEPS.length - 1;
+  const mid = el('div', 'sp', S.idx < 0 ? 'Sign in to begin' : whereAmI(STEPS[S.idx]));
+  const next = el('button', 'btn coral', S.idx < 0 ? 'Report for duty →' : last ? 'Finish' : 'Next →');
+  next.onclick = () => {
+    if (S.idx < 0) { if (!S.name.trim()) S.name = 'Field Assistant'; S.idx = 1; render(); return; }
+    if (last) {
+      // the button says Finish, so it has to finish something. the case is
+      // either still locked (send them to the digits) or the certificate is
+      // sitting further down the page and they should be looking at it.
+      const target = $(S.unlocked ? '#cert' : '#lockcard');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (!S.unlocked) { const f = $('.lockrow input'); if (f) f.focus(); }
+      return;
+    }
+    S.idx = Math.min(STEPS.length - 1, S.idx + 1);
+    render();
+  };
+  n.appendChild(back); n.appendChild(mid); n.appendChild(next);
+}
+
+/* where the nav bar says you are */
+function whereAmI(st) {
+  if (!st) return '';
+  if (st.kind === 'arrival') return 'Front desk';
+  if (st.kind === 'capstone') return 'The case opens';
+  const c = `Chapter ${st.ch.no} of ${CHAPTERS.length}`;
+  if (st.kind === 'cover') return c;
+  if (st.kind === 'review') return `${c} · the questions`;
+  if (st.kind === 'badge') return `${c} · badge`;
+  return `${c} · lesson ${st.ch.pages.indexOf(st.page) + 1} of ${st.ch.pages.length}`;
+}
+
+/* ---------- chapter cover ---------- */
+function renderChapterCover(wrap, ch) {
+  const done = ch.pages.every(p => S.visited[`lesson:${ch.u}:${p.n}`]);
+  const c = el('div', 'chcover');
+  c.innerHTML = `<div class="chno">${ch.no}</div>
+    <div class="chtag">${ch.tag}</div>
+    <h2>${ch.name}</h2>
+    <div class="chpromise">${rich(ch.promise)}</div>`;
+  const fig = el('figure', 'chfig'); fig.innerHTML = ART_CH[ch.u] ? ART_CH[ch.u](ch.colour) : '';
+  c.appendChild(fig);
+
+  const list = el('ol', 'chlist');
+  ch.pages.forEach(p => {
+    const li = el('li', S.visited[`lesson:${ch.u}:${p.n}`] ? 'seen' : '', rich(p.title));
+    li.onclick = () => { S.idx = STEPS.findIndex(s => s.kind === 'lesson' && s.page === p); render(); };
+    list.appendChild(li);
+  });
+  c.appendChild(el('div', 'ctitle', `THE ${ch.pages.length} LESSONS IN THIS CHAPTER`));
+  c.appendChild(list);
+
+  if (ch.badgePage) {
+    const got = S.digits[ch.badgePage.n] !== undefined;
+    c.appendChild(el('div', 'chbadge' + (got ? ' got' : ''),
+      `<span class="lab">${got ? 'BADGE EARNED' : 'BADGE ON OFFER'}</span>${rich(ch.badgePage.badge.title)}
+       <span class="dg">${got ? 'DIGIT ' + ch.badgePage.badge.digit : 'ONE DIGIT OF THE CASE CODE'}</span>`));
+  }
+  if (done) c.appendChild(el('div', 'result', 'You have read every lesson in this chapter. The questions are waiting at the end of it.'));
+  wrap.appendChild(c);
+}
+
+/* ---------- chapter review: every question from the chapter, together ---------- */
+function renderReview(wrap, ch) {
+  wrap.appendChild(el('div', 'phead',
+    `<div><div class="u">CHAPTER ${ch.no}</div><div class="un">${ch.name}</div></div>
+     <h2>The Questions</h2><div class="n">?</div>`));
+  wrap.appendChild(el('div', 'hook',
+    `Everything this chapter taught you, asked back. Nothing new here — if one of these will not come, the lesson it came from is a tap away on the rail above.`));
+
+  const tally = el('div', 'revtally');
+  wrap.appendChild(tally);
+
+  const paintTally = () => {
+    const done = ch.review.filter(r => S.answered[(r.type === 'trap' ? 'trap' : 'chk') + r.page.n]).length;
+    const right = ch.review.filter(r => (S.answered[(r.type === 'trap' ? 'trap' : 'chk') + r.page.n] || {}).right).length;
+    tally.innerHTML = `<span class="pill">${done} of ${ch.review.length} answered</span><span class="pill g">${right} right</span>`;
+  };
+
+  ch.review.forEach((r, i) => {
+    const q = r.type === 'trap' ? r.page.trap : r.page.check;
+    const key = (r.type === 'trap' ? 'trap' : 'chk') + r.page.n;
+    const card = el('div', 'card' + (r.type === 'trap' ? '' : ' dash'));
+    // a trap belongs to the lesson it sits on, so name it. A memory check is
+    // deliberately about something taught earlier, so naming the lesson it was
+    // attached to would point at the wrong place; the question says where.
+    card.appendChild(el('div', 'ctitle', r.type === 'trap'
+      ? `CATCH THE ERROR <span class="sub">· question ${i + 1} of ${ch.review.length} · from “${rich(r.page.title)}”</span>`
+      : `MEMORY CHECK <span class="sub">· question ${i + 1} of ${ch.review.length} · looking back, no peeking</span>`));
+    const text = r.type === 'trap' ? q.text.replace(/^MISCONCEPTION TRAP\.\s*/, '') : q.q;
+    card.appendChild(el('div', 'q', rich(text)));
+    card.appendChild(quiz(key, q, paintTally).frag);
+    // the tally also has to move when they use the retry button
+    card.addEventListener('click', () => setTimeout(paintTally, 0));
+    wrap.appendChild(card);
+  });
+  paintTally();
+
+  if (ch.badgePage) wrap.appendChild(el('div', 'result',
+    'When these feel solid, the badge challenge is next, and it releases your digit.'));
+}
+
+/* ---------- badge, now a step of its own ---------- */
+function renderBadgePage(wrap, ch, p) {
+  wrap.appendChild(el('div', 'phead',
+    `<div><div class="u">CHAPTER ${ch.no}</div><div class="un">${ch.name}</div></div>
+     <h2>Badge Challenge</h2><div class="n">${S.digits[p.n] !== undefined ? p.badge.digit : '?'}</div>`));
+  wrap.appendChild(el('div', 'hook',
+    `Every answer has to be right before the digit is released. That is the whole point of a badge — it has to mean something.`));
+  wrap.appendChild(badgeBlock(p));
+  if (p.cooperate) wrap.appendChild(el('div', 'team', `<span class="lab">TEAM TASK · ALL FOUR OF YOU</span>${rich(p.cooperate)}`));
+}
+
+/* ---------- setup / cover ---------- */
+function renderSetup(wrap) {
+  const p = PAGES[0];
+  const s = el('div', 'setup');
+  s.innerHTML = `<h1>SHAKE STATION 7</h1>
+    <div class="sub">A FIELD COURSE IN EARTHQUAKES, WAVES AND TECTONIC PLATES</div>
+    <div class="ages">FOUR ASSISTANTS · AGES 6, 8, 11 AND 11</div>`;
+  const fig = el('figure'); fig.innerHTML = ART.cover(); s.appendChild(fig);
+  s.appendChild(el('div', 'story', paras(p.coverBody)));
+
+  s.appendChild(el('div', 'ctitle', 'WHAT IS YOUR NAME?'));
+  const inp = el('input', 'namein'); inp.placeholder = 'type your name'; inp.value = S.name;
+  inp.oninput = e => { S.name = e.target.value; save(); };
+  s.appendChild(inp);
+
+  s.appendChild(el('div', 'ctitle', 'WHICH DOOR ARE YOU TAKING?'));
+  const tp = el('div', 'tierpick');
+  Object.entries(TIERS).forEach(([k, v]) => {
+    const b = el('button', 'tierbtn' + (S.tier === k ? ' on' : ''),
+      `<div class="tl">${k}</div><div class="tn">${v[1]}</div><div class="ta">${v[2]}</div>`);
+    b.onclick = () => { S.tier = k; render(); };
+    tp.appendChild(b);
+  });
+  s.appendChild(tp);
+  s.appendChild(el('div', 'oath', `<b>THE OATH</b><br>${rich(p.oath).replace(/\n/g, '<br>')}`));
+
+  s.appendChild(el('div', 'ctitle', 'THE SIX CHAPTERS <span class="sub">· tap one to go straight there</span>'));
+  s.appendChild(chapterMenu());
+
+  s.appendChild(el('div', 'ctitle', `THE LOCKED CASE · ${Object.keys(S.digits).length} of 6 digits earned`));
+  s.appendChild(earnedRow());
+  s.appendChild(el('div', 'swap',
+    `<a href="reader.html">↔ Prefer to just read it?</a><span>the same course as one long page, good for printing or reading aloud</span>`));
+  wrap.appendChild(s);
+}
+
+/* ---------- chapter menu ----------
+   Doubles as the map of the course on a first visit and as the way back in on
+   every visit after that: what is in it, how far they got, which digits landed. */
+function chapterMenu() {
+  const g = el('div', 'chmenu');
+  CHAPTERS.forEach(ch => {
+    const seen = ch.pages.filter(p => S.visited[`lesson:${ch.u}:${p.n}`]).length;
+    const digit = ch.badgePage ? S.digits[ch.badgePage.n] : undefined;
+    const got = digit !== undefined;
+    const complete = seen === ch.pages.length;
+
+    const card = el('button', 'chcard' + (got ? ' got' : '') + (complete && !got ? ' read' : ''));
+    card.style.setProperty('--accent', ch.colour);
+    card.innerHTML =
+      `<span class="cn">${ch.no}</span>
+       <span class="cbody">
+         <span class="cname">${esc(ch.name)}</span>
+         <span class="ctag">${esc(ch.tag.toLowerCase())}</span>
+         <span class="cmeta">${ch.pages.length} lessons · ${ch.review.length} questions</span>
+       </span>
+       <span class="cright">
+         <span class="cdig">${got ? digit : '?'}</span>
+         <span class="cprog">${seen}/${ch.pages.length}</span>
+       </span>`;
+    card.title = got
+      ? `Chapter ${ch.no}: badge earned, digit ${digit}`
+      : `Chapter ${ch.no}: ${seen} of ${ch.pages.length} lessons read`;
+    card.setAttribute('aria-label', card.title);
+    card.onclick = () => { S.idx = STEPS.findIndex(st => st.kind === 'cover' && st.ch === ch); render(); };
+
+    // a row of pips, one per lesson, so progress is legible without reading
+    const pips = el('span', 'cpips');
+    ch.pages.forEach(p => {
+      const d = el('i', S.visited[`lesson:${ch.u}:${p.n}`] ? 'on' : '');
+      pips.appendChild(d);
+    });
+    card.querySelector('.cbody').appendChild(pips);
+    g.appendChild(card);
+  });
+  return g;
+}
+
+function earnedRow() {
+  const r = el('div', 'earned');
+  PAGES.filter(p => p.badge).forEach(p => {
+    const got = S.digits[p.n] !== undefined;
+    r.appendChild(el('span', got ? 'got' : '', got ? String(p.badge.digit) : '?'));
+  });
+  return r;
+}
+
+/* ---------- standard page ---------- */
+function renderPage(wrap, p, ch) {
+  const pos = ch ? ch.pages.indexOf(p) + 1 : 0;
+  wrap.appendChild(el('div', 'phead',
+    `<div><div class="u">CHAPTER ${ch ? ch.no : p.unit}</div><div class="un">${ch ? ch.name : p.unitTitle}</div></div>
+     <h2>${p.title}</h2><div class="n">${ch ? pos + '/' + ch.pages.length : p.n}</div>`));
+  wrap.appendChild(el('div', 'hook', rich(p.hook)));
+
+  // core, veiled until the prediction is made
+  const veil = el('div', 'veil');
+  const inner = el('div');
+  inner.appendChild(el('div', 'core', paras(p.core) +
+    (p.terms ? `<div class="terms">${p.terms.map(t => `<span class="term"><b>${t[0]}</b> ${t[1]}</span>`).join('')}</div>` : '')));
+  veil.appendChild(inner);
+  const msg = el('div', 'veilmsg', 'Make your guess above and this unlocks.');
+  const unveil = () => { veil.classList.remove('hidden'); if (msg.parentNode) msg.remove(); };
+
+  if (p.predict) {
+    const c = el('div', 'card coral');
+    c.appendChild(el('div', 'ctitle', 'PREDICT FIRST <span class="sub">guess before you read on. a wrong guess still helps.</span>'));
+    c.appendChild(el('div', 'q', rich(p.predict.text)));
+    const qz = quiz('pre' + p.n, { ...p.predict, why: p.predict.reveal }, unveil);
+    c.appendChild(qz.frag);
+    wrap.appendChild(c);
+    if (!qz.isAnswered()) { veil.classList.add('hidden'); veil.appendChild(msg); }
+  }
+  wrap.appendChild(veil);
+
+  if (p.okonkwo) wrap.appendChild(el('div', 'okon', `<div class="oh">DR. OKONKWO</div>${paras(p.okonkwo)}`));
+
+  if (ART[p.art]) {
+    const f = el('figure'); f.innerHTML = ART[p.art]();
+    if (p.artCaption) f.appendChild(el('figcaption', '', rich(p.artCaption)));
+    wrap.appendChild(f);
+  }
+
+  if (p.myths) {
+    const r = el('div', 'mythrow');
+    p.myths.forEach(m => r.appendChild(el('div', 'mythcard', `<b>${rich(m.myth)}</b>${rich(m.truth)}`)));
+    wrap.appendChild(r);
+  }
+
+  if (p.warning) {
+    const w = el('div', 'warnbox');
+    w.innerHTML = `<div class="ctitle">${p.warning.title}</div><ol>${p.warning.items.map(i => `<li>${rich(i)}</li>`).join('')}</ol><div class="rule">${rich(p.warning.rule)}</div>`;
+    wrap.appendChild(w);
+  }
+
+  /* the trap question used to sit here; it is asked in the chapter review now */
+
+  if (p.build) {
+    const b = el('div', 'card');
+    b.innerHTML = `<div class="ctitle">${p.build.title}</div>
+      <div><b>YOU NEED:</b> ${rich(p.build.materials)}</div>
+      <ol class="steps">${p.build.steps.map(s => `<li>${rich(s)}</li>`).join('')}</ol>
+      <div class="feedback"><b>PREDICT FIRST</b>${rich(p.build.predict)}</div>
+      <div class="feedback miss"><b>THEN CHECK</b>${rich(p.build.result)}</div>
+      <div style="margin-top:10px;font-size:14px"><b>${rich(p.build.wrong)}</b></div>`;
+    wrap.appendChild(b);
+  }
+
+  if (p.activity) wrap.appendChild(el('div', 'card', `<div class="ctitle">${p.activity.title}</div><div class="mono">${rich(p.activity.body)}</div>`));
+  if (p.drill) wrap.appendChild(el('div', 'card coral', `<div class="ctitle">${p.drill.title}</div><div class="mono">${rich(p.drill.body)}</div>`));
+
+  // interactive tools
+  if (TOOLS[p.n]) wrap.appendChild(TOOLS[p.n]());
+
+  wrap.appendChild(tierBlock(p));
+
+  // the team task travels with the badge when the lesson carries one
+  if (p.cooperate && !p.badge) wrap.appendChild(el('div', 'team', `<span class="lab">TEAM TASK · ALL FOUR OF YOU</span>${rich(p.cooperate)}`));
+
+  /* badge and memory check used to close every lesson. Both now belong to the
+     chapter: the questions come after all its lessons, then the badge. */
+  if (ch) {
+    const isLast = ch.pages[ch.pages.length - 1] === p;
+    const nextUp = isLast
+      ? 'That is the last lesson in this chapter. The questions are next.'
+      : `Next lesson: ${rich(ch.pages[ch.pages.indexOf(p) + 1].title)}.`;
+    wrap.appendChild(el('div', 'lessonend', nextUp));
+  }
+}
+
+function tierBlock(p) {
+  const box = el('div');
+  const tabs = el('div', 'tiertabs');
+  const body = el('div', 'tierbody');
+  const paintBody = () => {
+    body.className = 'tierbody';
+    const [k, label] = [TIERS[S.tier][0], TIERS[S.tier][1]];
+    const d = p.doors[k];
+    body.innerHTML = '';
+    body.appendChild(el('div', 'tiertask', `<span class="lab">${label} · YOUR TASK ON PAPER</span>${rich(d.print)}`));
+    if (d.q) {
+      body.appendChild(el('div', 'q', rich(d.q.text)));
+      body.appendChild(quiz(`d${p.n}${S.tier}`, d.q).frag);
+    }
+  };
+  Object.entries(TIERS).forEach(([k, v]) => {
+    const t = el('button', 'tiertab ' + k + (S.tier === k ? ' on' : ''), `${k} · ${v[1].split(' ')[0]}`);
+    t.onclick = () => { S.tier = k; [...tabs.children].forEach(c => c.classList.remove('on')); t.classList.add('on'); paintBody(); renderWho(); save(); };
+    tabs.appendChild(t);
+  });
+  paintBody();
+  box.appendChild(tabs); box.appendChild(body);
+  return box;
+}
+
+function badgeBlock(p) {
+  const b = el('div', 'badge');
+  b.appendChild(el('div', 'badgehead', `<span class="t">${p.badge.title}</span><span class="d">EARNS DIGIT ${S.digits[p.n] !== undefined ? p.badge.digit : '?'}</span>`));
+  const win = el('div');
+  const check = () => {
+    const all = p.badge.questions.every((q, i) => S.answered[`b${p.n}_${i}`]);
+    const allRight = p.badge.questions.every((q, i) => (S.answered[`b${p.n}_${i}`] || {}).right);
+    win.innerHTML = '';
+    if (all) {
+      if (allRight) {
+        S.digits[p.n] = p.badge.digit;
+        win.appendChild(el('div', 'digitwin', `<div class="lb">BADGE EARNED · YOUR DIGIT IS</div><div class="big">${p.badge.digit}</div><div class="lb">WRITE IT DOWN</div>`));
+        win.appendChild(earnedRow());
+      } else {
+        const retry = el('button', 'btn ghost', 'Clear and try the missed ones again');
+        retry.onclick = () => { p.badge.questions.forEach((q, i) => { if (!(S.answered[`b${p.n}_${i}`] || {}).right) delete S.answered[`b${p.n}_${i}`]; }); render(); };
+        win.appendChild(el('div', 'result', 'Every answer has to be right before the digit is released. Fix the ones marked in red.'));
+        win.appendChild(retry);
+      }
+      save();
+    }
+  };
+  p.badge.questions.forEach((q, i) => {
+    const bq = el('div', 'bq');
+    bq.appendChild(el('div', 'n', `QUESTION ${i + 1} OF ${p.badge.questions.length}`));
+    bq.appendChild(el('div', 'q', rich(q.text)));
+    const z = quiz(`b${p.n}_${i}`, q, null, false);
+    bq.appendChild(z.frag);
+    b.appendChild(bq);
+  });
+  // re-check after any click inside
+  b.addEventListener('click', () => setTimeout(check, 0));
+  b.appendChild(win);
+  check();
+  return b;
+}
+
+/* ---------- capstone ---------- */
+function renderCapstone(wrap, p) {
+  wrap.appendChild(el('div', 'phead', `<div><div class="u">FINAL</div><div class="un">CERTIFICATION</div></div><h2>${p.title}</h2><div class="n">20</div>`));
+  wrap.appendChild(el('div', 'hook', rich(p.hook)));
+
+  const lock = el('div', 'card coral');
+  lock.id = 'lockcard';
+  lock.appendChild(el('div', 'ctitle', 'THE LOCKED CASE · ENTER YOUR SIX DIGITS'));
+  const row = el('div', 'lockrow');
+  const inputs = [];
+  for (let i = 0; i < 6; i++) {
+    const inp = el('input');
+    inp.maxLength = 1; inp.inputMode = 'numeric';
+    inp.oninput = () => {
+      inp.value = inp.value.replace(/\D/g, '');
+      if (inp.value && inputs[i + 1]) inputs[i + 1].focus();
+      const code = inputs.map(x => x.value).join('');
+      if (code === CODE) {
+        inputs.forEach(x => x.classList.add('ok'));
+        S.unlocked = true; save(); render();
+      }
+    };
+    inputs.push(inp); row.appendChild(inp);
+  }
+  lock.appendChild(row);
+  lock.appendChild(earnedRow());
+  if (!S.unlocked) {
+    lock.appendChild(el('div', 'result', 'One digit per unit badge. If a slot is still a question mark, that unit is unfinished. Go back and find it.'));
+    // one digit at a time. handing over all six in a single click throws away
+    // the six badges the whole course was building toward.
+    const hint = el('button', 'btn ghost', 'Give me one digit');
+    const note = el('div', 'result');
+    hint.onclick = () => {
+      const next = inputs.findIndex((x, i) => x.value !== CODE[i]);
+      if (next === -1) return;
+      inputs[next].value = CODE[next];
+      inputs[next].classList.add('ok');
+      const left = inputs.filter((x, i) => x.value !== CODE[i]).length;
+      note.textContent = left
+        ? `Slot ${next + 1} filled in. ${left} still to go — those badges are worth going back for.`
+        : 'That is all six. Opening the case.';
+      if (!left) { S.unlocked = true; save(); render(); }
+    };
+    lock.appendChild(el('div', 'btnrow')).appendChild(hint);
+    lock.appendChild(note);
+  }
+  wrap.appendChild(lock);
+
+  if (!S.unlocked) return;
+
+  wrap.appendChild(el('div', 'okon', `<div class="oh">DR. OKONKWO</div>${paras(p.okonkwo)}`));
+  wrap.appendChild(el('div', 'core', paras(p.core)));
+  const f = el('figure'); f.innerHTML = ART.capstone();
+  f.appendChild(el('figcaption', '', rich(p.artCaption)));
+  wrap.appendChild(f);
+  wrap.appendChild(TOOLS.town());
+  wrap.appendChild(tierBlock(p));
+
+  const pct = S.tries ? Math.round(S.right / S.tries * 100) : 0;
+  const sc = el('div', 'scoreline');
+  sc.appendChild(el('div', 'pill g', `${S.right} correct`));
+  sc.appendChild(el('div', 'pill', `${S.tries} answered`));
+  sc.appendChild(el('div', 'pill', `${pct}% first time`));
+  sc.appendChild(el('div', 'pill g', `${Object.keys(S.digits).length} of 6 badges`));
+  wrap.appendChild(sc);
+
+  const c = el('div', 'cert');
+  c.id = 'cert';
+  c.innerHTML = `<h3>${p.certificate.title}</h3>
+    <div class="who">${esc(S.name).trim() || 'FIELD ASSISTANT'}</div>
+    <div class="body">${rich(p.certificate.body)}</div>
+    <div class="sig">${p.certificate.signature}</div>
+    <div class="seal"><span>SHAKE<br>STATION<br>SEVEN</span></div>`;
+  wrap.appendChild(c);
+  wrap.appendChild(el('div', 'okon', `<div class="oh">THE LAST THING SHE SAYS</div>${paras(p.final)}`));
+
+  const pr = el('button', 'btn', 'Print this certificate');
+  pr.onclick = () => window.print();
+  const again = el('button', 'btn ghost', 'Start again as someone else');
+  again.onclick = () => { if (confirm('This clears all answers and badges. Sure?')) { wipe(); Object.assign(S, { name: '', idx: -1, answered: {}, digits: {}, visited: {}, right: 0, tries: 0, unlocked: false }); render(); } };
+  const row2 = el('div', 'btnrow'); row2.appendChild(pr); row2.appendChild(again);
+  wrap.appendChild(row2);
+}
+
+/* ============ INTERACTIVE TOOLS ============ */
+const TOOLS = {};
+
+/* page 11 — wave racer */
+TOOLS[11] = () => {
+  const t = el('div', 'tool');
+  t.innerHTML = `<div class="toolhead">WAVE RACER</div>
+    <div class="toolsub">Send all three waves from the same earthquake and watch which reaches the station first. Distance: 300 km.</div>`;
+  const cv = el('canvas'); cv.width = 900; cv.height = 230; cv.style.width = '100%'; cv.style.height = 'auto';
+  t.appendChild(cv);
+  const out = el('div', 'result', 'Press GO. Watch the order of arrival, then read the clock times.');
+  const go = el('button', 'btn coral', 'GO');
+  const row = el('div', 'btnrow'); row.appendChild(go); t.appendChild(row); t.appendChild(out);
+  const cx = cv.getContext('2d');
+  const D = 300, speeds = [6, 3.5, 2.6], names = ['P WAVE', 'S WAVE', 'SURFACE'], cols = ['#8fb3bf', '#33414a', '#e8553e'];
+  let t0 = null, raf = null;
+  function frame(ts) {
+    if (!t0) t0 = ts;
+    const secs = (ts - t0) / 1000 * 22; // 22x speed
+    cx.clearRect(0, 0, 900, 230);
+    cx.font = 'bold 14px sans-serif';
+    const arrivals = [];
+    speeds.forEach((v, i) => {
+      const y = 50 + i * 60;
+      cx.strokeStyle = 'rgba(51,65,74,.2)'; cx.lineWidth = 2;
+      cx.beginPath(); cx.moveTo(120, y); cx.lineTo(840, y); cx.stroke();
+      cx.fillStyle = '#33414a'; cx.fillText(names[i], 10, y + 5);
+      const prog = Math.min(1, (secs * v) / D);
+      const x = 120 + prog * 720;
+      cx.strokeStyle = cols[i]; cx.lineWidth = 5;
+      cx.beginPath(); cx.moveTo(120, y); cx.lineTo(x, y); cx.stroke();
+      cx.fillStyle = cols[i]; cx.beginPath(); cx.arc(x, y, 8, 0, 7); cx.fill();
+      if (prog >= 1) arrivals.push(`${names[i]} arrived at ${(D / v).toFixed(1)} s`);
+    });
+    cx.fillStyle = '#33414a'; cx.fillRect(114, 20, 6, 190);
+    cx.fillRect(834, 20, 6, 190);
+    cx.font = '12px sans-serif';
+    cx.fillText('QUAKE', 96, 16); cx.fillText('STATION (300 km)', 780, 16);
+    cx.font = 'bold 18px Georgia,serif';
+    cx.fillText(secs.toFixed(1) + ' s', 420, 218);
+    if (arrivals.length === 3) {
+      out.innerHTML = arrivals.join('. ') + '. <b>The P to S gap is ' + (D / 3.5 - D / 6).toFixed(1) + ' seconds.</b> Multiply that gap by 8 and you get ' + Math.round((D / 3.5 - D / 6) * 8) + ' km, which is close to the real 300 km. That is the rule of 8, and now you know where it comes from.';
+      return;
+    }
+    raf = requestAnimationFrame(frame);
+  }
+  go.onclick = () => { cancelAnimationFrame(raf); t0 = null; out.textContent = 'Running...'; raf = requestAnimationFrame(frame); };
+  cx.fillStyle = '#33414a'; cx.font = '16px sans-serif'; cx.fillText('Press GO', 380, 120);
+  return t;
+};
+
+/* page 13 — magnitude comparator */
+TOOLS[13] = () => {
+  const t = el('div', 'tool');
+  t.innerHTML = `<div class="toolhead">ENERGY COMPARATOR</div>
+    <div class="toolsub">Pick two magnitudes and see the real energy ratio. The answer surprises most adults.</div>`;
+  const mk = (lab, val) => {
+    const s = el('div', 'slider');
+    s.innerHTML = `<label>${lab}</label><input type="range" min="2" max="9" step="0.1" value="${val}"><span class="val">M ${val}</span>`;
+    return s;
+  };
+  const a = mk('SMALLER', 5), b = mk('BIGGER', 7);
+  t.appendChild(a); t.appendChild(b);
+  const out = el('div', 'result');
+  t.appendChild(out);
+  const calc = () => {
+    let m1 = +a.querySelector('input').value, m2 = +b.querySelector('input').value;
+    a.querySelector('.val').textContent = 'M ' + m1.toFixed(1);
+    b.querySelector('.val').textContent = 'M ' + m2.toFixed(1);
+    if (m2 < m1) { const x = m1; m1 = m2; m2 = x; }
+    const ratio = Math.pow(10, 1.5 * (m2 - m1));
+    const fmt = r => r >= 1e6 ? (r / 1e6).toFixed(1) + ' million' : r >= 1000 ? (r / 1000).toFixed(1) + ' thousand' : r.toFixed(1);
+    const amp = Math.pow(10, m2 - m1);
+    out.innerHTML = `A magnitude ${m2.toFixed(1)} releases about <b>${fmt(ratio)} times</b> the energy of a magnitude ${m1.toFixed(1)}.<br>
+      The ground also moves about <b>${fmt(amp)} times</b> further.<br>
+      <span style="opacity:.75">Energy multiplies by about 32 for every whole step. Ground movement multiplies by 10.</span>`;
+  };
+  a.querySelector('input').oninput = calc; b.querySelector('input').oninput = calc; calc();
+  return t;
+};
+
+/* page 14 — triangulation */
+TOOLS[14] = () => {
+  const t = el('div', 'tool');
+  t.innerHTML = `<div class="toolhead">TRIANGULATION DESK</div>
+    <div class="toolsub">Turn each P to S gap into a distance with the rule of 8, then set each circle. When all three cross on one point, you have found it.</div>`;
+  const truth = [64, 120, 88], gaps = [8, 15, 11], names = ['ALPHA', 'BRAVO', 'CHARLIE'];
+  const st = [{ x: 299.9, y: 158.1 }, { x: 475.9, y: 148.9 }, { x: 352.3, y: 267.7 }];
+  const r = [30, 30, 30];
+  const cv = el('canvas'); cv.width = 800; cv.height = 400; cv.style.width = '100%'; cv.style.height = 'auto';
+  const sliders = names.map((n, i) => {
+    const s = el('div', 'slider');
+    s.innerHTML = `<label>${n} · ${gaps[i]}s</label><input type="range" min="20" max="200" value="30"><span class="val">30 km</span>`;
+    s.querySelector('input').oninput = e => { r[i] = +e.target.value; s.querySelector('.val').textContent = r[i] + ' km'; draw(); };
+    return s;
+  });
+  sliders.forEach(s => t.appendChild(s));
+  t.appendChild(cv);
+  const out = el('div', 'result', 'Set all three. The scale is 1 km per unit, so a 10 second gap means a circle of 80.');
+  t.appendChild(out);
+  const cx = cv.getContext('2d');
+  function draw() {
+    cx.fillStyle = '#faf5e9'; cx.fillRect(0, 0, 800, 400);
+    cx.strokeStyle = 'rgba(51,65,74,.14)'; cx.lineWidth = 1;
+    for (let x = 0; x <= 800; x += 50) { cx.beginPath(); cx.moveTo(x, 0); cx.lineTo(x, 400); cx.stroke(); }
+    for (let y = 0; y <= 400; y += 50) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(800, y); cx.stroke(); }
+    let ok = 0;
+    st.forEach((s, i) => {
+      const good = Math.abs(r[i] - truth[i]) <= 4;
+      if (good) ok++;
+      cx.strokeStyle = good ? '#7d9471' : '#e8553e';
+      cx.lineWidth = good ? 3 : 2;
+      cx.beginPath(); cx.arc(s.x, s.y, r[i], 0, 7); cx.stroke();
+      cx.fillStyle = '#33414a';
+      cx.beginPath(); cx.moveTo(s.x, s.y - 10); cx.lineTo(s.x + 9, s.y + 7); cx.lineTo(s.x - 9, s.y + 7); cx.fill();
+      cx.font = 'bold 13px sans-serif'; cx.fillText(names[i], s.x + 13, s.y - 2);
+      cx.font = '11px sans-serif'; cx.fillText(gaps[i] + ' s gap', s.x + 13, s.y + 12);
+    });
+    if (ok === 3) {
+      cx.strokeStyle = '#e8553e'; cx.lineWidth = 6;
+      cx.beginPath(); cx.moveTo(347, 167); cx.lineTo(373, 193); cx.moveTo(373, 167); cx.lineTo(347, 193); cx.stroke();
+      cx.fillStyle = '#e8553e'; cx.font = 'bold 15px sans-serif'; cx.fillText('EPICENTRE', 386, 188);
+      out.innerHTML = '<b>Found it.</b> 8 x 8 = 64. 15 x 8 = 120. 11 x 8 = 88. Three circles, one crossing point. This is the idea behind every earthquake location you have ever seen on the news. In real life the circles form a small triangle instead of a point, because wave speed changes with the rock it travels through.';
+    } else {
+      out.innerHTML = `${ok} of 3 circles correct. Use the rule: distance in km = gap in seconds x 8.`;
+    }
+  }
+  draw();
+  return t;
+};
+
+/* page 18 — shake table */
+TOOLS[18] = () => {
+  const t = el('div', 'tool');
+  t.innerHTML = `<div class="toolhead">SHAKE TABLE SIMULATOR</div>
+    <div class="toolsub">Build a tower, then shake it. Test your ideas here before you waste any spaghetti.</div>`;
+  const choices = {
+    base: [['Narrow base', 0], ['Wide base', 2]],
+    brace: [['Squares only', 0], ['Triangles (cross braced)', 3]],
+    height: [['Short, 4 floors', 2], ['Tall, 10 floors', 0]],
+    found: [['Bolted straight to the ground', 0], ['On rubber pads (base isolation)', 3]]
+  };
+  const pick = { base: 0, brace: 0, height: 0, found: 0 };
+  Object.entries(choices).forEach(([k, opts]) => {
+    const g = el('div', 'towergrid');
+    opts.forEach((o, i) => {
+      const b = el('button', 'topt' + (pick[k] === i ? ' on' : ''), o[0]);
+      b.onclick = () => { pick[k] = i; [...g.children].forEach(c => c.classList.remove('on')); b.classList.add('on'); };
+      g.appendChild(b);
+    });
+    t.appendChild(g);
+  });
+  const cv = el('canvas'); cv.width = 800; cv.height = 260; cv.style.width = '100%'; cv.style.height = 'auto';
+  t.appendChild(cv);
+  const out = el('div', 'result', 'Choose one option from each row, then SHAKE.');
+  const go = el('button', 'btn coral', 'SHAKE IT');
+  const row = el('div', 'btnrow'); row.appendChild(go);
+  t.appendChild(row); t.appendChild(out);
+  const cx = cv.getContext('2d');
+  let raf, t0;
+  function score() { return Object.entries(choices).reduce((s, [k, o]) => s + o[pick[k]][1], 0); }
+  function drawTower(off, fallen) {
+    cx.clearRect(0, 0, 800, 260);
+    cx.fillStyle = '#e6d7ba'; cx.fillRect(0, 220, 800, 40);
+    cx.strokeStyle = '#33414a'; cx.lineWidth = 2;
+    cx.beginPath(); cx.moveTo(0, 220); cx.lineTo(800, 220); cx.stroke();
+    const floors = pick.height === 0 ? 4 : 10;
+    const w = pick.base === 1 ? 110 : 56;
+    const fh = 190 / floors;
+    const cxx = 400;
+    cx.save();
+    if (fallen) { cx.translate(cxx, 220); cx.rotate(0.9); cx.translate(-cxx, -220); }
+    for (let i = 0; i < floors; i++) {
+      const y = 220 - (i + 1) * fh;
+      const lean = fallen ? 0 : off * (i / floors) * (pick.found === 1 ? 0.25 : 1);
+      cx.strokeStyle = '#33414a'; cx.lineWidth = 2.5;
+      cx.strokeRect(cxx - w / 2 + lean, y, w, fh);
+      if (pick.brace === 1) {
+        cx.strokeStyle = '#e8553e'; cx.lineWidth = 2;
+        cx.beginPath(); cx.moveTo(cxx - w / 2 + lean, y + fh); cx.lineTo(cxx + w / 2 + lean, y); cx.stroke();
+      }
+    }
+    if (pick.found === 1) {
+      cx.fillStyle = '#e8553e';
+      for (let i = 0; i < 4; i++) cx.fillRect(cxx - w / 2 + 4 + i * (w - 16) / 3, 212, 10, 8);
+    }
+    cx.restore();
+    cx.fillStyle = '#33414a'; cx.font = 'bold 13px sans-serif';
+    cx.fillText(floors + ' floors', 20, 30);
+  }
+  drawTower(0, false);
+  go.onclick = () => {
+    cancelAnimationFrame(raf); t0 = null;
+    const sc = score(), survives = sc >= 6;
+    const dur = 3200;
+    function f(ts) {
+      if (!t0) t0 = ts;
+      const e = ts - t0;
+      const amp = 22 * Math.min(1, e / 600);
+      const off = Math.sin(e / 55) * amp;
+      const fallen = !survives && e > 1400;
+      drawTower(off, fallen);
+      if (e < dur) raf = requestAnimationFrame(f);
+      else {
+        drawTower(0, !survives);
+        const notes = [];
+        if (pick.base === 0) notes.push('A narrow base tips easily. Widen it.');
+        if (pick.brace === 0) notes.push('Squares fold into parallelograms. One diagonal per floor fixes that, and it is the cheapest upgrade in engineering.');
+        if (pick.height === 1) notes.push('Tall and flexible is not automatically bad, but a tall tower on a narrow base is.');
+        if (pick.found === 0) notes.push('Bolted straight down means the building has to absorb every bit of the shaking itself.');
+        out.innerHTML = (survives
+          ? `<b>IT HELD.</b> Score ${sc} out of 10. `
+          : `<b>IT CAME DOWN.</b> Score ${sc} out of 10. `) +
+          (notes.length ? notes.join(' ') : 'That is close to the best build available here. Wide base, triangles, low centre of mass, isolated foundation.');
+      }
+    }
+    raf = requestAnimationFrame(f);
+  };
+  return t;
+};
+
+/* page 20 — town planner */
+TOOLS.town = () => {
+  const t = el('div', 'tool');
+  t.innerHTML = `<div class="toolhead">TOWN PLANNER</div>
+    <div class="toolsub">Tap a building, then tap the map to place it. The report at the bottom argues with your choices. It is not always right, but it will always tell you what you traded away.</div>`;
+  const ITEMS = [
+    { k: 'HOSPITAL', c: '#e8553e' }, { k: 'SCHOOL', c: '#c98b3a' }, { k: 'FIRE STN', c: '#e8553e' },
+    { k: 'HOUSING', c: '#33414a' }, { k: 'POWER', c: '#7d9471' }, { k: 'MEET PT', c: '#8fb3bf' }
+  ];
+  let sel = 0;
+  const placed = {};
+  const bar = el('div', 'towergrid');
+  ITEMS.forEach((it, i) => {
+    const b = el('button', 'topt' + (i === 0 ? ' on' : ''), it.k);
+    b.onclick = () => { sel = i; [...bar.children].forEach(c => c.classList.remove('on')); b.classList.add('on'); };
+    bar.appendChild(b);
+  });
+  t.appendChild(bar);
+  const cv = el('canvas'); cv.width = 800; cv.height = 400; cv.style.width = '100%'; cv.style.height = 'auto'; cv.style.cursor = 'crosshair';
+  t.appendChild(cv);
+  const out = el('div', 'result', 'Place all six. Then read the report.');
+  const clear = el('button', 'btn ghost', 'Clear the map');
+  clear.onclick = () => { Object.keys(placed).forEach(k => delete placed[k]); draw(); };
+  t.appendChild(el('div', 'btnrow')).appendChild(clear);
+  t.appendChild(out);
+  const cx = cv.getContext('2d');
+
+  // zones: fault line from (120,380) to (600,40). rock = x>600 region. sand = river band. coast = x<150
+  const distToFault = (x, y) => {
+    const x1 = 120, y1 = 380, x2 = 600, y2 = 40;
+    const A = x - x1, B = y - y1, Cc = x2 - x1, D = y2 - y1;
+    const dot = A * Cc + B * D, len = Cc * Cc + D * D;
+    let p = len ? dot / len : -1; p = Math.max(0, Math.min(1, p));
+    return Math.hypot(x - (x1 + p * Cc), y - (y1 + p * D));
+  };
+  const riverDist = (x, y) => {
+    // river band approximated by line (170,60) -> (620,380)
+    const x1 = 170, y1 = 60, x2 = 620, y2 = 380;
+    const A = x - x1, B = y - y1, Cc = x2 - x1, D = y2 - y1;
+    let p = (A * Cc + B * D) / (Cc * Cc + D * D); p = Math.max(0, Math.min(1, p));
+    return Math.hypot(x - (x1 + p * Cc), y - (y1 + p * D));
+  };
+  const zone = (x, y) => {
+    if (x < 140) return 'SEA';
+    if (x > 610) return 'ROCK';
+    if (riverDist(x, y) < 55) return 'SAND';
+    if (y > 300 && x < 320) return 'COAST';
+    return 'MIXED';
+  };
+
+  let bgReady = false;
+  function draw() {
+    if (bgReady) cx.drawImage(bg, 0, 0);
+    else { cx.fillStyle = '#faf5e9'; cx.fillRect(0, 0, 800, 400);
+      cx.fillStyle = '#33414a'; cx.font = '16px sans-serif'; cx.fillText('loading the valley...', 300, 200); }
+    Object.entries(placed).forEach(([i, p]) => {
+      const it = ITEMS[i];
+      cx.fillStyle = it.c; cx.strokeStyle = '#faf5e9'; cx.lineWidth = 2;
+      cx.beginPath(); cx.arc(p.x, p.y, 11, 0, 7); cx.fill(); cx.stroke();
+      cx.fillStyle = '#33414a'; cx.font = 'bold 11px sans-serif';
+      cx.fillText(it.k, p.x + 15, p.y + 4);
+    });
+    report();
+  }
+  function report() {
+    const n = Object.keys(placed).length;
+    if (n < 6) { out.innerHTML = `${n} of 6 placed. Keep going.`; return; }
+    const notes = [];
+    const z = i => zone(placed[i].x, placed[i].y);
+    const df = i => distToFault(placed[i].x, placed[i].y);
+    ITEMS.forEach((it, i) => {
+      if (df(i) < 35) notes.push(`<b>${it.k}</b> is sitting almost on the fault. Nothing goes there.`);
+    });
+    if (z(0) !== 'ROCK') notes.push('<b>HOSPITAL</b> is not on the hard rock. It has to still be working the morning after. That is the one building you cannot afford to lose.');
+    if (z(2) !== 'ROCK') notes.push('<b>FIRE STN</b> is off the rock. A fire station that fails in the event is worse than no fire station, because everyone was counting on it.');
+    if (z(1) === 'SAND') notes.push('<b>SCHOOL</b> is on the old river sand. That ground liquefies. Move it.');
+    if (z(1) === 'COAST') notes.push('<b>SCHOOL</b> is on the low coastal ground. Think about what arrives after the shaking stops.');
+    if (z(5) === 'SAND' || z(5) === 'COAST') notes.push('<b>MEET PT</b> is somewhere people cannot safely reach or stay. High and open is the rule.');
+    if (z(4) === 'SAND') notes.push('<b>POWER</b> on liquefiable ground means broken lines, and broken lines start fires.');
+    if (z(3) === 'ROCK') notes.push('<b>HOUSING</b> is all on the safest ground, which sounds ideal. Ask yourself who then lives on the sand, and whether 8000 people actually fit up there.');
+    out.innerHTML = notes.length
+      ? '<b>THE REPORT</b><br>' + notes.join('<br>') + '<br><span style="opacity:.75">A plan with no admitted weak point is a plan nobody has thought about properly. Which of these are you willing to live with, and why?</span>'
+      : '<b>THE REPORT</b><br>Nothing on the fault. Critical services on rock. School off the sand. Meeting point high. That is a defensible plan. Now write down the one decision you are least sure about, because there is always one.';
+  }
+  const bg = new Image();
+  const svg = ART.capstone().replace('<svg ', '<svg width="800" height="400" ');
+  bg.onload = () => { bgReady = true; draw(); };
+  bg.onerror = () => { bgReady = false; draw(); };
+  bg.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  draw();
+  cv.onclick = e => {
+    const r = cv.getBoundingClientRect();
+    placed[sel] = { x: (e.clientX - r.left) * 800 / r.width, y: (e.clientY - r.top) * 400 / r.height };
+    if (sel < ITEMS.length - 1) { sel++; [...bar.children].forEach((c, i) => c.classList.toggle('on', i === sel)); }
+    draw();
+  };
+  return t;
+};
+
+/* ============ saved progress ============ */
+/* The course is twenty pages long and nobody finishes it in one sitting, so the
+   station log has to survive a closed tab. Everything lives under one key; if
+   storage is unavailable (private browsing, wiped profile) the course simply
+   runs in memory the way it used to, rather than falling over. */
+/* v2: the course became chapters, so an index means something different than
+   it did and the visited map is keyed by step rather than page number. Old
+   saves are ignored rather than restored onto the wrong step. */
+const STORE = 'shake-station-7/v2';
+let storageOK = true;
+
+function save() {
+  if (!storageOK) return;
+  try {
+    localStorage.setItem(STORE, JSON.stringify({
+      v: 2, name: S.name, tier: S.tier, idx: S.idx,
+      answered: S.answered, digits: S.digits, visited: S.visited,
+      right: S.right, tries: S.tries, unlocked: S.unlocked
+    }));
+  } catch (e) { storageOK = false; }   // quota or a blocked profile: carry on in memory
+}
+
+function load() {
+  let raw = null;
+  try { raw = localStorage.getItem(STORE); } catch (e) { storageOK = false; return false; }
+  if (!raw) return false;
+  try {
+    const d = JSON.parse(raw);
+    if (!d || d.v !== 2) return false;
+    if (typeof d.name === 'string') S.name = d.name;
+    if (TIERS[d.tier]) S.tier = d.tier;
+    if (Number.isInteger(d.idx) && d.idx >= -1 && d.idx < STEPS.length) S.idx = d.idx;
+    if (d.answered && typeof d.answered === 'object') S.answered = d.answered;
+    if (d.digits && typeof d.digits === 'object') S.digits = d.digits;
+    if (d.visited && typeof d.visited === 'object') S.visited = d.visited;
+    if (Number.isFinite(d.right)) S.right = d.right;
+    if (Number.isFinite(d.tries)) S.tries = d.tries;
+    S.unlocked = !!d.unlocked;
+    return S.idx > -1 || !!S.name;
+  } catch (e) { return false; }        // corrupt log, start clean
+}
+
+function wipe() {
+  try { localStorage.removeItem(STORE); } catch (e) {}
+}
+
+function boot() {
+  const resumed = load();
+  try { initTrace(); } catch (e) { /* the animated trace is decorative, never fatal */ }
+  try { render(); }
+  catch (e) { showError((e && e.message) + '\n' + (e && e.stack || '')); }
+  if (resumed) showResumed();
+  bindKeys();
+}
+
+/* a quiet note that the log was found, rather than silently teleporting them */
+function showResumed() {
+  const t = $('#resumed'); if (!t) return;
+  const where = S.idx > 0 ? whereAmI(STEPS[S.idx]).toLowerCase() : 'the front desk';
+  t.innerHTML = `Welcome back${S.name ? ', ' + esc(S.name) : ''} — your log was still here. You are on ${where}.` +
+    ` <button type="button" id="freshstart">Start over</button>`;
+  t.style.display = 'block';
+  $('#freshstart').onclick = () => {
+    if (!confirm('This clears the name, every answer and all six digits. Sure?')) return;
+    wipe();
+    Object.assign(S, { name: '', tier: 'F', idx: -1, answered: {}, digits: {}, visited: {}, right: 0, tries: 0, unlocked: false });
+    t.style.display = 'none';
+    render();
+  };
+  setTimeout(() => { t.style.display = 'none'; }, 9000);
+}
+
+/* ============ keyboard ============ */
+function bindKeys() {
+  addEventListener('keydown', e => {
+    const tag = (e.target && e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'ArrowRight' && S.idx > -1 && S.idx < STEPS.length - 1) { S.idx++; render(); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft' && S.idx > -1) { S.idx = Math.max(-1, S.idx - 1); render(); e.preventDefault(); }
+  });
+}
+/* offline: only meaningful when served over http(s), skipped on file:// */
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+
+window.addEventListener('error', ev => showError(ev.message + ' @' + (ev.lineno || '?')));
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+
+</script>
+</body></html>
